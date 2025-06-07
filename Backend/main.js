@@ -4,10 +4,12 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import pg from 'pg';
 
-dotenv.config({ path: '../.env' });
+import Middleware from './Middleware/authMiddleware.js';
 
 import AuthRouter from './Routes/Auth.js';
-import Middleware from './Middleware/authMiddleware.js';
+import DatasetRouter from './Routes/Datasets.js';
+
+dotenv.config({ path: '../.env' });
 
 const app = express();
 
@@ -33,6 +35,7 @@ const pool = new pg.Pool({
 export { pool };
 
 app.use('/api/auth', AuthRouter);
+app.use('/api/datasets', DatasetRouter);
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {

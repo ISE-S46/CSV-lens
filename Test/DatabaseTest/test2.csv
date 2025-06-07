@@ -1,0 +1,4 @@
+id,name,age,is_member,balance,join_date,last_login
+1,John Doe,30,true,1234.56,2023-01-15,2025-06-07T14:30:00Z
+2,Jane Smith,25,false,789.00,2022-11-20,2025-06-06T09:15:00Z
+3,Bob Johnson,40,true,0.00,2021-05-10,2025-06-07T18:45:00Z

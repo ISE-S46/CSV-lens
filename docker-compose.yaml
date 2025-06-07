@@ -10,6 +10,7 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - PgDB:/var/lib/postgresql/data
+      - ./Database/:/docker-entrypoint-initdb.d/
 
 volumes:
   PgDB:

@@ -1,4 +1,4 @@
-import { pool } from '../../main.js';
+import { pool } from '../../../main.js';
 
 export async function getPaginatedSortedFilteredRows(
     datasetId,

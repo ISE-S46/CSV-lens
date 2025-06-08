@@ -112,7 +112,7 @@ async function parseCsvBuffer(csvBuffer) {
                     if (currentMeta.column_type === 'unknown') {
                         currentMeta.column_type = inferredType;
                     } else if (currentMeta.column_type === 'integer' && inferredType === 'float') {
-                        currentMeta.column_type = 'float'; // Upgrade integer to float
+                        currentMeta.column_type = 'float';
                     } else if (currentMeta.column_type !== inferredType && inferredType !== 'unknown') {
                         currentMeta.column_type = 'string';
                     }

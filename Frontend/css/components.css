@@ -1,0 +1,15 @@
+.blue-btn {
+    @apply py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition duration-200;
+}
+
+.red-btn {
+    @apply py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition duration-200;
+}
+
+.UserInput-form {
+    @apply w-full px-4 py-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.UserPwdInput-form {
+    @apply flex items-center border border-gray-400 rounded overflow-hidden;
+}

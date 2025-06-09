@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV-lens</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/components.css">
+</head>
+
+<body class="bg-gray-300">
+
+    <div class="max-w-sm mx-auto mt-12 p-6 bg-white shadow-md rounded-xl">
+        <h1 class="text-2xl font-bold text-center mb-6">Login</h1>
+        <form id="LoginForm" class="space-y-4">
+            <div>
+                <label for="loginEmail" class="block text-sm font-medium mb-1">Email address</label>
+                <input type="email" id="loginEmail" placeholder="Email" class="UserInput-form">
+            </div>
+
+            <div>
+                <label for="loginPassword" class="block text-sm font-medium mb-1">Password</label>
+                <div class="UserPwdInput-form">
+                    <input type="password" id="loginPassword" placeholder="Password"
+                        class="w-full px-4 py-2 focus:outline-none">
+                    <button type="button" class="px-3 text-gray-500 togglePassword">
+                        <img src="icons/eye.svg" alt="Show password" id="showIcon" class="w-5 h-5 hidden">
+                        <img src="icons/eye-slash-fill.svg" alt="Hide password" id="hideIcon" class="w-5 h-5">
+                    </button>
+                </div>
+            </div>
+            <div class="mb-3 flex justify-between">
+                <a href="#" class="text-blue-600 hover:underline" id="AccountPage">Forgot password?</a>
+                <a href="./Register" class="text-blue-600 hover:underline" id="AccountPage">Register</a>
+            </div>
+            <button type="submit"
+                class="w-full blue-btn Login">
+                Login
+            </button>
+
+        </form>
+    </div>
+
+    <!--JS dependencies-->
+    <script type="module" src="./Script/Login.js"></script>
+
+</body>
+
+</html>

@@ -1,12 +1,11 @@
 import { pool } from '../../main.js';
+import { validateDatasetId } from './subFunction/Validation.js';
 
 const DeleteDatasets = async (req, res) => {
     const userId = req.user.id; // User ID from the Middleware
     const datasetId = parseInt(req.params.datasetId, 10); // Get dataset ID from URL parameter
 
-    if (isNaN(datasetId) || datasetId <= 0) {
-        return res.status(400).json({ msg: 'Invalid Dataset ID provided.' });
-    }
+    if (validateDatasetId(datasetId, res)) return;
 
     let client;
     try {

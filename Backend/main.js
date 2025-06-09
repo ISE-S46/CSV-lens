@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import pg from 'pg';
 
-import Middleware from './Middleware/authMiddleware.js';
+import { Middleware, verifyToken } from './Middleware/authMiddleware.js';
 
 import AuthRouter from './Routes/Auth.js';
 import DatasetRouter from './Routes/Datasets.js';
@@ -23,6 +23,27 @@ app.use(express.urlencoded({ extended: false }));
 
 // Setup static folder
 app.use(express.static(path.join(__dirname, '../Frontend')));
+
+// Handle route based on authentication status
+app.get('/', async (req, res) => {
+    const token = req.header('x-auth-token');
+
+    const { isValid } = verifyToken(token);
+
+    if (isValid) {
+        res.sendFile(path.join(__dirname, '../Frontend/index.html'));
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/login', async (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/Login.html'));
+});
+
+app.get('/register', async (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/Register.html'));
+});
 
 const pool = new pg.Pool({
     user: process.env.DB_USER,

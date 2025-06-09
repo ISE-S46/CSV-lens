@@ -20,4 +20,17 @@ const Middleware = (req, res, next) => {
     }
 };
 
-export default Middleware;
+const verifyToken = (token) => {
+    if (!token) {
+        return { isValid: false, userId: null };
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return { isValid: true, userId: decoded.id };
+    } catch (err) {
+        // Token is invalid or expired
+        return { isValid: false, userId: null };
+    }
+};
+
+export { Middleware, verifyToken };

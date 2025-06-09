@@ -1,5 +1,5 @@
 import { pool } from '../../main.js';
-
+import { validateDatasetId } from './subFunction/Validation.js';
 import { getPaginatedSortedFilteredRows } from './subFunction/dataRetrieval.js';
 
 const ListAllDatasets = async (req, res) => {
@@ -92,10 +92,8 @@ const GetSpecificDatasetRow = async (req, res) => {
         }
     }
 
-    // Basic validation for direct route parameters
-    if (isNaN(datasetId) || datasetId <= 0) {
-        return res.status(400).json({ msg: 'Invalid Dataset ID provided.' });
-    }
+    if (validateDatasetId(datasetId, res)) return;
+
     if (isNaN(page) || page <= 0) {
         return res.status(400).json({ msg: 'Invalid page number. Page must be a positive integer.' });
     }

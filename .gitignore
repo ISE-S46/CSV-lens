@@ -1,3 +1,4 @@
 .env
 **/CSV-lens
 **/node_modules
+**/styles.css

@@ -1,4 +1,5 @@
 import { pool } from "../../main.js";
+import { validateDatasetId } from './subFunction/Validation.js';
 
 const UpdateSpecificRow = async (req, res) => {
     const userId = req.user.id;
@@ -6,10 +7,8 @@ const UpdateSpecificRow = async (req, res) => {
     const rowNumber = parseInt(req.params.rowNumber, 10);
     const newRowData = req.body;
 
-    // Basic validation for path parameters
-    if (isNaN(datasetId) || datasetId <= 0) {
-        return res.status(400).json({ msg: 'Invalid Dataset ID provided.' });
-    }
+    if (validateDatasetId(datasetId, res)) return;
+
     if (isNaN(rowNumber) || rowNumber <= 0) {
         return res.status(400).json({ msg: 'Invalid Row Number provided. Row number must be a positive integer.' });
     }
@@ -78,10 +77,8 @@ const UpdateColumnName = async (req, res) => {
     const oldColumnName = req.params.oldColumnName;
     const { newColumnName } = req.body;
 
-    // Basic validation for path and body parameters
-    if (isNaN(datasetId) || datasetId <= 0) {
-        return res.status(400).json({ msg: 'Invalid Dataset ID provided.' });
-    }
+    if (validateDatasetId(datasetId, res)) return;
+
     if (typeof oldColumnName !== 'string' || oldColumnName.trim() === '') {
         return res.status(400).json({ msg: 'Invalid Old Column Name provided.' });
     }
@@ -148,7 +145,6 @@ const UpdateColumnName = async (req, res) => {
         );
 
         // Method 1: Using string concatenation (more explicit typing)
-        // First, let's try with explicit casting to help PostgreSQL understand the types
         const updateQuery = `
             UPDATE csv_data
             SET row_data = (row_data - $1::text) || jsonb_build_object($2::text, row_data->$1::text)
@@ -173,7 +169,7 @@ const UpdateColumnName = async (req, res) => {
                 console.log('Method 2 failed, trying method 3:', altError.message);
                 
                 // Method 3: Step-by-step approach
-                // First get all affected rows
+                // Get all affected rows
                 const rowsToUpdate = await client.query(
                     'SELECT row_number, row_data FROM csv_data WHERE dataset_id = $1 AND row_data ? $2',
                     [datasetId, sanitizedOldColumnName]

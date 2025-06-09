@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer'; // Express middleware that handles multipart/form-data
-import Middleware from '../Middleware/authMiddleware.js';
+import { Middleware } from '../Middleware/authMiddleware.js';
 
 import { CSVuploadEndpoint } from './controllers/post.js';
 import { ListAllDatasets, GetSpecificDataset, GetSpecificDatasetRow } from './controllers/get.js';

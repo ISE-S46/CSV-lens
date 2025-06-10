@@ -21,7 +21,10 @@ AuthRouter.post('/register', async (req, res) => {
     try {
         client = await pool.connect();
         // Check if user already exists
-        const user = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = await pool.query(
+            'SELECT id FROM users WHERE username = $1 OR email = $2',
+            [username, email]
+        );
 
         if (user.rows.length > 0) {
             return res.status(400).json({ msg: 'User with that email already exists' });
@@ -40,7 +43,7 @@ AuthRouter.post('/register', async (req, res) => {
         res.status(201).json({
             msg: 'User registered successfully',
             user: {
-                id: newUser.rows[0].user_id,
+                id: newUser.rows[0].id,
                 username: newUser.rows[0].username,
                 email: newUser.rows[0].email
             }
@@ -69,7 +72,10 @@ AuthRouter.post('/login', async (req, res) => {
     try {
         client = await pool.connect();
         // Check if user exists
-        const user = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = await pool.query(
+            'SELECT id, username, email, password_hash FROM users WHERE email = $1',
+            [email]
+        );
 
         if (user.rows.length === 0) {
             return res.status(400).json({ msg: 'Invalid Credentials' });
@@ -85,9 +91,7 @@ AuthRouter.post('/login', async (req, res) => {
         }
 
         // Create JWT
-        const payload = {
-            id: storedUser.user_id,
-        };
+        const payload = { id: storedUser.id, username: storedUser.username };
 
         jwt.sign(
             payload,

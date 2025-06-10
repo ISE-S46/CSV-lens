@@ -1,14 +1,16 @@
 import { TogglePasswordIcon } from "./module/ShowPassword.js";
-import { handleLogin } from "./module/HandleLogin.js";
+import { handleLogin, checkExistingTokenAndRedirect } from "./module/HandleLogin.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    const Password = document.querySelector('#loginPassword');
+    checkExistingTokenAndRedirect();
 
+    const Password = document.querySelector('#loginPassword');
     const showIcon = document.querySelector('#showIcon');
     const hideIcon = document.querySelector('#hideIcon');
 
     document.body.addEventListener('click', event => {
+
         const btn = event.target.closest('button');
         if (!btn) return;
 

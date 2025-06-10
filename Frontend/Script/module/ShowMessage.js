@@ -5,7 +5,7 @@ function showMessage(elementId, message, isSuccess = false) {
     //     msgElement.className = `message ${isSuccess ? 'success-message' : 'error-message'}`;
     //     msgElement.style.display = 'block';
     // }
-    alert("will add proper message pop up later");
+    alert(message);
 }
 
 function hideMessage(elementId) {

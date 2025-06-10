@@ -14,7 +14,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 20 * 1024 * 1024 // set limit to 20 mb
+        fileSize: 10 * 1024 * 1024 // set limit to 10 mb
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('text/csv') || file.mimetype.startsWith('application/vnd.ms-excel')) {

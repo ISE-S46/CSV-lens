@@ -79,4 +79,32 @@ async function checkAuthAndRender() {
     }
 }
 
-export { handleLogin, checkAuthAndRender };
+async function checkExistingTokenAndRedirect() {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        return; 
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
+            method: 'GET',
+            headers: { 'x-auth-token': token }
+        });
+
+        if (response.ok) {
+            console.log('User already logged in, redirecting to dashboard...');
+            window.location.href = '/';
+            return true; 
+        } else {
+            localStorage.removeItem('token');
+            console.log('Stored token invalid or expired, user must log in.');
+        }
+    } catch (error) {
+        console.error('Error verifying token on login page:', error);
+        localStorage.removeItem('token');
+    }
+    return false;
+}
+
+export { handleLogin, checkAuthAndRender, checkExistingTokenAndRedirect };

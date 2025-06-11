@@ -20,7 +20,7 @@
             </a>
             <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative">
                 <button type="button"
-                    class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                    class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 user-menu-button"
                     id="user-menu-button" aria-expanded="false">
                     <span class="sr-only">Open user menu</span>
                     <div
@@ -55,10 +55,11 @@
             <!-- Upload Section -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Add New CSV</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Upload New CSV File</h2>
 
                     <!-- Upload Area -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
+                    <div id="dropZone"
+                        class="dropZone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:bg-gray-50">
                         <div class="flex justify-center mb-4">
                             <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linejoin="round">
@@ -68,10 +69,58 @@
                         </div>
                         <p class="text-gray-600 mb-2">Drag & drop your .CSV file here</p>
                         <p class="text-gray-500 text-sm mb-4">or</p>
-                        <button class="px-4 py-2 blue-btn transition-colors">
+                        <button id="browseBtn" class="browseBtn px-4 py-2 blue-btn transition-colors">
                             Browse Files
                         </button>
                     </div>
+
+                    <!-- Hidden File Input -->
+                    <input type="file" id="fileInput" accept=".csv" class="hidden">
+
+                    <!-- File Info Display -->
+                    <div id="fileInfo" class="fileInfo hidden bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-green-500 mr-3">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <div>
+                                    <p id="fileName" class="fileName font-medium text-gray-900"></p>
+                                    <p id="fileSize" class="fileSize text-sm text-gray-500"></p>
+                                </div>
+                            </div>
+                            <button id="removeFile" class="removeFile text-red-500 hover:text-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                    class="w-7 h-7" stroke-width="2">
+                                    <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
+                                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage"
+                        class="errorMessage hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"
+                                stroke-width="0.5" stroke="currentColor" class="w-5 h-5 text-red-400 mr-2">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <p id="errorText" class="errorText text-red-800 text-sm"></p>
+                        </div>
+                    </div>
+
+                    <!-- Process Button -->
+                    <button id="processBtn"
+                        class="processBtn hidden w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
+                        Upload CSV file
+                    </button>
 
                     <!-- Requirements -->
                     <div class="bg-blue-50 rounded-lg p-4">
@@ -106,7 +155,8 @@
                                     class="w-full sm:w-54 md:w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                     class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2">
-                                    <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
                                         d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
                                         clip-rule="evenodd" />
                                 </svg>

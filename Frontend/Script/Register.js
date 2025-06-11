@@ -1,4 +1,5 @@
 import { TogglePasswordIcon } from "./module/ShowPassword.js";
+import { handleRegister } from "./module/HandleRegister.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
 
             case btn.classList.contains('Register-btn'):
-                alert("ehe");
+                handleRegister(event);
                 break;
         }
 

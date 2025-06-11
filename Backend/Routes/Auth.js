@@ -11,9 +11,11 @@ const AuthRouter = express.Router();
 
 // User Registration
 AuthRouter.post('/register', async (req, res) => {
-    const { username, email, password } = req.body;
+    const { userName, email, password } = req.body;
 
-    if (!username || !email || !password) {
+    console.log( { userName, email, password } )
+
+    if (!userName || !email || !password) {
         return res.status(400).json({ msg: 'Please enter all fields' });
     }
 
@@ -23,11 +25,11 @@ AuthRouter.post('/register', async (req, res) => {
         // Check if user already exists
         const user = await pool.query(
             'SELECT id FROM users WHERE username = $1 OR email = $2',
-            [username, email]
+            [userName, email]
         );
 
         if (user.rows.length > 0) {
-            return res.status(400).json({ msg: 'User with that email already exists' });
+            return res.status(400).json({ msg: 'User with that email or user name already exists' });
         }
 
         // Hash password
@@ -36,15 +38,15 @@ AuthRouter.post('/register', async (req, res) => {
 
         // Save user
         const newUser = await client.query(
-            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING user_id, username, email, registration_date',
-            [username, email, hashedPassword]
+            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email, created_at',
+            [userName, email, hashedPassword]
         );
 
         res.status(201).json({
             msg: 'User registered successfully',
             user: {
                 id: newUser.rows[0].id,
-                username: newUser.rows[0].username,
+                userName: newUser.rows[0].userName,
                 email: newUser.rows[0].email
             }
         });
@@ -91,7 +93,7 @@ AuthRouter.post('/login', async (req, res) => {
         }
 
         // Create JWT
-        const payload = { id: storedUser.id, username: storedUser.username };
+        const payload = { id: storedUser.id, userName: storedUser.userName };
 
         jwt.sign(
             payload,

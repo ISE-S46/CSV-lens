@@ -1,9 +1,21 @@
 import { checkAuthAndRender } from "./module/HandleLogin.js";
 import { handleFile, clearFile, processCSV } from "./module/CSVupload.js";
+import { renderCSVlist } from "./module/getCSVlist.js";
+import { searchProducts } from "./module/SearchDatasets.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchQuery) {
+        searchInput.value = searchQuery;
+        searchProducts(searchQuery);
+    } else {
+        renderCSVlist(); // show default list
+    }
 
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
@@ -12,6 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!menuButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
             dropdownMenu.classList.add('hidden');
         }
+    });
+
+    document.querySelector('form[role="search"]').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const query = searchInput.value.trim();
+        const newUrl = `?search=${encodeURIComponent(query)}`;
+
+        history.pushState({}, '', newUrl);
+
+        searchProducts(searchInput.value);
     });
 
     const dropZone = document.getElementById('dropZone');

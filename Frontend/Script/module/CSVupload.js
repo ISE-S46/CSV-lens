@@ -103,4 +103,4 @@ async function processCSV() {
     }
 }
 
-export { handleFile, clearFile, processCSV };
+export { handleFile, clearFile, processCSV, formatFileSize };

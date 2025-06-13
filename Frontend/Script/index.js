@@ -1,30 +1,21 @@
 import { checkAuthAndRender } from "./module/HandleLogin.js";
 import { handleFile, clearFile, processCSV } from "./module/CSVupload.js";
-import { renderCSVlist } from "./module/getCSVlist.js";
-import { searchProducts } from "./module/SearchDatasets.js";
+import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js";
+import { DeleteCSV } from "./module/DeleteCSV.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchQuery = urlParams.get('search');
+
+    const userString = localStorage.getItem('user');
+    const user = JSON.parse(userString);
+
+    const UserName = document.getElementById("UserName");
+    UserName.innerHTML = user.username;
+
     const searchInput = document.getElementById("searchInput");
 
-    if (searchQuery) {
-        searchInput.value = searchQuery;
-        searchProducts(searchQuery);
-    } else {
-        renderCSVlist(); // show default list
-    }
-
-    const menuButton = document.getElementById('user-menu-button');
-    const dropdownMenu = document.getElementById('user-dropdown');
-
-    document.addEventListener('click', function (e) {
-        if (!menuButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.classList.add('hidden');
-        }
-    });
+    handleSearchFromURL();
 
     document.querySelector('form[role="search"]').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -34,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         history.pushState({}, '', newUrl);
 
-        searchProducts(searchInput.value);
+        searchProducts(query);
     });
 
     const dropZone = document.getElementById('dropZone');
@@ -67,9 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const menuButton = document.getElementById('user-menu-button');
+    const dropdownMenu = document.getElementById('user-dropdown');
+
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
         const fileInput = document.getElementById('fileInput');
+
+        if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.classList.add('hidden');
+        }
 
         if (!btn) return;
 
@@ -81,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('logout-btn'):
                 localStorage.removeItem('token');
+                localStorage.removeItem('user');
                 window.location.href = '/login';
                 break;
 
@@ -100,8 +99,21 @@ document.addEventListener('DOMContentLoaded', () => {
             case btn.classList.contains('processBtn'):
                 processCSV();
                 break;
+
+            case btn.classList.contains('delete-btn'):
+                const row = event.target.closest('tr.Dataset');
+                if (!row) return;
+
+                const datasetId = row.dataset.id;
+                DeleteCSV(datasetId);
+
+                row.remove();
+                break;
+
         }
 
     });
+
+    window.addEventListener('popstate', handleSearchFromURL);
 
 });

@@ -99,7 +99,15 @@ AuthRouter.post('/login', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRES_IN || '2h' },
             (err, token) => {
                 if (err) throw err;
-                res.json({ msg: 'Logged in successfully', token });
+                res.json({
+                    msg: 'Logged in successfully', 
+                    token,
+                    user: {
+                        id: storedUser.user_id,
+                        username: storedUser.username,
+                        email: storedUser.email
+                    }
+                });
             }
         );
 

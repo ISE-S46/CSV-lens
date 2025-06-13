@@ -30,6 +30,7 @@ async function handleLogin(event) {
 
         if (response.ok) {
             localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
             showMessage(loginMessageDiv, 'Login successful! Redirecting...', true);
             window.location.href = '/';
         } else {
@@ -51,6 +52,8 @@ async function checkAuthAndRender() {
         return;
     }
 
+    hideMessage(dashboardMessageDiv);
+
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
             method: 'GET',
@@ -60,6 +63,7 @@ async function checkAuthAndRender() {
         if (!response.ok) {
             // Token invalid or expired, force logout and redirect
             localStorage.removeItem('token');
+            localStorage.removeItem('user'); 
             showMessage(dashboardMessageDiv, 'Session expired. Please log in again.', false);
             setTimeout(() => {
                 window.location.href = '/login';
@@ -83,7 +87,7 @@ async function checkExistingTokenAndRedirect() {
     const token = localStorage.getItem('token');
 
     if (!token) {
-        return; 
+        return;
     }
 
     try {
@@ -95,7 +99,7 @@ async function checkExistingTokenAndRedirect() {
         if (response.ok) {
             console.log('User already logged in, redirecting to dashboard...');
             window.location.href = '/';
-            return true; 
+            return true;
         } else {
             localStorage.removeItem('token');
             console.log('Stored token invalid or expired, user must log in.');

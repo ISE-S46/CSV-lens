@@ -16,9 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = event.target.closest('button');
         if (!btn) return;
 
-        const id = btn.dataset.productId;
-        const type = btn.dataset.productType;
-
         switch (true) {
 
             case btn.classList.contains('togglePassword'):

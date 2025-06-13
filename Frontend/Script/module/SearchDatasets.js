@@ -11,4 +11,18 @@ async function searchProducts(searchInput, ) {
     return renderCSVlist(matchingDatasets);
 }
 
-export { searchProducts };
+function handleSearchFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchQuery) {
+        searchInput.value = searchQuery;
+        searchProducts(searchQuery);
+    } else {
+        searchInput.value = '';
+        renderCSVlist();
+    }
+}
+
+export { searchProducts, handleSearchFromURL };

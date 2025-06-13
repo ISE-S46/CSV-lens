@@ -1,4 +1,4 @@
-import { showMessage } from "./ShowMessage.js";
+import { showMessage, hideMessage } from "./ShowMessage.js";
 import { formatFileSize } from "./CSVupload.js";
 
 const API_BASE_URL = '/api';
@@ -6,6 +6,8 @@ const API_BASE_URL = '/api';
 async function getCSVlist() {
     const token = localStorage.getItem('token');
     const dashboardMessageDiv = document.getElementById('dashboard-message');
+
+    hideMessage(dashboardMessageDiv);
 
     try {
         const response = await fetch(`${API_BASE_URL}/datasets`, {
@@ -47,7 +49,7 @@ async function renderCSVlist(matchingDatasets) {
 function renderData(data) {
     const { dataset_id, csv_name, file_size_bytes, row_count, upload_date } = data;
     return `
-    <tr class="hover:bg-gray-50">
+    <tr class="hover:bg-gray-50 Dataset" data-id="${dataset_id}">
         <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -68,7 +70,7 @@ function renderData(data) {
             <button class="text-blue-600 hover:text-blue-800 font-medium">
                 <a href="/datasets/${dataset_id}/edit">Edit</a>
             </button>
-            <button class="text-red-600 hover:text-red-800 font-medium">Delete</button>
+            <button class="text-red-600 hover:text-red-800 font-medium delete-btn">Delete</button>
         </td>
     </tr>
     `;

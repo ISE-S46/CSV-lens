@@ -1,4 +1,5 @@
-import { showMessage } from "./ShowMessage.js";
+import { showMessage, hideMessage } from "./ShowMessage.js";
+import { renderCSVlist } from "./getCSVlist.js";
 
 let selectedFile = null;
 
@@ -66,6 +67,8 @@ async function processCSV() {
     const token = localStorage.getItem('token');
     const dashboardMessageDiv = document.getElementById('dashboard-message');
 
+    hideMessage(dashboardMessageDiv);
+
     if (!selectedFile) {
         showMessage(dashboardMessageDiv, 'No file selected', false);
         return;
@@ -92,11 +95,13 @@ async function processCSV() {
             data = await response.text();
         }
 
-        if (response.ok) {
-            showMessage(dashboardMessageDiv, 'Upload CSV file success!', true);
-        } else {
+        if (!response.ok) {
             showMessage(dashboardMessageDiv, data.msg || 'Upload failed.', false);
-        }
+        } 
+
+        showMessage(dashboardMessageDiv, 'Upload CSV file success!', true);
+        renderCSVlist();
+
     } catch (error) {
         console.error('Upload error:', error);
         showMessage(dashboardMessageDiv, 'Network error. Please try again later.', false);

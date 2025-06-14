@@ -14,10 +14,21 @@ const dateFormats = [
 ];
 
 const inferColumnType = (value, currentInferredType = 'unknown') => {
-    // Handle Null/Empty values first
-    const stringValue = String(value || '').trim(); // Ensure string and handle null/undefined safely
+    // Explicit null/empty handling
+    if (value === null || value === undefined || value === '') {
+        return currentInferredType === 'unknown' ? 'string' : currentInferredType;
+    }
 
+    // Convert to string and trim, but preserve 0/false
+    const stringValue = String(value).trim();
+
+    // Handle empty strings
     if (stringValue === '') {
+        return currentInferredType === 'unknown' ? 'string' : currentInferredType;
+    }
+
+    // Special case: literal string "null"
+    if (stringValue.toLowerCase() === 'null') {
         return currentInferredType === 'unknown' ? 'string' : currentInferredType;
     }
 
@@ -77,7 +88,12 @@ async function parseCsvBuffer(csvBuffer) {
         const readableStream = Readable.from(csvBuffer.toString()); // Assuming UTF-8 CSVs
 
         readableStream
-            .pipe(csv())
+            .pipe(csv({
+                strict: false,
+                skipEmptyLines: true,
+                nullObject: true,
+                headers: false
+            }))
             .on('headers', (headers) => {
                 if (headersProcessed) return; // Prevent reprocessing headers if stream somehow emits again
 
@@ -92,8 +108,15 @@ async function parseCsvBuffer(csvBuffer) {
                 headersProcessed = true;
             })
             .on('data', (data) => {
+                // Convert empty strings to null
+                const processedData = Object.fromEntries(
+                    Object.entries(data).map(([key, val]) =>
+                        [key, val === '' ? null : val]
+                    )
+                );
+
                 rowCount++;
-                rows.push(data);
+                rows.push(processedData);
 
                 // Refine column types based on the data encountered
                 Object.keys(data).forEach(key => {
@@ -138,25 +161,36 @@ async function parseCsvBuffer(csvBuffer) {
 }
 
 async function insertCsvDataBatch(client, datasetId, rows) {
-    if (rows.length === 0) {
-        return;
+    if (rows.length === 0) return;
+
+    const batchSize = 500;
+    let batchCount = 0;
+
+    try {
+        for (let i = 0; i < rows.length; i += batchSize) {
+            batchCount++;
+            const batch = rows.slice(i, i + batchSize);
+            const valuePlaceholders = [];
+            const params = [];
+            let paramIndex = 1;
+
+            batch.forEach((row, index) => {
+                valuePlaceholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}::jsonb)`);
+                params.push(datasetId, i + index + 1, row === null ? null : JSON.stringify(row));
+            });
+
+            const query = `
+                INSERT INTO csv_data (dataset_id, row_number, row_data)
+                VALUES ${valuePlaceholders.join(',')}
+            `;
+
+            await client.query(query, params);
+            console.log(`Inserted batch ${batchCount} (rows ${i + 1}-${Math.min(i + batchSize, rows.length)})`);
+        }
+    } catch (err) {
+        console.error(`Error in batch ${batchCount}:`, err);
+        throw err;
     }
-
-    const valuePlaceholders = [];
-    const params = [];
-    let paramIndex = 1;
-
-    rows.forEach((row, index) => {
-        valuePlaceholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}::jsonb)`);
-        params.push(datasetId, index + 1, JSON.stringify(row));
-    });
-
-    const query = `
-        INSERT INTO csv_data (dataset_id, row_number, row_data)
-        VALUES ${valuePlaceholders.join(',')}
-    `;
-
-    await client.query(query, params);
 }
 
-export { parseCsvBuffer, insertCsvDataBatch }
+export { parseCsvBuffer, insertCsvDataBatch };

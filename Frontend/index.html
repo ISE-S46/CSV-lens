@@ -10,7 +10,7 @@
 
 </head>
 
-<body class="bg-gray-300">
+<body class="bg-gray-300 flex flex-col h-screen">
 
     <nav
         class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
@@ -49,154 +49,164 @@
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto mt-24 px-3">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Upload Section -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Upload New CSV File</h2>
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto mt-24 px-3">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Upload Section -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-6">Upload New CSV File</h2>
 
-                    <!-- Upload Area -->
-                    <div id="dropZone"
-                        class="dropZone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:bg-gray-50">
-                        <div class="flex justify-center mb-4">
-                            <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linejoin="round">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
-                        </div>
-                        <p class="text-gray-600 mb-2">Drag & drop your .CSV file here</p>
-                        <p class="text-gray-500 text-sm mb-4">or</p>
-                        <button id="browseBtn" class="browseBtn px-4 py-2 blue-btn transition-colors">
-                            Browse Files
-                        </button>
-                    </div>
-
-                    <!-- Hidden File Input -->
-                    <input type="file" id="fileInput" accept=".csv" class="hidden">
-
-                    <!-- File Info Display -->
-                    <div id="fileInfo" class="fileInfo hidden bg-white border border-gray-200 rounded-lg p-4 mb-4">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-green-500 mr-3">
+                        <!-- Upload Area -->
+                        <div id="dropZone"
+                            class="dropZone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:bg-gray-50">
+                            <div class="flex justify-center mb-4">
+                                <svg class="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke-linejoin="round">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                 </svg>
-                                <div>
-                                    <p id="fileName" class="fileName font-medium text-gray-900"></p>
-                                    <p id="fileSize" class="fileSize text-sm text-gray-500"></p>
-                                </div>
                             </div>
-                            <button id="removeFile" class="removeFile text-red-500 hover:text-red-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                    class="w-7 h-7" stroke-width="2">
-                                    <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
-                                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                            <p class="text-gray-600 mb-2">Drag & drop your .CSV file here</p>
+                            <p class="text-gray-500 text-sm mb-4">or</p>
+                            <button id="browseBtn" class="browseBtn px-4 py-2 blue-btn transition-colors">
+                                Browse Files
                             </button>
                         </div>
-                    </div>
 
-                    <!-- Error Message -->
-                    <div id="errorMessage"
-                        class="errorMessage hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                        <div class="flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"
-                                stroke-width="0.5" stroke="currentColor" class="w-5 h-5 text-red-400 mr-2">
-                                <path fill-rule="evenodd"
-                                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <p id="errorText" class="errorText text-red-800 text-sm"></p>
+                        <!-- Hidden File Input -->
+                        <input type="file" id="fileInput" accept=".csv" class="hidden">
+
+                        <!-- File Info Display -->
+                        <div id="fileInfo" class="fileInfo hidden bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-green-500 mr-3">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <div>
+                                        <p id="fileName" class="fileName font-medium text-gray-900"></p>
+                                        <p id="fileSize" class="fileSize text-sm text-gray-500"></p>
+                                    </div>
+                                </div>
+                                <button id="removeFile" class="removeFile text-red-500 hover:text-red-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-7 h-7" stroke-width="2">
+                                        <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Process Button -->
-                    <button id="processBtn"
-                        class="processBtn hidden w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
-                        Upload CSV file
-                    </button>
-
-                    <!-- Requirements -->
-                    <div class="bg-blue-50 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-blue-800 mb-3">CSV File Requirements</h3>
-                        <ul class="text-sm text-blue-700 space-y-1">
-                            <li class="flex items-start">
-                                <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                                File must be in .CSV format
-                            </li>
-                            <li class="flex items-start">
-                                <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                                Maximum file size: 10MB
-                            </li>
-                            <li class="flex items-start">
-                                <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                                First row should contain headers
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Files List Section -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-5">
-                    <!-- Header -->
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-lg font-semibold text-gray-800">Your CSV Files</h2>
-                            <form role="search" class="relative">
-                                <input type="text" name="query" placeholder="Search files..." id="searchInput"
-                                    class="w-full sm:w-54 md:w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                    class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                    <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+                        <!-- Error Message -->
+                        <div id="errorMessage"
+                            class="errorMessage hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                            <div class="flex">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"
+                                    stroke-width="0.5" stroke="currentColor" class="w-5 h-5 text-red-400 mr-2">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z"
                                         clip-rule="evenodd" />
                                 </svg>
-                            </form>
+                                <p id="errorText" class="errorText text-red-800 text-sm"></p>
+                            </div>
+                        </div>
+
+                        <!-- Process Button -->
+                        <button id="processBtn"
+                            class="processBtn hidden w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
+                            Upload CSV file
+                        </button>
+
+                        <!-- Requirements -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-blue-800 mb-3">CSV File Requirements</h3>
+                            <ul class="text-sm text-blue-700 space-y-1">
+                                <li class="flex items-start">
+                                    <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                    File must be in .CSV format
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                    Maximum file size: 10MB
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                    First row should contain headers
+                                </li>
+                            </ul>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Table -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 my-4 mx-3">
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            File Name</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Size</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date Added</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Rows</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions</th>
-                                    </tr>
-                                </thead>
-                                <!-- Temporary file will change to real file later -->
+                <!-- Files List Section -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-5">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-semibold text-gray-800">Your CSV Files</h2>
+                                <form role="search" class="relative">
+                                    <input type="text" name="query" placeholder="Search files..." id="searchInput"
+                                        class="w-full sm:w-54 md:w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                        <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </form>
+                            </div>
+                        </div>
 
-                                <tbody class="bg-white divide-y divide-gray-200 DatasetsContainer" id="DatasetsContainer"></tbody>
+                        <!-- Table -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-100 my-4 mx-3">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                File Name</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Size</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Date Added</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Rows</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- Temporary file will change to real file later -->
 
-                            </table>
+                                    <tbody class="bg-white divide-y divide-gray-200 DatasetsContainer"
+                                        id="DatasetsContainer"></tbody>
+
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <footer class="left-0 w-full bg-gray-900 text-white p-4">
+        <div class="container mx-auto text-center text-sm">
+            <p>© 2025 CSV-lens</p>
+        </div>
+    </footer>
 
     <script type="module" src="./Script/index.js"></script>
 </body>

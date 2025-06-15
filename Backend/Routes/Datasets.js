@@ -9,6 +9,8 @@ import { UpdateSpecificRow, UpdateColumnName } from './controllers/update.js';
 
 const DatasetRouter = express.Router();
 
+DatasetRouter.use(Middleware);
+
 // Multer setup
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -25,18 +27,18 @@ const upload = multer({
     }
 });
 
-DatasetRouter.post('/upload', Middleware, upload.single('csvFile'), CSVuploadEndpoint);
+DatasetRouter.post('/upload', upload.single('csvFile'), CSVuploadEndpoint);
 
-DatasetRouter.get('/', Middleware, ListAllDatasets);
+DatasetRouter.get('/', ListAllDatasets);
 
-DatasetRouter.get('/:datasetId', Middleware, GetSpecificDataset);
+DatasetRouter.get('/:datasetId', GetSpecificDataset);
 
-DatasetRouter.get('/:datasetId/rows', Middleware, GetSpecificDatasetRow);
+DatasetRouter.get('/:datasetId/rows', GetSpecificDatasetRow);
 
-DatasetRouter.delete('/:datasetId', Middleware, DeleteDatasets);
+DatasetRouter.delete('/:datasetId', DeleteDatasets);
 
-DatasetRouter.put('/:datasetId/rows/:rowNumber', Middleware, UpdateSpecificRow);
+DatasetRouter.put('/:datasetId/rows/:rowNumber', UpdateSpecificRow);
 
-DatasetRouter.patch('/:datasetId/columns/:oldColumnName', Middleware, UpdateColumnName);
+DatasetRouter.patch('/:datasetId/columns/:oldColumnName', UpdateColumnName);
 
 export default DatasetRouter;

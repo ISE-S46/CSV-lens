@@ -82,7 +82,7 @@ async function parseCsvBuffer(csvBuffer) {
     // Use a Map to maintain insertion order of columns and for easier lookup
     let columnsMetadata = new Map();
     let rowCount = 0;
-    let headersProcessed = false; // Flag to ensure headers are processed once
+    let headers = []; // Store header names
 
     return new Promise((resolve, reject) => {
         const readableStream = Readable.from(csvBuffer.toString()); // Assuming UTF-8 CSVs
@@ -91,13 +91,15 @@ async function parseCsvBuffer(csvBuffer) {
             .pipe(csv({
                 strict: false,
                 skipEmptyLines: true,
-                nullObject: true,
-                headers: false
+                mapHeaders: ({ header, index }) => {
+                    // Store header names in order
+                    headers[index] = header;
+                    return header;
+                }
             }))
-            .on('headers', (headers) => {
-                if (headersProcessed) return; // Prevent reprocessing headers if stream somehow emits again
-
-                headers.forEach((header, index) => {
+            .on('headers', (parsedHeaders) => {
+                // Process headers and initialize metadata
+                parsedHeaders.forEach((header, index) => {
                     // Initialize with 'unknown' or 'string' as a starting point for inference
                     columnsMetadata.set(header, {
                         column_name: header,
@@ -105,58 +107,57 @@ async function parseCsvBuffer(csvBuffer) {
                         column_order: index + 1
                     });
                 });
-                headersProcessed = true;
             })
             .on('data', (data) => {
-                // Convert empty strings to null
+                rowCount++;
+                
+                // Convert empty strings to null and preserve headers
                 const processedData = Object.fromEntries(
-                    Object.entries(data).map(([key, val]) =>
+                    Object.entries(data).map(([key, val]) => 
                         [key, val === '' ? null : val]
                     )
                 );
-
-                rowCount++;
+                
                 rows.push(processedData);
 
-                // Refine column types based on the data encountered
-                Object.keys(data).forEach(key => {
+                // Refine column types
+                Object.entries(processedData).forEach(([key, value]) => {
                     if (!columnsMetadata.has(key)) {
-                        // This case handles CSVs where header row might be missing or inconsistent, or if a column appears mid-way
                         columnsMetadata.set(key, {
                             column_name: key,
                             column_type: 'unknown',
                             column_order: columnsMetadata.size + 1
                         });
                     }
+                    
                     const currentMeta = columnsMetadata.get(key);
-                    const inferredType = inferColumnType(data[key], currentMeta.column_type);
-
-                    // Logic to handle type conflicts:
+                    const inferredType = inferColumnType(value, currentMeta.column_type);
+                    
+                    // Type conflict resolution
                     if (currentMeta.column_type === 'unknown') {
                         currentMeta.column_type = inferredType;
                     } else if (currentMeta.column_type === 'integer' && inferredType === 'float') {
                         currentMeta.column_type = 'float';
-                    } else if (currentMeta.column_type !== inferredType && inferredType !== 'unknown') {
+                    } else if (currentMeta.column_type !== inferredType) {
                         currentMeta.column_type = 'string';
                     }
-
-                    // Update the map with the potentially refined metadata
-                    columnsMetadata.set(key, currentMeta);
                 });
             })
             .on('end', () => {
-                // After all data is processed, make a final pass to default 'unknown' types to 'string'
-                columnsMetadata.forEach((meta, key) => {
+                // Final type assignment
+                columnsMetadata.forEach(meta => {
                     if (meta.column_type === 'unknown') {
                         meta.column_type = 'string';
                     }
                 });
-                resolve({ rows, columnsMetadata: Array.from(columnsMetadata.values()), rowCount });
+                
+                resolve({ 
+                    rows, 
+                    columnsMetadata: Array.from(columnsMetadata.values()), 
+                    rowCount 
+                });
             })
-            .on('error', (err) => {
-                console.error('CSV Parsing Error:', err.message);
-                reject(new Error('Failed to parse CSV file: ' + err.message));
-            });
+            .on('error', reject);
     });
 }
 

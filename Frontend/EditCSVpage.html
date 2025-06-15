@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV-lens</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/components.css">
+
+</head>
+
+<body class="bg-gray-300 flex flex-col h-screen">
+
+    <nav
+        class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <span class="self-center text-3xl font-semibold whitespace-nowrap dark:text-white">CSV-lens</span>
+            </a>
+            <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative">
+                <button type="button"
+                    class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 user-menu-button"
+                    id="user-menu-button" aria-expanded="false">
+                    <span class="sr-only">Open user menu</span>
+                    <div
+                        class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
+                        U</div>
+                </button>
+                <div class="z-50 hidden absolute top-full right-0 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600"
+                    id="user-dropdown">
+                    <div class="px-4 py-3">
+                        <span class="block text-s">
+                            <p class="text-gray-900 dark:text-white" id="UserName"></p>
+                        </span>
+                    </div>
+                    <ul class="py-2" aria-labelledby="user-menu-button">
+                        <li>
+                            <a href="/account" class="UserMenu">Account</a>
+                        </li>
+                        <li>
+                            <button class="logout-btn w-full text-left UserMenu">
+                                Sign out
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow mt-44">
+        <p>edit csv page</p>
+    </main>
+
+    <footer class="left-0 w-full bg-gray-900 text-white p-4">
+        <div class="container mx-auto text-center text-sm">
+            <p>© 2025 CSV-lens</p>
+        </div>
+    </footer>
+
+    <script type="module" src="/Script/EditCSVpage.js"></script>
+</body>
+
+</html>

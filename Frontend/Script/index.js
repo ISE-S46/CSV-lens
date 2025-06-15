@@ -1,4 +1,4 @@
-import { checkAuthAndRender } from "./module/HandleLogin.js";
+import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
 import { handleFile, clearFile, processCSV } from "./module/CSVupload.js";
 import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js";
 import { DeleteCSV } from "./module/DeleteCSV.js";
@@ -78,9 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
 
             case btn.classList.contains('logout-btn'):
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
+                handleLogout();
                 break;
 
             case btn.classList.contains('dropZone'):

@@ -99,14 +99,23 @@ AuthRouter.post('/login', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRES_IN || '2h' },
             (err, token) => {
                 if (err) throw err;
+
+                // Set JWT as HTTP-only cookie
+                res.cookie('auth_token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                    maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 2 * 60 * 60 * 1000, // 2 hours
+                    signed: !!process.env.COOKIE_SECRET,
+                });
+
                 res.json({
-                    msg: 'Logged in successfully', 
-                    token,
+                    msg: 'Logged in successfully',
                     user: {
-                        id: storedUser.user_id,
+                        id: storedUser.id,
                         username: storedUser.username,
-                        email: storedUser.email
-                    }
+                        email: storedUser.email,
+                    },
                 });
             }
         );
@@ -119,6 +128,15 @@ AuthRouter.post('/login', async (req, res) => {
             client.release();
         }
     }
+});
+
+AuthRouter.post('/logout', async (req, res) => {
+    res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
+    res.json({ msg: 'Logged out successfully' });
 });
 
 AuthRouter.get('/verify-token', Middleware, (req, res) => {

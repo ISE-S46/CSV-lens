@@ -3,11 +3,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import pg from 'pg';
+import cookieParser from 'cookie-parser';
 
 import { Middleware, verifyToken } from './Middleware/authMiddleware.js';
 
 import AuthRouter from './Routes/Auth.js';
 import DatasetRouter from './Routes/Datasets.js';
+import DatasetPageRouter from './Routes/DatasetPage.js'
 
 dotenv.config({ path: '../.env' });
 
@@ -20,6 +22,7 @@ const __dirname = path.dirname(__filename);
 // Body parser middileware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Setup static folder
 app.use(express.static(path.join(__dirname, '../Frontend')));
@@ -59,6 +62,7 @@ const API_BASE_URL = process.env.API_BASE_URL;
 
 app.use(`${API_BASE_URL}/auth`, AuthRouter);
 app.use(`${API_BASE_URL}/datasets`, DatasetRouter);
+app.use(`/datasets`, DatasetPageRouter);
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {

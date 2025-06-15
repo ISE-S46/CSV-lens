@@ -42,6 +42,23 @@ async function handleLogin(event) {
     }
 }
 
+async function handleLogout() {
+    try {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+        });
+        const data = await response.json();
+        console.log(data.msg);
+
+        localStorage.removeItem('user');
+
+        window.location.href = '/login';
+    } catch (err) {
+        console.error('Logout error:', err);
+    }
+}
+
 async function checkAuthAndRender() {
     const token = localStorage.getItem('token');
     const dashboardMessageDiv = document.getElementById('dashboard-message');
@@ -63,7 +80,7 @@ async function checkAuthAndRender() {
         if (!response.ok) {
             // Token invalid or expired, force logout and redirect
             localStorage.removeItem('token');
-            localStorage.removeItem('user'); 
+            localStorage.removeItem('user');
             showMessage(dashboardMessageDiv, 'Session expired. Please log in again.', false);
             setTimeout(() => {
                 window.location.href = '/login';
@@ -84,16 +101,10 @@ async function checkAuthAndRender() {
 }
 
 async function checkExistingTokenAndRedirect() {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-        return;
-    }
-
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
             method: 'GET',
-            headers: { 'x-auth-token': token }
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -101,14 +112,14 @@ async function checkExistingTokenAndRedirect() {
             window.location.href = '/';
             return true;
         } else {
-            localStorage.removeItem('token');
-            console.log('Stored token invalid or expired, user must log in.');
+            localStorage.removeItem('user');
+            console.log('Session expired or invalid, user must log in.');
         }
     } catch (error) {
-        console.error('Error verifying token on login page:', error);
-        localStorage.removeItem('token');
+        console.error('Error verifying token:', error);
+        localStorage.removeItem('user');
     }
     return false;
 }
 
-export { handleLogin, checkAuthAndRender, checkExistingTokenAndRedirect };
+export { handleLogin, handleLogout, checkAuthAndRender, checkExistingTokenAndRedirect };

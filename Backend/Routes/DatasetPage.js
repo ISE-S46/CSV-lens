@@ -1,10 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { checkDatasetOwnership } from '../Middleware/authMiddleware.js';
-import dotenv from 'dotenv';
-
-import { Middleware } from '../Middleware/authMiddleware.js';
+import { Middleware, checkDatasetOwnership } from '../Middleware/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

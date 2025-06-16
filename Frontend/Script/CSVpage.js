@@ -1,8 +1,10 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
+import { loadDatasetPage } from "./module/FetchCSV.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
+    loadDatasetPage();
 
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);
@@ -15,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
-        const fileInput = document.getElementById('fileInput');
 
         if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
             dropdownMenu.classList.add('hidden');

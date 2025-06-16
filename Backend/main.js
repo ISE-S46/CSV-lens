@@ -48,6 +48,8 @@ app.get('/register', async (req, res) => {
     res.sendFile(path.join(__dirname, '../Frontend/Register.html'));
 });
 
+app.use(`/datasets`, DatasetPageRouter);
+
 const pool = new pg.Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -62,7 +64,6 @@ const API_BASE_URL = process.env.API_BASE_URL;
 
 app.use(`${API_BASE_URL}/auth`, AuthRouter);
 app.use(`${API_BASE_URL}/datasets`, DatasetRouter);
-app.use(`/datasets`, DatasetPageRouter);
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {

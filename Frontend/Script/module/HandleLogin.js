@@ -51,6 +51,7 @@ async function handleLogout() {
         const data = await response.json();
         console.log(data.msg);
 
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
 
         window.location.href = '/login';
@@ -93,6 +94,7 @@ async function checkAuthAndRender() {
     } catch (error) {
         console.error('Error verifying token:', error);
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         showMessage(dashboardMessageDiv, 'Network error during authentication check. Redirecting to login.', false);
         setTimeout(() => {
             window.location.href = '/login';

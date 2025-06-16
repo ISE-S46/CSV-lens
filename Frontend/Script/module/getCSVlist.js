@@ -90,5 +90,4 @@ function formatTimestamp(timestamp) {
     return `${day}-${month}-${year} ${hours}:${minutes}`;
 }
 
-
-export { renderCSVlist, getCSVlist };
+export { renderCSVlist, getCSVlist, formatTimestamp };

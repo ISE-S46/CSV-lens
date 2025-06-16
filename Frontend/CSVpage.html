@@ -49,8 +49,44 @@
         </div>
     </nav>
 
-    <main class="flex-grow mt-44">
-        <p>display csv page</p>
+    <main class="flex-grow mt-24">
+        <div class="max-w-7xl mx-3 lg:mx-auto bg-white p-6 rounded-xl shadow-lg px-4 mb-5">
+
+            <!-- Dataset Metadata Section -->
+            <div id="dataset-metadata" class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h1 class="text-xl font-semibold text-blue-800 mb-2">Dataset Information</h1>
+                <p><span class="font-semibold">Name:</span> <span id="meta-name">Loading...</span></p>
+                <p><span class="font-semibold">Description:</span> <span id="meta-description">Loading...</span></p>
+                <p><span class="font-semibold">Total Rows:</span> <span id="meta-rows">Loading...</span></p>
+                <p><span class="font-semibold">Uploaded On:</span> <span id="meta-date">Loading...</span></p>
+            </div>
+
+            <!-- Global Message Area -->
+            <div id="message-area" class="message" style="display: none;"></div>
+            <div id="loading-spinner" class="loading-spinner mx-auto" style="display: none;"></div>
+
+            <!-- Data Table Section -->
+            <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
+                <table id="csv-table" class="min-w-full divide-y divide-gray-200 bg-white">
+                    <thead class="bg-gray-50">
+                        <tr id="table-header-row"></tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="mt-6 flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <button id="prev-page-btn"
+                    class="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-50 prev-page-btn"
+                    disabled>Previous</button>
+                <span class="text-gray-700">Page <span id="current-page-display">1</span> of <span
+                        id="total-pages-display">1</span></span>
+                <button id="next-page-btn"
+                    class="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-50 next-page-btn"
+                    disabled>Next</button>
+            </div>
+        </div>
     </main>
 
     <footer class="left-0 w-full bg-gray-900 text-white p-4">

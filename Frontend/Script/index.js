@@ -1,11 +1,16 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
 import { handleFile, clearFile, processCSV } from "./module/CSVupload.js";
-import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js";
+import { searchProducts } from "./module/SearchDatasets.js";
 import { DeleteCSV } from "./module/DeleteCSV.js";
+import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
+import { initializePagination } from "./module/getCSVlist.js";
+import { renderCSVlist } from "./module/getCSVlist.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
+    initializePageInput();
+    initializePagination();
 
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);
@@ -15,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById("searchInput");
 
-    handleSearchFromURL();
+    renderCSVlist();
 
     document.querySelector('form[role="search"]').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -108,10 +113,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 row.remove();
                 break;
 
+            case btn.classList.contains('Inputpage-btn'):
+                showPageInputModal();
+                break;
+
+            case btn.classList.contains('cancel-page-btn'):
+                hidePageInputModal();
+                break;
+
         }
 
     });
-
-    window.addEventListener('popstate', handleSearchFromURL);
 
 });

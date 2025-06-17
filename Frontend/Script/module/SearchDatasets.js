@@ -1,6 +1,6 @@
 import { renderCSVlist, getCSVlist } from "./getCSVlist.js";
 
-async function searchProducts(searchInput, ) {
+async function searchProducts(searchInput) {
     const Datasets = await getCSVlist();
 
     const query = searchInput.toLowerCase();

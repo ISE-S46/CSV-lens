@@ -1,10 +1,12 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
 import { loadDatasetPage } from "./module/FetchCSV.js";
+import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
     loadDatasetPage();
+    initializePageInput();
 
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);
@@ -32,6 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('logout-btn'):
                 handleLogout();
+                break;
+
+            case btn.classList.contains('Inputpage-btn'):
+                showPageInputModal();
+                break;
+            case btn.classList.contains('Inputpage-btn'):
+                hidePageInputModal();
                 break;
 
         }

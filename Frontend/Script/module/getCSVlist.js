@@ -1,27 +1,40 @@
 import { showMessage, hideMessage } from "./ShowMessage.js";
 import { formatFileSize } from "./CSVupload.js";
+import {
+    getCurrentPage,
+    setCurrentPage,
+    setTotalPages,
+    resetPagination,
+    updatePaginationDisplay,
+    bindPaginationButtons,
+    getPageFromUrl,
+    updateUrlWithPage,
+    handlePopstate
+} from './Pagination.js';
+import { handleSearchFromURL } from "./SearchDatasets.js";
 
 const API_BASE_URL = '/api';
 
+const rowsPerPage = 2;
+let allDatasets = [];
+
 async function getCSVlist() {
-    const token = localStorage.getItem('token');
     const dashboardMessageDiv = document.getElementById('dashboard-message');
 
     hideMessage(dashboardMessageDiv);
 
     try {
         const response = await fetch(`${API_BASE_URL}/datasets`, {
-            method: 'GET',
-            headers: { 'x-auth-token': token }
+            method: 'GET'
         });
 
         if (!response.ok) {
+            const data = await response.json();
             showMessage(dashboardMessageDiv, data.msg || 'fetching datasets failed.', false);
             return;
         }
 
         const data = await response.json();
-
         return data.datasets;
 
     } catch (error) {
@@ -37,13 +50,70 @@ async function renderCSVlist(matchingDatasets) {
         datasets = matchingDatasets;
     }
 
-    const DatasetsContainer = document.getElementById("DatasetsContainer");
-    DatasetsContainer.innerHTML = '';
+    // Store all datasets for pagination
+    allDatasets = datasets || [];
+    
+    // Reset pagination and get initial page from URL
+    resetPagination();
+    const initialPage = getPageFromUrl();
+    const totalPages = Math.ceil(allDatasets.length / rowsPerPage);
+    
+    setTotalPages(totalPages);
+    setCurrentPage(initialPage);
+    
+    renderCurrentPage();
+}
 
-    datasets.forEach(dataset => {
+function renderCurrentPage() {
+    const DatasetsContainer = document.getElementById("DatasetsContainer");
+
+    if (!DatasetsContainer) return;
+
+    // Calculate pagination using the imported functions
+    const currentPage = getCurrentPage();
+    const totalPages = Math.ceil(allDatasets.length / rowsPerPage);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const currentDatasets = allDatasets.slice(startIndex, endIndex);
+
+    // Render current page data
+    DatasetsContainer.innerHTML = '';
+    currentDatasets.forEach(dataset => {
         DatasetsContainer.innerHTML += renderData(dataset);
     });
 
+    // Update pagination display using imported function
+    const pagination = {
+        currentPage: currentPage,
+        totalPages: totalPages,
+        hasPreviousPage: currentPage > 1,
+        hasNextPage: currentPage < totalPages
+    };
+    
+    updatePaginationDisplay(pagination);
+}
+
+
+function handlePageChange(direction) {
+    const currentPage = getCurrentPage();
+    const newPage = currentPage + direction;
+    const totalPages = Math.ceil(allDatasets.length / rowsPerPage);
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        setCurrentPage(newPage);
+        renderCurrentPage();
+        updateUrlWithPage(newPage, true);
+    }
+}
+
+function initializePagination() {
+    bindPaginationButtons(handlePageChange);
+
+    window.addEventListener('popstate', async () => {
+        await handlePopstate();
+        renderCurrentPage();
+        handleSearchFromURL;
+    });
 }
 
 function renderData(data) {
@@ -90,4 +160,4 @@ function formatTimestamp(timestamp) {
     return `${day}-${month}-${year} ${hours}:${minutes}`;
 }
 
-export { renderCSVlist, getCSVlist, formatTimestamp };
+export { renderCSVlist, getCSVlist, formatTimestamp, initializePagination };

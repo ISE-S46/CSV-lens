@@ -1,5 +1,3 @@
-import { loadCurrentPageRows } from "./FetchCSV.js";
-
 const prevPageBtn = document.getElementById('prev-page-btn');
 const nextPageBtn = document.getElementById('next-page-btn');
 const currentPageDisplay = document.getElementById('current-page-display');
@@ -7,7 +5,6 @@ const totalPagesDisplay = document.getElementById('total-pages-display');
 
 let currentPage = 1;
 let totalPages = 1;
-let isHandlingPopstate = false;
 
 function getCurrentPage() {
     return currentPage;
@@ -16,6 +13,9 @@ function getCurrentPage() {
 function setCurrentPage(page) {
     if (page >= 1 && page <= totalPages) {
         currentPage = page;
+        console.log(`setCurrentPage: Page successfully set to ${currentPage}.`);
+    } else {
+        console.warn(`setCurrentPage: Invalid page number ${page}. Keeping ${currentPage}.`);
     }
 }
 
@@ -57,35 +57,28 @@ function bindPaginationButtons(onPageChange) {
 function getPageFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const pageParam = parseInt(urlParams.get('page'), 10);
-    return !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+    const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+    return page;
 }
 
 function updateUrlWithPage(page, pushState = true) {
     const url = new URL(window.location.href);
     url.searchParams.set('page', page);
     
-    if (pushState && !isHandlingPopstate) {
-        window.history.pushState({ page: page }, '', url);
-    } else if (!pushState) {
-        window.history.replaceState({ page: page }, '', url);
+    if (pushState) {
+        window.history.pushState({ page: page }, '', url.toString());
+    } else {
+        window.history.replaceState({ page: page }, '', url.toString());
     }
 }
 
 async function handlePopstate() {
-    isHandlingPopstate = true;
-    
     try {
         const targetPage = getPageFromUrl();
-        // console.log('Popstate: navigating to page', targetPage);
-
         setCurrentPage(targetPage);
-
-        await loadCurrentPageRows(false);
-        
+        console.log(`handlePopstate (Pagination.js): setCurrentPage called with ${targetPage}. Internal currentPage is now ${currentPage}.`);
     } catch (error) {
-        console.error('Error handling popstate:', error);
-    } finally {
-        isHandlingPopstate = false;
+        console.error('Error in handlePopstate (Pagination.js):', error);
     }
 }
 

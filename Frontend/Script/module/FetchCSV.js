@@ -1,15 +1,16 @@
 import { showMessage, hideMessage } from "./ShowMessage.js";
 import { formatTimestamp } from "./getCSVlist.js";
+import { updateTotalPages } from './PageInput.js';
 import {
-    getCurrentPage, 
-    setCurrentPage, 
-    setTotalPages, 
-    resetPagination, 
-    updatePaginationDisplay, 
-    bindPaginationButtons, 
-    getPageFromUrl, 
-    updateUrlWithPage, 
-    handlePopstate 
+    getCurrentPage,
+    setCurrentPage,
+    setTotalPages,
+    resetPagination,
+    updatePaginationDisplay,
+    bindPaginationButtons,
+    getPageFromUrl,
+    updateUrlWithPage,
+    handlePopstate
 } from './Pagination.js';
 
 const API_BASE_URL = '/api';
@@ -201,35 +202,41 @@ async function loadDatasetPage() {
 
     resetPagination();
     const datasetDetails = await fetchDatasetDetails(currentDatasetId);
+
+    if (!datasetDetails) return;
+
+    renderDatasetMetadata(datasetDetails);
+    const totalPageCount = Math.ceil(datasetDetails.row_count / rowsPerPage);
+    setTotalPages(totalPageCount);
+    updateTotalPages(totalPageCount);
+
+    // Get initial page from URL
+    const initialPage = getPageFromUrl();
+    setCurrentPage(initialPage);
+
+    updateUrlWithPage(initialPage, false);
+
+    await loadCurrentPageRows(false); // Don't update URL again
+
+    bindPaginationButtons(async (direction) => {
+        const newPage = getCurrentPage() + direction;
+        if (newPage >= 1 && newPage <= Math.ceil(datasetDetails.row_count / rowsPerPage)) {
+            setCurrentPage(newPage);
+            await loadCurrentPageRows();
+        }
+    });
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', async () => {
+        await handlePopstate();
+        await loadCurrentPageRows(false);
+    });
     
-    if (datasetDetails) {
-        renderDatasetMetadata(datasetDetails);
-        setTotalPages(Math.ceil(datasetDetails.row_count / rowsPerPage));
-
-        // Get initial page from URL
-        const initialPage = getPageFromUrl();
-        setCurrentPage(initialPage);
-
-        updateUrlWithPage(initialPage, false);
-
-        await loadCurrentPageRows(false); // Don't update URL again
-
-        bindPaginationButtons(async (direction) => {
-            const newPage = getCurrentPage() + direction;
-            if (newPage >= 1 && newPage <= Math.ceil(datasetDetails.row_count / rowsPerPage)) {
-                setCurrentPage(newPage);
-                await loadCurrentPageRows();
-            }
-        });
-
-        // Handle browser back/forward
-        window.addEventListener('popstate', handlePopstate);
-    }
 }
 
 async function loadCurrentPageRows(updateUrl = true) {
     const page = getCurrentPage();
-    
+
     // Update URL if requested (for programmatic navigation)
     if (updateUrl) {
         updateUrlWithPage(page);

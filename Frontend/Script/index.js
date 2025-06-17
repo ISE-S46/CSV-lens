@@ -1,10 +1,9 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
 import { handleFile, clearFile, processCSV } from "./module/CSVupload.js";
-import { searchProducts } from "./module/SearchDatasets.js";
+import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js";
 import { DeleteCSV } from "./module/DeleteCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 import { initializePagination } from "./module/getCSVlist.js";
-import { renderCSVlist } from "./module/getCSVlist.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById("searchInput");
 
-    renderCSVlist();
+    handleSearchFromURL();
 
     document.querySelector('form[role="search"]').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -124,5 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     });
+
+    window.addEventListener('popstate', handleSearchFromURL);
 
 });

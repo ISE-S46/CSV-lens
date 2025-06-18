@@ -1,12 +1,12 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
-import { loadDatasetPage } from "./module/FetchCSV.js";
+import { loadDatasetPage, loadCurrentPageRows } from "./module/FetchCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
     loadDatasetPage();
-    initializePageInput();
+    initializePageInput(loadCurrentPageRows);
 
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);

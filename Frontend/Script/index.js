@@ -8,8 +8,8 @@ import { initializePagination } from "./module/getCSVlist.js";
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
-    initializePageInput();
     initializePagination();
+    initializePageInput(handleSearchFromURL);
 
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);

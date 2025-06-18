@@ -13,10 +13,14 @@ function getCurrentPage() {
 function setCurrentPage(page) {
     if (page >= 1 && page <= totalPages) {
         currentPage = page;
-        console.log(`setCurrentPage: Page successfully set to ${currentPage}.`);
+        // console.log(`setCurrentPage: Page successfully set to ${currentPage}.`); // might use in debugging later
     } else {
-        console.warn(`setCurrentPage: Invalid page number ${page}. Keeping ${currentPage}.`);
+        // console.warn(`setCurrentPage: Invalid page number ${page}. Keeping ${currentPage}.`); // might use in debugging later
     }
+}
+
+function getTotalPages() {
+    return totalPages;
 }
 
 function setTotalPages(count) {
@@ -76,15 +80,16 @@ async function handlePopstate() {
     try {
         const targetPage = getPageFromUrl();
         setCurrentPage(targetPage);
-        console.log(`handlePopstate (Pagination.js): setCurrentPage called with ${targetPage}. Internal currentPage is now ${currentPage}.`);
+        // console.log(`handlePopstate (Pagination.js): setCurrentPage called with ${targetPage}. Internal currentPage is now ${currentPage}.`); // might use in debugging later
     } catch (error) {
-        console.error('Error in handlePopstate (Pagination.js):', error);
+        // console.error('Error in handlePopstate (Pagination.js):', error); // might use in debugging later
     }
 }
 
 export { 
     getCurrentPage, 
     setCurrentPage, 
+    getTotalPages, 
     setTotalPages, 
     resetPagination, 
     updatePaginationDisplay, 

@@ -15,7 +15,7 @@ import { handleSearchFromURL } from "./SearchDatasets.js";
 
 const API_BASE_URL = '/api';
 
-const rowsPerPage = 2;
+const rowsPerPage = 1; // Set to 1 for testing pagination, will change it back later
 let allDatasets = [];
 
 async function getCSVlist() {
@@ -59,8 +59,9 @@ async function renderCSVlist(matchingDatasets) {
     const totalPages = Math.ceil(allDatasets.length / rowsPerPage);
     
     setTotalPages(totalPages);
+    // console.log("from rendercsvlist") // might use in debugging later
     setCurrentPage(initialPage);
-    
+
     renderCurrentPage();
 }
 

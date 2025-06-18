@@ -1,5 +1,5 @@
-import { getCurrentPage, setCurrentPage } from './Pagination.js';
-import { loadCurrentPageRows } from './FetchCSV.js';
+import { setTotalPages, getCurrentPage, setCurrentPage, getTotalPages } from './Pagination.js';
+import { updateUrlWithPage } from './Pagination.js';
 
 const modal = document.getElementById('page-input-modal');
 const pageNumberInput = document.getElementById('page-number-input');
@@ -7,16 +7,15 @@ const goToPageBtn = document.getElementById('go-to-page-btn');
 const pageError = document.getElementById('page-error');
 const modalTotalPages = document.getElementById('modal-total-pages');
 
-let totalPages = 1;
-
 function showPageInputModal() {
     const currentPage = getCurrentPage();
-    
+    const total = getTotalPages();
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     pageNumberInput.value = currentPage;
-    pageNumberInput.max = totalPages;
-    modalTotalPages.textContent = totalPages;
+    pageNumberInput.max = total;
+    modalTotalPages.textContent = total;
     pageError.classList.add('hidden');
     
     // Focus and select the input
@@ -34,47 +33,59 @@ function hidePageInputModal() {
 }
 
 function validatePageNumber(pageNum) {
-    return pageNum >= 1 && pageNum <= totalPages && !isNaN(pageNum);
+    const total = getTotalPages();
+    return pageNum >= 1 && pageNum <= total && !isNaN(pageNum);
 }
 
 async function goToPage(pageNum) {
     if (validatePageNumber(pageNum)) {
+        // console.log("from gotopage") // might use in debugging later
         setCurrentPage(pageNum);
+        updateUrlWithPage(pageNum);
         hidePageInputModal();
-        
-        // Load the requested page
-        await loadCurrentPageRows();
+
+        return true;
     } else {
         pageError.classList.remove('hidden');
         pageNumberInput.focus();
         pageNumberInput.select();
+
+        return false;
     }
 }
 
 // Update total pages when dataset changes
 function updateTotalPages(count) {
-    totalPages = count;
+    setTotalPages(count);
+
+    const total = getTotalPages();
     if (modalTotalPages) {
-        modalTotalPages.textContent = totalPages;
+        modalTotalPages.textContent = total;
     }
     if (pageNumberInput) {
-        pageNumberInput.max = totalPages;
+        pageNumberInput.max = total;
     }
 }
 
-function initializePageInput() {
+function initializePageInput(InputFunction) {
     if (!modal) return;
 
     goToPageBtn.addEventListener('click', async () => {
         const pageNum = parseInt(pageNumberInput.value, 10);
-        await goToPage(pageNum);
+        if (goToPage(pageNum)) {
+            await InputFunction();
+            console.log("from initialize page input")
+        }
     });
 
     // Handle Enter key in input
     pageNumberInput.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
             const pageNum = parseInt(pageNumberInput.value, 10);
-            await goToPage(pageNum);
+            if (goToPage(pageNum)) {
+                await InputFunction();
+                console.log("from initialize page input")
+            }
         } else if (e.key === 'Escape') {
             hidePageInputModal();
         }

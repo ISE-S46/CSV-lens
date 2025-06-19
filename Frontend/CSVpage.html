@@ -62,7 +62,32 @@
             </div>
 
             <!-- Global Message Area -->
-            <div id="message-area" class="message" style="display: none;"></div>
+            <div id="message-area" class="message">
+                <!-- Main Modal -->
+                <div id="csv-page-modal" class="fixed z-50 hidden">
+                    <div class="fixed top-4 right-4 mt-2 mr-2 z-50">
+                        <div class="bg-white rounded-md shadow-md w-full max-w-xs relative overflow-hidden">
+                            <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                                <h2 class="text-md font-medium text-gray-800">Notification</h2>
+                                <button id="close-modal-btn"
+                                    class="close-modal-btn text-gray-400 hover:text-gray-600 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="1.5"
+                                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div id="modal-message" class="p-4 text-md text-gray-600">
+                                Test
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="loading-spinner" class="loading-spinner mx-auto" style="display: none;"></div>
 
             <!-- Data Table Section -->
@@ -77,24 +102,21 @@
 
             <!-- Pagination Controls -->
             <div class="mt-6 flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border border-gray-200">
-                <button id="prev-page-btn"
-                    class="px-4 rounded-lg blue-btn disabled:opacity-50 prev-page-btn"
+                <button id="prev-page-btn" class="px-4 rounded-lg blue-btn disabled:opacity-50 prev-page-btn"
                     disabled>Previous</button>
                 <button
                     class="Inputpage-btn border border-gray-300 px-4 py-2 rounded-lg transition-colors duration-150 active:text-white active:border-blue-600">
                     <span class="text-gray-700">Page <span id="current-page-display">1</span> of <span
                             id="total-pages-display">1</span></span>
                 </button>
-                <button id="next-page-btn"
-                    class="px-4 rounded-lg blue-btn disabled:opacity-50 next-page-btn"
+                <button id="next-page-btn" class="px-4 rounded-lg blue-btn disabled:opacity-50 next-page-btn"
                     disabled>Next</button>
             </div>
         </div>
     </main>
 
     <!-- Page Input Popup Modal -->
-    <div id="page-input-modal"
-        class="fixed inset-0 bg-opacity-50 items-center justify-center z-50 hidden">
+    <div id="page-input-modal" class="fixed inset-0 bg-opacity-50 items-center justify-center z-50 hidden">
         <div class="bg-slate-50 rounded-lg shadow-xl p-6 w-80 max-w-sm mx-4">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Go to Page</h3>
 
@@ -113,8 +135,7 @@
                     class="cancel-page-btn px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150 font-semibold">
                     Cancel
                 </button>
-                <button id="go-to-page-btn"
-                    class="px-4 transition-colors blue-btn">
+                <button id="go-to-page-btn" class="px-4 transition-colors blue-btn">
                     Go to Page
                 </button>
             </div>

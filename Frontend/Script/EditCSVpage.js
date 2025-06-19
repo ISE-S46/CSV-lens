@@ -1,4 +1,5 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
+import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -12,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
+
+    const Modal = document.querySelector('#Edit-page-modal');
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
@@ -31,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('logout-btn'):
                 handleLogout();
+                break;
+
+            case btn.classList.contains('close-modal-btn'):
+                hideMessage(Modal);
                 break;
 
         }

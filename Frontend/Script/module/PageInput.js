@@ -74,7 +74,7 @@ function initializePageInput(InputFunction) {
         const pageNum = parseInt(pageNumberInput.value, 10);
         if (goToPage(pageNum)) {
             await InputFunction();
-            console.log("from initialize page input")
+            // console.log("from initialize page input") // might need for debugging later
         }
     });
 
@@ -84,7 +84,7 @@ function initializePageInput(InputFunction) {
             const pageNum = parseInt(pageNumberInput.value, 10);
             if (goToPage(pageNum)) {
                 await InputFunction();
-                console.log("from initialize page input")
+                // console.log("from initialize page input") // might need for debugging later
             }
         } else if (e.key === 'Escape') {
             hidePageInputModal();

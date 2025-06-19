@@ -66,6 +66,30 @@
         </div>
     </main>
 
+    <!-- Modal -->
+    <div id="login-modal" class="fixed z-50 hidden">
+        <div class="fixed top-4 right-4 mt-2 mr-2 z-50">
+            <div class="bg-white rounded-md shadow-md w-full max-w-xs relative overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-md font-medium text-gray-800">Notification</h2>
+                    <button id="close-modal-btn"
+                        class="close-modal-btn text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="modal-message" class="p-4 text-md text-gray-600">
+                    Test
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="left-0 w-full bg-gray-900 text-white p-4">
         <div class="container mx-auto text-center text-sm">
             <p>© 2025 CSV-lens</p>

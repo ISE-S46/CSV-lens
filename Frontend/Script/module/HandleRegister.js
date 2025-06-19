@@ -10,7 +10,7 @@ async function handleRegister(event) {
     const registerPassword = document.getElementById('registerPassword');
     const registerConfirmPassword = document.getElementById('registerConfirmPassword');
 
-    const registerMessageDiv = document.getElementById('register-message');
+    const registerMessageDiv = document.getElementById('Register-modal');
 
     hideMessage(registerMessageDiv);
 
@@ -43,7 +43,7 @@ async function handleRegister(event) {
             showMessage(registerMessageDiv, 'Register successful!', true);
             window.location.href = '/login';
         } else {
-            showMessage(registerMessageDiv, data.msg || 'Register failed.', false);
+            showMessage(registerMessageDiv, `Register failed, ${data.msg}`, false);
         }
     } catch (error) {
         console.error('Register error:', error);

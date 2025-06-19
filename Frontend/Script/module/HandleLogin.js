@@ -7,7 +7,7 @@ async function handleLogin(event) {
 
     const loginEmailInput = document.getElementById('loginEmail');
     const loginPasswordInput = document.getElementById('loginPassword');
-    const loginMessageDiv = document.getElementById('login-message');
+    const loginMessageDiv = document.querySelector('#login-modal');
 
     hideMessage(loginMessageDiv);
 
@@ -34,7 +34,7 @@ async function handleLogin(event) {
             showMessage(loginMessageDiv, 'Login successful! Redirecting...', true);
             window.location.href = '/';
         } else {
-            showMessage(loginMessageDiv, data.msg || 'Login failed. Please check your credentials.', false);
+            showMessage(loginMessageDiv, `Login failed, ${data.msg}.`, false);
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -43,13 +43,18 @@ async function handleLogin(event) {
 }
 
 async function handleLogout() {
+    const dashboardMessageDiv = document.querySelector('#login-modal');
+
+    hideMessage(dashboardMessageDiv);
+
     try {
         const response = await fetch('/api/auth/logout', {
             method: 'POST',
             credentials: 'include',
         });
         const data = await response.json();
-        console.log(data.msg);
+        // console.log(data.msg);
+        showMessage(dashboardMessageDiv, `Session expired, ${data.msg}`, false);
 
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -57,12 +62,13 @@ async function handleLogout() {
         window.location.href = '/login';
     } catch (err) {
         console.error('Logout error:', err);
+        showMessage(dashboardMessageDiv, `Logout error: ${err}`, false);
     }
 }
 
 async function checkAuthAndRender() {
     const token = localStorage.getItem('token');
-    const dashboardMessageDiv = document.getElementById('dashboard-message');
+    const dashboardMessageDiv = document.querySelector('#login-modal');
 
     if (!token) {
         // No token found, redirect to login page
@@ -74,8 +80,7 @@ async function checkAuthAndRender() {
 
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
-            method: 'GET',
-            headers: { 'x-auth-token': token }
+            method: 'GET'
         });
 
         if (!response.ok) {
@@ -114,11 +119,13 @@ async function checkExistingTokenAndRedirect() {
             window.location.href = '/';
             return true;
         } else {
+            localStorage.removeItem('token');
             localStorage.removeItem('user');
             console.log('Session expired or invalid, user must log in.');
         }
     } catch (error) {
         console.error('Error verifying token:', error);
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
     }
     return false;

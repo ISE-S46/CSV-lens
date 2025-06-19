@@ -1,5 +1,6 @@
 import { TogglePasswordIcon } from "./module/ShowPassword.js";
 import { handleLogin, checkExistingTokenAndRedirect } from "./module/HandleLogin.js";
+import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -8,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const Password = document.querySelector('#loginPassword');
     const showIcon = document.querySelector('#showIcon');
     const hideIcon = document.querySelector('#hideIcon');
+    const Modal = document.querySelector('#login-modal');
 
     document.body.addEventListener('click', event => {
 
@@ -22,6 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('Login'):
                 handleLogin(event);
+                break;
+
+            case btn.classList.contains('close-modal-btn'):
+                hideMessage(Modal);
                 break;
         }
 

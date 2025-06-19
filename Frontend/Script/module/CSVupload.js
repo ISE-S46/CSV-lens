@@ -64,8 +64,7 @@ function formatFileSize(bytes) {
 }
 
 async function processCSV() {
-    const token = localStorage.getItem('token');
-    const dashboardMessageDiv = document.getElementById('dashboard-message');
+    const dashboardMessageDiv = document.querySelector('#Main-page-modal');
 
     hideMessage(dashboardMessageDiv);
 
@@ -82,7 +81,6 @@ async function processCSV() {
     try {
         const response = await fetch(`${API_BASE_URL}/datasets/upload`, {
             method: 'POST',
-            headers: { 'x-auth-token': token },
             body: formData
         });
 
@@ -96,10 +94,10 @@ async function processCSV() {
         }
 
         if (!response.ok) {
-            showMessage(dashboardMessageDiv, data.msg || 'Upload failed.', false);
+            showMessage(dashboardMessageDiv,`Upload failed, ${data.msg}`, false);
         } 
 
-        showMessage(dashboardMessageDiv, 'Upload CSV file success!', true);
+        showMessage(dashboardMessageDiv, 'Upload CSV file successfully', true);
         renderCSVlist();
 
     } catch (error) {

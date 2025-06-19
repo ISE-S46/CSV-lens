@@ -13,8 +13,14 @@ const AuthRouter = express.Router();
 AuthRouter.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
     if (!username || !email || !password) {
         return res.status(400).json({ msg: 'Please enter all fields' });
+    }
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ msg: 'Invalid email format' });
     }
 
     let client;
@@ -27,7 +33,7 @@ AuthRouter.post('/register', async (req, res) => {
         );
 
         if (user.rows.length > 0) {
-            return res.status(400).json({ msg: 'User with that email already exists' });
+            return res.status(400).json({ msg: 'User with that email or username already exists' });
         }
 
         // Hash password
@@ -66,6 +72,12 @@ AuthRouter.post('/login', async (req, res) => {
     // Basic validation
     if (!email || !password) {
         return res.status(400).json({ msg: 'Please enter all fields' });
+    }
+
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ msg: 'Invalid email format' });
     }
 
     let client;

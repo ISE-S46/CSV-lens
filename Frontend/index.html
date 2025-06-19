@@ -218,6 +218,30 @@
         </div>
     </main>
 
+    <!-- Main Modal -->
+    <div id="Main-page-modal" class="fixed z-50 hidden">
+        <div class="fixed top-4 right-4 mt-2 mr-2 z-50">
+            <div class="bg-white rounded-md shadow-md w-full max-w-xs relative overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-md font-medium text-gray-800">Notification</h2>
+                    <button id="close-modal-btn"
+                        class="close-modal-btn text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="modal-message" class="p-4 text-md text-gray-600">
+                    Test
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Page Input Popup Modal -->
     <div id="page-input-modal" class="fixed inset-0 bg-opacity-50 items-center justify-center z-50 hidden">
         <div class="bg-slate-50 rounded-lg shadow-xl p-6 w-80 max-w-sm mx-4">
@@ -238,8 +262,7 @@
                     class="cancel-page-btn px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150 font-semibold">
                     Cancel
                 </button>
-                <button id="go-to-page-btn"
-                    class="px-4 transition-colors blue-btn">
+                <button id="go-to-page-btn" class="px-4 transition-colors blue-btn">
                     Go to Page
                 </button>
             </div>

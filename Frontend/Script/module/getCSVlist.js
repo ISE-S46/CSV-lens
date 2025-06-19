@@ -19,7 +19,7 @@ const rowsPerPage = 1; // Set to 1 for testing pagination, will change it back l
 let allDatasets = [];
 
 async function getCSVlist() {
-    const dashboardMessageDiv = document.getElementById('dashboard-message');
+    const dashboardMessageDiv = document.querySelector('#Main-page-modal');
 
     hideMessage(dashboardMessageDiv);
 
@@ -30,7 +30,7 @@ async function getCSVlist() {
 
         if (!response.ok) {
             const data = await response.json();
-            showMessage(dashboardMessageDiv, data.msg || 'fetching datasets failed.', false);
+            showMessage(dashboardMessageDiv, `fetching datasets failed, ${data.msg}`, false);
             return;
         }
 

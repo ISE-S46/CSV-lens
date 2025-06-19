@@ -19,7 +19,7 @@ let currentDatasetId = null;
 const rowsPerPage = 50; // Api default is 50 but adjustable here as well
 let columnsInfo = [];
 
-const messageArea = document.getElementById('message-area');
+const messageArea = document.getElementById('csv-page-modal');
 const loadingSpinner = document.getElementById('loading-spinner');
 
 function showLoadingSpinner() {
@@ -31,10 +31,11 @@ function hideLoadingSpinner() {
 }
 
 function handleAuthError(response) {
+    hideMessage(messageArea);
     if (response.status === 401 || response.status === 403) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        showMessage(messageArea, 'Session expired or unauthorized. Please log in again.', 'error');
+        showMessage(messageArea, 'Session expired or unauthorized. Please log in again.');
         setTimeout(() => {
             window.location.href = '/login';
         }, 1500);
@@ -46,7 +47,7 @@ function handleAuthError(response) {
 // --- Data Fetching Functions ---
 
 async function fetchDatasetDetails(datasetId) {
-    hideMessage();
+    hideMessage(messageArea);
     showLoadingSpinner();
     const token = localStorage.getItem('token');
     if (!token) {
@@ -59,18 +60,18 @@ async function fetchDatasetDetails(datasetId) {
 
         if (handleAuthError(response)) return null;
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            showMessage(messageArea, `Error fetching dataset details: ${errorData.msg || response.statusText}`, 'error');
+            showMessage(messageArea, `Error fetching dataset details: ${data.msg || response.statusText}`);
             return null;
         }
 
-        const data = await response.json();
         return data.dataset;
 
     } catch (error) {
-        console.error('Network error fetching dataset details:', error);
-        showMessage(messageArea, 'Network error fetching dataset details.', 'error');
+        console.error('Network error fetching dataset:', error);
+        showMessage(messageArea, 'Error fetching dataset.');
         return null;
     } finally {
         hideLoadingSpinner();
@@ -78,7 +79,7 @@ async function fetchDatasetDetails(datasetId) {
 }
 
 async function fetchDatasetRows(datasetId, page, limit) {
-    hideMessage();
+    hideMessage(messageArea);
     showLoadingSpinner();
     const token = localStorage.getItem('token');
     if (!token) {
@@ -98,7 +99,7 @@ async function fetchDatasetRows(datasetId, page, limit) {
 
         if (!response.ok) {
             const errorData = await response.json();
-            showMessage(messageArea, `Error fetching dataset rows: ${errorData.msg || response.statusText}`, 'error');
+            showMessage(messageArea, `Error fetching dataset rows: ${errorData.msg || response.statusText}`);
             return null;
         }
 
@@ -106,7 +107,7 @@ async function fetchDatasetRows(datasetId, page, limit) {
         return data;
     } catch (error) {
         console.error('Network error fetching dataset rows:', error);
-        showMessage(messageArea, 'Network error fetching dataset rows.', 'error');
+        showMessage(messageArea, 'Error fetching dataset rows.');
         return null;
     } finally {
         hideLoadingSpinner();
@@ -131,16 +132,17 @@ const csvTableHeaderRow = document.getElementById('table-header-row');
 const csvTableBody = document.getElementById('table-body');
 
 function renderTable(rows) {
+    hideMessage(messageArea);
     csvTableHeaderRow.innerHTML = '';
     csvTableBody.innerHTML = '';
 
     if (columnsInfo.length === 0) {
-        showMessage(messageArea, 'No column information found for this dataset.', 'info');
+        showMessage(messageArea, 'No column information found for this dataset.');
         return;
     }
 
     if (rows.length === 0) {
-        showMessage(messageArea, 'No data available for this page with current filters/sorts.', 'info');
+        showMessage(messageArea, 'No data available for this page with current filters/sorts.');
         return;
     }
 
@@ -186,17 +188,18 @@ function renderTable(rows) {
 // --- Main Page Load Logic ---
 
 async function loadDatasetPage() {
+    hideMessage(messageArea);
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
 
     if (!id) {
-        showMessage(messageArea, 'No dataset ID provided in the URL.', 'error');
+        showMessage(messageArea, 'No dataset ID provided in the URL.');
         return;
     }
 
     currentDatasetId = parseInt(id, 10);
     if (isNaN(currentDatasetId)) {
-        showMessage(messageArea, 'Invalid dataset ID in the URL.', 'error');
+        showMessage(messageArea, 'Invalid dataset ID in the URL.');
         return;
     }
 

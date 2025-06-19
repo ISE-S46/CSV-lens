@@ -4,6 +4,7 @@ import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js"
 import { DeleteCSV } from "./module/DeleteCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 import { initializePagination } from "./module/getCSVlist.js";
+import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
+    const Modal = document.querySelector('#Main-page-modal');
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
@@ -79,6 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
             case btn.classList.contains('user-menu-button'):
                 event.stopPropagation();
                 dropdownMenu.classList.toggle('hidden');
+                break;
+
+            case btn.classList.contains('close-modal-btn'):
+                hideMessage(Modal);
                 break;
 
             case btn.classList.contains('logout-btn'):

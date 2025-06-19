@@ -1,6 +1,7 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
 import { loadDatasetPage, loadCurrentPageRows } from "./module/FetchCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
+import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -16,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
+
+    const Modal = document.getElementById('csv-page-modal');
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
@@ -39,8 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
             case btn.classList.contains('Inputpage-btn'):
                 showPageInputModal();
                 break;
-            case btn.classList.contains('Inputpage-btn'):
+
+            case btn.classList.contains('cancel-page-btn'):
                 hidePageInputModal();
+                break;
+
+            case btn.classList.contains('close-modal-btn'):
+                hideMessage(Modal);
                 break;
 
         }

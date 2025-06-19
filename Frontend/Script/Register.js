@@ -1,10 +1,12 @@
 import { TogglePasswordIcon } from "./module/ShowPassword.js";
 import { handleRegister } from "./module/HandleRegister.js";
+import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     const registerPassword = document.querySelector('#registerPassword');
     const registerConfirmPassword = document.querySelector('#registerConfirmPassword');
+    const Modal = document.querySelector('#Register-modal');
 
     const showIcon = document.querySelector('#showIcon');
     const hideIcon = document.querySelector('#hideIcon');
@@ -28,6 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('Register-btn'):
                 handleRegister(event);
+                break;
+                
+            case btn.classList.contains('close-modal-btn'):
+                hideMessage(Modal);
                 break;
         }
 

@@ -1,20 +1,20 @@
-function showMessage(elementId, message, isSuccess = false) {
-    // const msgElement = document.getElementById(elementId);
-    // if (msgElement) {
-    //     msgElement.textContent = message;
-    //     msgElement.className = `message ${isSuccess ? 'success-message' : 'error-message'}`;
-    //     msgElement.style.display = 'block';
-    // }
-    console.log(message);
+function showMessage(Modal, message, isSuccess = false) {
+    document.getElementById('modal-message').textContent = message || 'Default message';
+
+    if (Modal) {
+        Modal.classList.remove('hidden');
+        Modal.classList.add('flex');
+        Modal.className = `message ${isSuccess ? 'success-message' : 'error-message'}`;
+    }
+
 }
 
-function hideMessage(elementId) {
-    // const msgElement = document.getElementById(elementId);
-    // if (msgElement) {
-    //     msgElement.style.display = 'none';
-    //     msgElement.textContent = '';
-    // }
-    console.log("hide pop up");
+function hideMessage(Modal) {
+    if (Modal) {
+        Modal.classList.add('hidden');
+        Modal.classList.remove('flex');
+    }
+
 }
 
 export { showMessage, hideMessage };

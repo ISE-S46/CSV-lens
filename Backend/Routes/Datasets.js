@@ -3,7 +3,7 @@ import multer from 'multer'; // Express middleware that handles multipart/form-d
 import { Middleware } from '../Middleware/authMiddleware.js';
 
 import { CSVuploadEndpoint } from './controllers/post.js';
-import { ListAllDatasets, GetSpecificDataset, GetSpecificDatasetRow } from './controllers/get.js';
+import { ListAllDatasets, GetSpecificDataset, GetSpecificDatasetRow, GetSpecificDatasetNullRow } from './controllers/get.js';
 import { DeleteDatasets } from './controllers/del.js';
 import { UpdateSpecificRow, UpdateColumnName } from './controllers/update.js';
 
@@ -34,6 +34,8 @@ DatasetRouter.get('/', ListAllDatasets);
 DatasetRouter.get('/:datasetId', GetSpecificDataset);
 
 DatasetRouter.get('/:datasetId/rows', GetSpecificDatasetRow);
+
+DatasetRouter.get('/:datasetId/null-rows', GetSpecificDatasetNullRow);
 
 DatasetRouter.delete('/:datasetId', DeleteDatasets);
 

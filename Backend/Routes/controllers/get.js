@@ -1,6 +1,6 @@
 import { pool } from '../../main.js';
 import { validateDatasetId } from './subFunction/Validation.js';
-import { getPaginatedSortedFilteredRows } from './subFunction/dataRetrieval.js';
+import { getPaginatedSortedFilteredRows, getDatasetColumns } from './subFunction/dataRetrieval.js';
 
 const ListAllDatasets = async (req, res) => {
     const userId = req.user.id;
@@ -133,4 +133,69 @@ const GetSpecificDatasetRow = async (req, res) => {
     }
 }
 
-export { ListAllDatasets, GetSpecificDataset, GetSpecificDatasetRow };
+const GetSpecificDatasetNullRow = async (req, res) => {
+    const userId = req.user.id;
+    const datasetId = parseInt(req.params.datasetId, 10);
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 1000; // Default to 1000 to get a large chunk or all
+
+    if (validateDatasetId(datasetId, res)) return;
+
+    if (isNaN(page) || page <= 0) {
+        return res.status(400).json({ msg: 'Invalid page number. Page must be a positive integer.' });
+    }
+    if (isNaN(limit) || limit <= 0 || limit > 10000) {
+        return res.status(400).json({ msg: 'Invalid limit. Limit must be between 1 and 10000.' });
+    }
+
+    try {
+        // Get all column names for the dataset
+        const datasetColumns = await getDatasetColumns(datasetId);
+        if (!datasetColumns || datasetColumns.length === 0) {
+            return res.status(404).json({ msg: 'Dataset columns not found or empty.' });
+        }
+
+        // Construct the filter to find rows where ANY column is null/empty
+        const nullCheckOrConditions = datasetColumns.map(col => ({
+            columnName: col.column_name,
+            operator: 'isNull',
+            value: true
+        }));
+
+        const filters = {
+            _or_conditions: nullCheckOrConditions
+        };
+
+        const result = await getPaginatedSortedFilteredRows(
+            datasetId,
+            userId,
+            { page, limit, filters } // Pass the constructed filters
+        );
+
+        res.status(200).json({
+            msg: 'Null rows retrieved successfully',
+            count: result.pagination.totalRows, // Total count of rows with nulls
+            data: result.data, // The actual null rows
+            pagination: result.pagination // Redundant but might need later
+        });
+
+    } catch (err) {
+        console.error(`Error fetching null rows for dataset ${datasetId}:`, err.message);
+        if (err.message.includes('Dataset not found')) {
+            res.status(404).json({ msg: err.message });
+        } else if (err.message.includes('Access denied')) {
+            res.status(403).json({ msg: err.message });
+        } else if (
+            err.message.includes('Invalid') ||
+            err.message.includes('Unsupported') ||
+            err.message.includes('Cannot sort')
+        ) {
+            res.status(400).json({ msg: err.message });
+        } else {
+            res.status(500).json({ msg: 'Server error fetching null rows.', error: err.message });
+        }
+    }
+};
+
+export { ListAllDatasets, GetSpecificDataset, GetSpecificDatasetRow, GetSpecificDatasetNullRow };

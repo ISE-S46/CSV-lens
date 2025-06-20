@@ -1,5 +1,5 @@
 import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
-import { loadDatasetPage, loadCurrentPageRows } from "./module/FetchCSV.js";
+import { loadDatasetPage, loadCurrentPageRows, toggleNullRowsDisplay } from "./module/FetchCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 import { hideMessage } from "./module/ShowMessage.js";
 
@@ -49,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('close-modal-btn'):
                 hideMessage(Modal);
+                break;
+
+            case btn.classList.contains('hide-null-rows-btn'):
+                toggleNullRowsDisplay();
                 break;
 
         }

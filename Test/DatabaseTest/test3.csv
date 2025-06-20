@@ -3,9 +3,9 @@ Alice,30,New York,true,2023-01-15,123.45
 Bob,24,London,false,2023-02-20,99.99
 Charlie,35,Paris,true,2023-01-05,500.00
 David,28,Berlin,false,2023-03-01,75.00
-Eve,22,New York,true,2024-04-10,250.50
+Eve,22,New York,true,2024-04-10,
 Frank,40,London,false,2023-01-25,1000.00
 Grace,29,Tokyo,true,2023-02-10,300.00
-Hannah,32,New York,false,2023-03-15,150.75
+,32,New York,false,2023-03-15,150.75
 Ian,26,London,true,2023-01-01,200.00
 Julia,38,Paris,false,2023-04-20,400.00

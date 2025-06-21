@@ -12,6 +12,7 @@ import {
     updateUrlWithPage,
     handlePopstate
 } from './Pagination.js';
+import { filterManager } from './Filter.js';
 
 const API_BASE_URL = '/api';
 
@@ -93,6 +94,19 @@ async function fetchDatasetRows(datasetId, page, limit) {
             limit: limit
         });
 
+        // Add filters
+        const filters = filterManager.getFilters();
+        if (Object.keys(filters).length > 0) {
+            queryParams.append('filters', JSON.stringify(filters));
+        }
+
+        // Add sorts - now supports multiple
+        const sorts = filterManager.getSorts();
+        if (sorts.length > 0) {
+            queryParams.append('sortBy', sorts.map(sort => sort.column).join(','));
+            queryParams.append('sortOrder', sorts.map(sort => sort.direction).join(','));
+        }
+
         const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows?${queryParams.toString()}`);
 
         if (handleAuthError(response)) return null;
@@ -146,17 +160,57 @@ async function fetchDatasetNullRows(datasetId) {
 }
 
 // --- Rendering Functions ---
+const CSVname = document.getElementById('CSV-name');
 const metaName = document.getElementById('meta-name');
 const metaDescription = document.getElementById('meta-description');
 const metaRows = document.getElementById('meta-rows');
 const metaDate = document.getElementById('meta-date');
 
 function renderDatasetMetadata(dataset) {
-    metaName.textContent = dataset.csv_name;
+    CSVname.textContent = dataset.csv_name;
+    metaName.textContent = dataset.original_filename;
     metaDescription.textContent = dataset.description || 'No description provided.';
     metaRows.textContent = dataset.row_count;
     metaDate.textContent = formatTimestamp(dataset.upload_date);
     columnsInfo = dataset.columns.sort((a, b) => a.column_order - b.column_order);
+
+    // Populate column dropdowns
+    populateColumnDropdowns();
+}
+
+function populateColumnDropdowns() {
+    if (!columnsInfo || columnsInfo.length === 0) return;
+
+    const columnNames = columnsInfo.map(col => col.column_name);
+
+    // Populate filter column dropdowns
+    const filterDropdowns = document.querySelectorAll('.filter-column');
+    filterDropdowns.forEach(select => {
+        // Clear existing options except the first
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+
+        // Add new options
+        columnNames.forEach(col => {
+            const option = document.createElement('option');
+            option.value = col;
+            option.textContent = col;
+            select.appendChild(option);
+        });
+    });
+
+    // Populate sort column dropdown
+    const sortDropdown = document.getElementById('sort-column');
+    while (sortDropdown.options.length > 1) {
+        sortDropdown.remove(1);
+    }
+    columnNames.forEach(col => {
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        sortDropdown.appendChild(option);
+    });
 }
 
 const csvTableHeaderRow = document.getElementById('table-header-row');
@@ -292,6 +346,33 @@ function toggleNullRowsDisplay() {
 
 // --- Main Page Load Logic ---
 
+function parseURLParameters() {
+    const params = new URLSearchParams(window.location.search);
+    const state = {};
+    
+    // Parse filters
+    if (params.has('filters')) {
+        try {
+            state.filters = JSON.parse(params.get('filters'));
+        } catch (e) {
+            console.error('Error parsing filters from URL', e);
+        }
+    }
+    
+    // Parse sorts
+    if (params.has('sortBy') && params.has('sortOrder')) {
+        const sortColumns = params.get('sortBy').split(',');
+        const sortDirections = params.get('sortOrder').split(',');
+        
+        state.sorts = sortColumns.map((column, index) => ({
+            column,
+            direction: sortDirections[index] || 'ASC'
+        }));
+    }
+    
+    return state;
+}
+
 const dataQualityCheckSection = document.getElementById('data-quality-check');
 const nullRowsCountText = document.getElementById('null-rows-count-text');
 const nullRowsMessage = document.getElementById('null-rows-message');
@@ -312,6 +393,29 @@ async function loadDatasetPage() {
         return;
     }
 
+    // Reset filters and sort
+    filterManager.clearFilters();
+    filterManager.clearSorts();
+    
+    // Apply URL parameters if they exist
+    const urlState = parseURLParameters();
+    
+    // Apply filters from URL
+    if (urlState.filters) {
+        for (const [column, conditions] of Object.entries(urlState.filters)) {
+            conditions.forEach(({operator, value}) => {
+                filterManager.addFilter(column, operator, value);
+            });
+        }
+    }
+    
+    // Apply sorts from URL
+    if (urlState.sorts) {
+        urlState.sorts.forEach(({column, direction}) => {
+            filterManager.addSort(column, direction);
+        });
+    }
+    
     resetPagination();
     const datasetDetails = await fetchDatasetDetails(currentDatasetId);
 
@@ -327,18 +431,17 @@ async function loadDatasetPage() {
     if (nullRowsResponse && nullRowsResponse.count > 0) {
         dataQualityCheckSection.classList.remove('hidden'); // Show the whole section
         nullRowsCountText.textContent = `${nullRowsResponse.count} rows across the dataset contain null or missing values. These may affect your data analysis and visualizations.`;
-        
+
         renderNullTable(nullRowsResponse.data); // Render the null rows data
-        
-        isNullRowsTableVisible = true; 
-        toggleNullRowsDisplay(); 
+
+        isNullRowsTableVisible = true;
+        toggleNullRowsDisplay();
 
         nullRowsMessage.classList.remove('hidden');
 
     } else {
         dataQualityCheckSection.classList.add('hidden');
     }
-
 
     // Get initial page from URL
     const initialPage = getPageFromUrl();
@@ -362,7 +465,7 @@ async function loadDatasetPage() {
         await handlePopstate();
         await loadCurrentPageRows(false);
     });
-    
+
 }
 
 async function loadCurrentPageRows(updateUrl = true) {

@@ -22,7 +22,7 @@ async function getDatasetColumns(datasetId) {
 async function getPaginatedSortedFilteredRows(
     datasetId,
     userId,
-    { page = 1, limit = 50, sortBy, sortOrder = 'ASC', filters = {} }
+    { page = 1, limit = 50, sortColumns = [], sortDirections = [], filters = {} }
 ) {
     const offset = (page - 1) * limit;
 
@@ -48,10 +48,9 @@ async function getPaginatedSortedFilteredRows(
 
         // Fetch column types for dynamic query construction and validation
         const datasetColumns = await getDatasetColumns(datasetId);
+        const columnTypes = new Map(datasetColumns.map(col => [col.column_name, col.column_type]));
 
         // console.log('Available columns and types:', Array.from(columnTypes.entries()));
-
-        const columnTypes = new Map(datasetColumns.map(col => [col.column_name, col.column_type]));
 
         // Dynamic Query Construction for Filtering
         let filterConditions = [];
@@ -88,56 +87,70 @@ async function getPaginatedSortedFilteredRows(
             }
         }
 
-        for (const [columnName, filterObj] of Object.entries(filters)) {
-            if (columnName === '_or_conditions') {
-                continue;
-            }
+        for (const [column, conditions] of Object.entries(filters)) {
 
-            const columnType = columnTypes.get(columnName);
+            if (column === '_or_conditions') {
+                continue;
+            }            const columnType = columnTypes.get(column);
 
             if (!columnType) {
-                console.warn(`Filter applied to non-existent or invalid column: ${columnName}. Ignoring.`);
+                console.warn(`Filter applied to non-existent or invalid column: ${column}. Ignoring.`);
                 continue;
             }
 
-            const { operator, value } = filterObj;
-            // Pass currentParamIndex to buildFilterCondition
-            const { condition, param, usedParam } = buildFilterCondition(columnName, columnType, operator, value, currentParamIndex);
+            // Handle multiple conditions for the same column
+            const columnConditions = [];
+            for (const { operator, value } of conditions) {
+                const { condition, param, usedParam } = buildFilterCondition(
+                    column, columnType, operator, value, currentParamIndex
+                );
 
-            if (condition) {
-                filterConditions.push(condition);
-                if (usedParam) {
-                    filterValues.push(param);
-                    currentParamIndex++; // Increment ONLY if a parameter was used
+                if (condition) {
+                    columnConditions.push(condition);
+                    if (usedParam) {
+                        filterValues.push(param);
+                        currentParamIndex++;
+                    }
                 }
+            }
+
+            if (columnConditions.length > 0) {
+                filterConditions.push(`(${columnConditions.join(' AND ')})`);
             }
         }
 
         const whereClause = filterConditions.length > 0 ? ' AND ' + filterConditions.join(' AND ') : '';
 
-        // Dynamic Query Construction for Sorting
         let orderByClause = '';
-        if (sortBy) {
-            const columnType = columnTypes.get(sortBy);
+        if (sortColumns.length > 0) {
+            const orderByParts = [];
 
-            if (!columnType) {
-                throw new Error(`Cannot sort by non-existent column: ${sortBy}`);
+            for (let i = 0; i < sortColumns.length; i++) {
+                const column = sortColumns[i];
+                const direction = sortDirections[i] || 'ASC'; // Default to ASC if not provided
+
+                const columnType = columnTypes.get(column);
+                if (!columnType) {
+                    throw new Error(`Cannot sort by non-existent column: ${column}`);
+                }
+
+                let pgSortCastType = '';
+                if (['integer', 'float'].includes(columnType)) {
+                    pgSortCastType = 'numeric';
+                } else if (['date', 'timestamp'].includes(columnType)) {
+                    pgSortCastType = 'timestamp';
+                } else if (columnType === 'boolean') {
+                    pgSortCastType = 'boolean';
+                } else {
+                    pgSortCastType = 'text';
+                }
+
+                orderByParts.push(`(row_data->>'${column}')::${pgSortCastType} ${direction}`);
             }
 
-            let pgSortCastType = '';
-            if (['integer', 'float'].includes(columnType)) {
-                pgSortCastType = 'numeric';
-            } else if (['date', 'timestamp'].includes(columnType)) {
-                pgSortCastType = 'timestamp';
-            } else if (columnType === 'boolean') {
-                pgSortCastType = 'boolean';
-            } else {
-                pgSortCastType = 'text'; // Default for strings
-            }
-
-            orderByClause = `ORDER BY (row_data->>'${sortBy}')::${pgSortCastType} ${sortOrder}`;
+            orderByClause = `ORDER BY ${orderByParts.join(', ')}`;
         } else {
-            orderByClause = `ORDER BY row_number ASC`; // Default if no sortBy provided
+            orderByClause = `ORDER BY row_number ASC`;
         }
 
         // Parameter positions in the final query string will be:
@@ -263,9 +276,21 @@ function buildFilterCondition(columnName, columnType, operator, value, paramCoun
             usedParam = true;
             break;
 
-        case 'like':
+        case 'contains':
             condition = `${jsonbPath} ILIKE $${paramCounter}`;
             param = `%${value}%`;
+            usedParam = true;
+            break;
+
+        case 'starts':
+            condition = `${jsonbPath} ILIKE $${paramCounter}`;
+            param = `${value}%`;
+            usedParam = true;
+            break;
+
+        case 'ends':
+            condition = `${jsonbPath} ILIKE $${paramCounter}`;
+            param = `%${value}`;
             usedParam = true;
             break;
 

@@ -54,8 +54,8 @@
 
             <!-- Dataset Metadata Section -->
             <div id="dataset-metadata" class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h1 class="text-xl font-semibold text-blue-800 mb-2">Dataset Information</h1>
-                <p><span class="font-semibold">Name:</span> <span id="meta-name">Loading...</span></p>
+                <h1 class="text-2xl font-semibold text-blue-800 mb-2" id="CSV-name">Dataset Information</h1>
+                <p><span class="font-semibold">Original File:</span> <span id="meta-name">Loading...</span></p>
                 <p><span class="font-semibold">Description:</span> <span id="meta-description">Loading...</span></p>
                 <p><span class="font-semibold">Total Rows:</span> <span id="meta-rows">Loading...</span></p>
                 <p><span class="font-semibold">Uploaded On:</span> <span id="meta-date">Loading...</span></p>
@@ -89,6 +89,106 @@
                 </div>
             </div>
             <div id="loading-spinner" class="loading-spinner mx-auto" style="display: none;"></div>
+
+            <div id="filter-section" class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-semibold text-gray-800">Filters & Sorting</h2>
+                    <div class="flex space-x-2">
+                        <button id="copy-filter-url"
+                            class="copy-filter-url bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition">
+                            Copy URL with Filters
+                        </button>
+                    </div>
+                </div>
+
+                <div id="filter-panel" class="border border-gray-200 rounded-lg p-4 shadow">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Filter Builder -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-3">Build Filters</h3>
+                            <div id="filter-builder" class="space-y-3">
+                                <div
+                                    class="filter-row flex flex-wrap items-center gap-2 p-2 border border-gray-200 rounded-md">
+                                    <select
+                                        class="filter-column flex-grow border border-gray-300 rounded-md py-1 px-2 text-sm">
+                                        <option value="">Select column</option>
+                                    </select>
+                                    <select
+                                        class="filter-operator flex-grow border border-gray-300 rounded-md py-1 px-2 text-sm">
+                                        <option value="=">=</option>
+                                        <option value="!=">!=</option>
+                                        <option value=">">></option>
+                                        <option value="<"><</option>
+                                        <option value=">=">>=</option>
+                                        <option value="<="><=</option>
+                                        <option value="contains">contains</option>
+                                        <option value="starts">starts with</option>
+                                        <option value="ends">ends with</option>
+                                    </select>
+                                    <input type="text"
+                                        class="filter-value w-1/3.5 border border-gray-300 rounded-md py-1 px-2 text-sm"
+                                        placeholder="Value">
+                                    <button
+                                        class="add-filter bg-green-100 hover:bg-green-200 text-green-700 p-1 rounded-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                            class="size-6">
+                                            <path fill-rule="evenodd"
+                                                d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button id="apply-filters"
+                                    class="apply-filters bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-4 rounded-md transition text-sm">
+                                    Apply Filters
+                                </button>
+                                <button id="clear-filters"
+                                    class="clear-filters bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-4 rounded-md transition text-sm ml-2">
+                                    Clear All
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-3">Sort Order</h3>
+                            <div id="sort-builder" class="space-y-3">
+                                <div class="sort-row flex items-center gap-2 p-2 border border-gray-200 rounded-md">
+                                    <select id="sort-column"
+                                        class="sort-column w-2/3 border border-gray-300 rounded-md py-1 px-2 text-sm">
+                                        <option value="">Select column</option>
+                                    </select>
+                                    <select
+                                        class="sort-direction w-1/3 border border-gray-300 rounded-md py-1 px-2 text-sm">
+                                        <option value="ASC">Ascending</option>
+                                        <option value="DESC">Descending</option>
+                                    </select>
+                                    <button id="add-sort"
+                                        class="add-sort bg-green-100 hover:bg-green-200 text-green-700 p-1 rounded-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                            class="size-6">
+                                            <path fill-rule="evenodd"
+                                                d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button id="apply-sort"
+                                    class="apply-sort bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-4 rounded-md transition text-sm">
+                                    Apply Sorting
+                                </button>
+                                <button id="clear-sort"
+                                    class="clear-sort bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-4 rounded-md transition text-sm ml-2">
+                                    Clear Sort
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Data Table Section -->
             <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
@@ -126,7 +226,7 @@
                 class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <span class="block sm:inline" id="null-rows-count-text"></span>
             </div>
-            
+
             <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200 max-h-[380px] overflow-y-scroll">
                 <table id="null-csv-table" class="min-w-full divide-y divide-gray-200 bg-white">
                     <thead class="bg-gray-50">

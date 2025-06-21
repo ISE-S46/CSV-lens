@@ -1,5 +1,5 @@
 .blue-btn {
-    @apply py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition duration-200;
+    @apply py-2 bg-indigo-600 text-white font-semibold rounded hover:bg-indigo-700 transition duration-200;
 }
 
 .red-btn {

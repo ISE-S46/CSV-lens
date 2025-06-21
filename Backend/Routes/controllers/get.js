@@ -80,9 +80,17 @@ const GetSpecificDatasetRow = async (req, res) => {
     // Parse pagination, sorting, and filtering parameters from query
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 50;
-    const sortBy = req.query.sortBy;
-    // Ensure sortOrder is either 'ASC' or 'DESC', default to 'ASC'
-    const sortOrder = req.query.sortOrder && ['ASC', 'DESC'].includes(req.query.sortOrder.toUpperCase()) ? req.query.sortOrder.toUpperCase() : 'ASC';
+    
+    // Parse multiple sort columns and directions
+    let sortColumns = [];
+    let sortDirections = [];
+    if (req.query.sortBy) {
+        sortColumns = req.query.sortBy.split(',');
+    }
+    if (req.query.sortOrder) {
+        sortDirections = req.query.sortOrder.split(',');
+    }
+    
     let filters = {};
     if (req.query.filters) {
         try {
@@ -101,22 +109,40 @@ const GetSpecificDatasetRow = async (req, res) => {
         return res.status(400).json({ msg: 'Invalid limit. Limit must be between 1 and 1000.' });
     }
 
+    // Validate sort directions
+    const validDirections = ['ASC', 'DESC'];
+    for (const dir of sortDirections) {
+        if (!validDirections.includes(dir.toUpperCase())) {
+            return res.status(400).json({ msg: `Invalid sort direction: ${dir}. Must be ASC or DESC.` });
+        }
+    }
+
+    // Validate same number of sort columns and directions
+    if (sortColumns.length !== sortDirections.length) {
+        return res.status(400).json({ msg: 'Number of sort columns must match number of sort directions.' });
+    }
+
     try {
-        // Call the utility function, passing all options
+        // Call the utility function with multiple sort support
         const result = await getPaginatedSortedFilteredRows(
             datasetId,
             userId,
-            { page, limit, sortBy, sortOrder, filters }
+            { 
+                page, 
+                limit, 
+                sortColumns, 
+                sortDirections, 
+                filters 
+            }
         );
 
         res.status(200).json({
             msg: 'Dataset rows retrieved successfully',
-            ...result // Spread the data and pagination from the utility function result
+            ...result
         });
 
     } catch (err) {
         console.error(`Error fetching rows for dataset ${datasetId}:`, err.message);
-        // Catch specific errors thrown by the utility function and map to HTTP status codes
         if (err.message.includes('Dataset not found')) {
             res.status(404).json({ msg: err.message });
         } else if (err.message.includes('Access denied')) {

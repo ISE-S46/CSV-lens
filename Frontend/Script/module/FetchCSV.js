@@ -13,6 +13,7 @@ import {
     handlePopstate
 } from './Pagination.js';
 import { filterManager } from './Filter.js';
+import { resetFilterUI } from "./FilterUI.js";
 
 const API_BASE_URL = '/api';
 
@@ -277,7 +278,7 @@ let isNullRowsTableVisible = false; // Initial state: null rows table is hidden
 
 function renderNullTable(nullRows) {
     hideMessage(messageArea);
-    
+
     nullCsvTableHeaderRow.innerHTML = '';
     nullCsvTableBody.innerHTML = '';
 
@@ -349,7 +350,7 @@ function toggleNullRowsDisplay() {
 function parseURLParameters() {
     const params = new URLSearchParams(window.location.search);
     const state = {};
-    
+
     // Parse filters
     if (params.has('filters')) {
         try {
@@ -358,18 +359,18 @@ function parseURLParameters() {
             console.error('Error parsing filters from URL', e);
         }
     }
-    
+
     // Parse sorts
     if (params.has('sortBy') && params.has('sortOrder')) {
         const sortColumns = params.get('sortBy').split(',');
         const sortDirections = params.get('sortOrder').split(',');
-        
+
         state.sorts = sortColumns.map((column, index) => ({
             column,
             direction: sortDirections[index] || 'ASC'
         }));
     }
-    
+
     return state;
 }
 
@@ -396,26 +397,26 @@ async function loadDatasetPage() {
     // Reset filters and sort
     filterManager.clearFilters();
     filterManager.clearSorts();
-    
+
     // Apply URL parameters if they exist
     const urlState = parseURLParameters();
-    
+
     // Apply filters from URL
     if (urlState.filters) {
         for (const [column, conditions] of Object.entries(urlState.filters)) {
-            conditions.forEach(({operator, value}) => {
+            conditions.forEach(({ operator, value }) => {
                 filterManager.addFilter(column, operator, value);
             });
         }
     }
-    
+
     // Apply sorts from URL
     if (urlState.sorts) {
-        urlState.sorts.forEach(({column, direction}) => {
+        urlState.sorts.forEach(({ column, direction }) => {
             filterManager.addSort(column, direction);
         });
     }
-    
+
     resetPagination();
     const datasetDetails = await fetchDatasetDetails(currentDatasetId);
 
@@ -463,6 +464,31 @@ async function loadDatasetPage() {
     // Handle browser back/forward
     window.addEventListener('popstate', async () => {
         await handlePopstate();
+        // Restore filter/sort state from URL
+        const urlState = parseURLParameters();
+
+        // Clear existing state
+        filterManager.clearFilters();
+        filterManager.clearSorts();
+
+        // Apply filters from URL
+        if (urlState.filters) {
+            for (const [column, conditions] of Object.entries(urlState.filters)) {
+                conditions.forEach(({ operator, value }) => {
+                    filterManager.addFilter(column, operator, value);
+                });
+            }
+        }
+
+        // Apply sorts from URL
+        if (urlState.sorts) {
+            urlState.sorts.forEach(({ column, direction }) => {
+                filterManager.addSort(column, direction);
+            });
+        }
+
+        // Update UI to reflect restored state
+        updateFilterUI();
         await loadCurrentPageRows(false);
     });
 
@@ -481,6 +507,60 @@ async function loadCurrentPageRows(updateUrl = true) {
         renderTable(dataResponse.data);
         updatePaginationDisplay(dataResponse.pagination);
     }
+}
+
+function updateFilterUI() {
+
+    const filterRows = document.querySelectorAll('.filter-row');
+    const sortRows = document.querySelectorAll('.sort-row');
+
+    if (filterRows.length !== 0 || sortRows.length !== 0) {
+        resetFilterUI();
+    }
+
+    // // Reset first row
+    const firstFilterRow = document.querySelector('.filter-row');
+    const firstSortRow = document.querySelector('.sort-row');
+
+    // Restore filter UI
+    const filters = filterManager.getFilters();
+    const filterEntries = Object.entries(filters);
+
+    filterEntries.forEach(([column, conditions], columnIndex) => {
+        conditions.forEach((condition, conditionIndex) => {
+            if (columnIndex === 0 && conditionIndex === 0) {
+                // Update first row
+                firstFilterRow.querySelector('.filter-column').value = column;
+                firstFilterRow.querySelector('.filter-operator').value = condition.operator;
+                firstFilterRow.querySelector('.filter-value').value = condition.value;
+            } else {
+                // Create new row - simulate click on add button
+                document.querySelector('.add-filter').click();
+                const rows = document.querySelectorAll('.filter-row');
+                const newRow = rows[rows.length - 1];
+                newRow.querySelector('.filter-column').value = column;
+                newRow.querySelector('.filter-operator').value = condition.operator;
+                newRow.querySelector('.filter-value').value = condition.value;
+            }
+        });
+    });
+
+    // Restore sort UI
+    const sorts = filterManager.getSorts();
+    sorts.forEach((sort, index) => {
+        if (index === 0) {
+            // Update first sort row
+            firstSortRow.querySelector('.sort-column').value = sort.column;
+            firstSortRow.querySelector('.sort-direction').value = sort.direction;
+        } else {
+            // Create new row
+            document.querySelector('.add-sort').click();
+            const sortRows = document.querySelectorAll('.sort-row');
+            const newRow = sortRows[sortRows.length - 1];
+            newRow.querySelector('.sort-column').value = sort.column;
+            newRow.querySelector('.sort-direction').value = sort.direction;
+        }
+    });
 }
 
 export { loadDatasetPage, loadCurrentPageRows, toggleNullRowsDisplay };

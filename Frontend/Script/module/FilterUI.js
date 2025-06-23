@@ -177,4 +177,4 @@ function getFilterUIEventHandlers() {
     };
 }
 
-export { getFilterUIEventHandlers};
+export { getFilterUIEventHandlers, resetFilterUI };

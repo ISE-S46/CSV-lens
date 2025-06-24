@@ -91,7 +91,9 @@ async function getPaginatedSortedFilteredRows(
 
             if (column === '_or_conditions') {
                 continue;
-            }            const columnType = columnTypes.get(column);
+            }            
+            
+            const columnType = columnTypes.get(column);
 
             if (!columnType) {
                 console.warn(`Filter applied to non-existent or invalid column: ${column}. Ignoring.`);
@@ -231,28 +233,18 @@ function buildFilterCondition(columnName, columnType, operator, value, paramCoun
 
     switch (operator) {
         case '=':
-            if (['integer', 'float'].includes(columnType)) {
-                condition = `(${jsonbPath})::numeric = $${paramCounter}::numeric`;
-                param = parseFloat(value);
-            } else if (columnType === 'boolean') {
-                condition = `(${jsonbPath})::boolean = $${paramCounter}::boolean`;
-                param = value === 'true' || value === true;
-            } else {
-                condition = `${jsonbPath} = $${paramCounter}`;
-                param = value;
-            }
-            usedParam = true;
-            break;
-
         case '!=':
-            if (['integer', 'float'].includes(columnType)) {
-                condition = `(${jsonbPath})::numeric != $${paramCounter}::numeric`;
+            if (['date', 'timestamp'].includes(columnType)) {
+                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
+                param = value;
+            } else if (['integer', 'float'].includes(columnType)) {
+                condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
                 param = parseFloat(value);
             } else if (columnType === 'boolean') {
-                condition = `(${jsonbPath})::boolean != $${paramCounter}::boolean`;
+                condition = `(${jsonbPath})::boolean ${operator} $${paramCounter}::boolean`;
                 param = value === 'true' || value === true;
             } else {
-                condition = `${jsonbPath} != $${paramCounter}`;
+                condition = `${jsonbPath} ${operator} $${paramCounter}`;
                 param = value;
             }
             usedParam = true;
@@ -270,7 +262,7 @@ function buildFilterCondition(columnName, columnType, operator, value, paramCoun
                 condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
                 param = parseFloat(value);
             } else if (['date', 'timestamp'].includes(columnType)) {
-                condition = `(${jsonbPath})::timestamp ${operator} $${paramCounter}::timestamp`;
+                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
                 param = value;
             }
             usedParam = true;

@@ -310,7 +310,7 @@ function renderNullTable(nullRows) {
             // Highlight null/empty values specifically for the null table
             if (cellValue === null || cellValue === undefined || cellValue === '' || String(cellValue).toLowerCase() === 'null') {
                 td.textContent = 'NULL'; // Display 'NULL' prominently
-                td.classList.add('text-red-600', 'font-semibold');
+                td.classList.add('text-red-600', 'font-semibold', 'bg-red-50');
             } else {
                 // Apply type handling for non-null values
                 if (col.column_type === 'date' || col.column_type === 'timestamp') {

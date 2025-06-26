@@ -1,8 +1,9 @@
-import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
-import { loadDatasetPage, loadCurrentPageRows, toggleNullRowsDisplay } from "./module/FetchCSV.js";
+import { checkAuthAndRender, handleLogout } from "./module/Auth/HandleLogin.js";
+import { loadDatasetPage, loadCurrentPageRows } from "./module/HandleCSV/LoadCSVpage.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 import { hideMessage } from "./module/ShowMessage.js";
 import { getFilterUIEventHandlers } from "./module/FilterUI.js";
+import { toggleNullRowsDisplay } from "./module/HandleCSV/RenderCSVrows.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 

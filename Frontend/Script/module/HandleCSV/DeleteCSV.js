@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "./ShowMessage.js";
+import { showMessage, hideMessage } from "../ShowMessage.js";
 
 const API_BASE_URL = '/api';
 

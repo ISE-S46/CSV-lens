@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "./ShowMessage.js";
+import { showMessage, hideMessage } from "../ShowMessage.js";
 import { formatFileSize } from "./CSVupload.js";
 import {
     getCurrentPage,
@@ -10,12 +10,12 @@ import {
     getPageFromUrl,
     updateUrlWithPage,
     handlePopstate
-} from './Pagination.js';
-import { handleSearchFromURL } from "./SearchDatasets.js";
+} from '../Pagination.js';
+import { handleSearchFromURL } from "../SearchDatasets.js";
 
 const API_BASE_URL = '/api';
 
-const rowsPerPage = 1; // Set to 1 for testing pagination, will change it back later
+const rowsPerPage = 12;
 let allDatasets = [];
 
 async function getCSVlist() {

@@ -1,5 +1,5 @@
 import { TogglePasswordIcon } from "./module/ShowPassword.js";
-import { handleLogin, checkExistingTokenAndRedirect } from "./module/HandleLogin.js";
+import { handleLogin, checkExistingTokenAndRedirect } from "./module/Auth/HandleLogin.js";
 import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {

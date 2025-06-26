@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "./ShowMessage.js";
+import { showMessage, hideMessage } from "../ShowMessage.js";
 import { renderCSVlist } from "./getCSVlist.js";
 
 let selectedFile = null;

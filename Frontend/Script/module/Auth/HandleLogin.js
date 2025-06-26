@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "./ShowMessage.js";
+import { showMessage, hideMessage } from "../ShowMessage.js";
 
 const API_BASE_URL = '/api';
 
@@ -107,6 +107,22 @@ async function checkAuthAndRender() {
     }
 }
 
+function handleAuthError(response) {
+    const messageArea = document.getElementById('csv-page-modal');
+
+    hideMessage(messageArea);
+    if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        showMessage(messageArea, 'Session expired or unauthorized. Please log in again.');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1500);
+        return true;
+    }
+    return false;
+}
+
 async function checkExistingTokenAndRedirect() {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
@@ -131,4 +147,4 @@ async function checkExistingTokenAndRedirect() {
     return false;
 }
 
-export { handleLogin, handleLogout, checkAuthAndRender, checkExistingTokenAndRedirect };
+export { handleLogin, handleLogout, checkAuthAndRender, handleAuthError, checkExistingTokenAndRedirect };

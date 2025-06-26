@@ -1,4 +1,4 @@
-import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
+import { checkAuthAndRender, handleLogout } from "./module/Auth/HandleLogin.js";
 import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
-        const fileInput = document.getElementById('fileInput');
 
         if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
             dropdownMenu.classList.add('hidden');

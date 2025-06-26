@@ -37,7 +37,6 @@ class FilterManager {
         return this.filters.size > 0;
     }
 
-    // Sort methods - now support multiple criteria
     addSort(column, direction = 'ASC') {
         // Remove existing sort for this column if it exists
         this.sorts = this.sorts.filter(sort => sort.column !== column);

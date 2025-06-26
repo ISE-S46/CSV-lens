@@ -1,9 +1,9 @@
-import { checkAuthAndRender, handleLogout } from "./module/HandleLogin.js";
-import { handleFile, clearFile, processCSV } from "./module/CSVupload.js";
+import { checkAuthAndRender, handleLogout } from "./module/Auth/HandleLogin.js";
+import { handleFile, clearFile, processCSV } from "./module/HandleCSV/CSVupload.js";
 import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js";
-import { DeleteCSV } from "./module/DeleteCSV.js";
+import { DeleteCSV } from "./module/HandleCSV/DeleteCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
-import { initializePagination } from "./module/getCSVlist.js";
+import { initializePagination } from "./module/HandleCSV/getCSVlist.js";
 import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {

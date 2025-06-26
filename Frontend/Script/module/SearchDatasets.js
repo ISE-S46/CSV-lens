@@ -1,4 +1,4 @@
-import { renderCSVlist, getCSVlist } from "./getCSVlist.js";
+import { renderCSVlist, getCSVlist } from "./HandleCSV/getCSVlist.js";
 
 async function searchProducts(searchInput) {
     const Datasets = await getCSVlist();

@@ -12,8 +12,4 @@ DatasetPageRouter.get('/:datasetId', Middleware, checkDatasetOwnership, async (r
         res.sendFile(path.join(__dirname, '../../Frontend/CSVpage.html'));
 });
 
-DatasetPageRouter.get('/:datasetId/edit', Middleware, checkDatasetOwnership, async (req, res) => {
-    res.sendFile(path.join(__dirname, '../../Frontend/EditCSVpage.html'));
-});
-
 export default DatasetPageRouter;

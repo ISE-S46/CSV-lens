@@ -139,7 +139,7 @@ function renderData(data) {
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row_count}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
             <button class="text-blue-600 hover:text-blue-800 font-medium">
-                <a href="/datasets/${dataset_id}/edit">Edit</a>
+                <a href="/datasets/${dataset_id}">Edit</a>
             </button>
             <button class="text-red-600 hover:text-red-800 font-medium delete-btn">Delete</button>
         </td>

@@ -48,6 +48,10 @@ app.get('/register', async (req, res) => {
     res.sendFile(path.join(__dirname, '../Frontend/Register.html'));
 });
 
+app.get('/account', async (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/AccountPage.html'));
+});
+
 app.use(`/datasets`, DatasetPageRouter);
 
 const pool = new pg.Pool({

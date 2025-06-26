@@ -164,7 +164,7 @@ const GetSpecificDatasetNullRow = async (req, res) => {
     const datasetId = parseInt(req.params.datasetId, 10);
 
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 1000; // Default to 1000 to get a large chunk or all
+    const limit = parseInt(req.query.limit, 10) || 10000; // Default to 10000 to get a large chunk or all
 
     if (validateDatasetId(datasetId, res)) return;
 

@@ -19,199 +19,188 @@ async function getDatasetColumns(datasetId) {
     }
 }
 
+function buildFilterClause(filters, columnTypes, baseParamIndex = 1) {
+    let filterConditions = [];
+    let filterValues = [];
+    let currentParamIndex = baseParamIndex;
+
+    // Handle OR conditions
+    if (filters._or_conditions && Array.isArray(filters._or_conditions)) {
+        const orGroupConditions = [];
+        for (const filterObj of filters._or_conditions) {
+            const { columnName, operator, value } = filterObj;
+            const columnType = columnTypes.get(columnName);
+
+            if (!columnType) {
+                console.warn(`OR filter ignored - invalid column: ${columnName}`);
+                continue;
+            }
+
+            const { condition, param, usedParam } = buildFilterCondition(
+                columnName, columnType, operator, value, currentParamIndex
+            );
+
+            if (condition) {
+                orGroupConditions.push(condition);
+                if (usedParam) {
+                    filterValues.push(param);
+                    currentParamIndex++; // Increment ONLY if a parameter was used
+                }
+            }
+        }
+        if (orGroupConditions.length > 0) {
+            filterConditions.push(`(${orGroupConditions.join(' OR ')})`);
+        }
+    }
+
+    // Handle standard filters
+    for (const [column, conditions] of Object.entries(filters)) {
+        if (column === '_or_conditions') continue;
+
+        const columnType = columnTypes.get(column);
+        if (!columnType) {
+            console.warn(`Filter ignored - invalid column: ${column}`);
+            continue;
+        }
+
+        const columnConditions = [];
+        for (const { operator, value } of conditions) {
+            const { condition, param, usedParam } = buildFilterCondition(
+                column, columnType, operator, value, currentParamIndex
+            );
+
+            if (condition) {
+                columnConditions.push(condition);
+                if (usedParam) {
+                    filterValues.push(param);
+                    currentParamIndex++;
+                }
+            }
+        }
+
+        if (columnConditions.length > 0) {
+            filterConditions.push(`(${columnConditions.join(' AND ')})`);
+        }
+    }
+
+    const whereClause = filterConditions.length > 0
+        ? `AND ${filterConditions.join(' AND ')}`
+        : '';
+
+    return { whereClause, filterValues, nextParamIndex: currentParamIndex };
+}
+
+function buildPaginationSorting(sortColumns, sortDirections, columnTypes, paramIndex) {
+    // Build ORDER BY clause
+    let orderByClause = '';
+    if (sortColumns.length > 0) {
+        const orderByParts = [];
+        for (let i = 0; i < sortColumns.length; i++) {
+            const column = sortColumns[i];
+            const direction = sortDirections[i] || 'ASC';
+            const columnType = columnTypes.get(column);
+
+            if (!columnType) {
+                throw new Error(`Cannot sort by non-existent column: ${column}`);
+            }
+
+            let pgSortCastType = 'text';
+            if (['integer', 'float'].includes(columnType)) pgSortCastType = 'numeric';
+            else if (['date', 'timestamp'].includes(columnType)) pgSortCastType = 'timestamp';
+            else if (columnType === 'boolean') pgSortCastType = 'boolean';
+
+            orderByParts.push(`(row_data->>'${column}')::${pgSortCastType} ${direction}`);
+        }
+        orderByClause = `ORDER BY ${orderByParts.join(', ')}`;
+    } else {
+        orderByClause = 'ORDER BY row_number ASC';
+    }
+
+    // Build pagination placeholders
+    const limitPlaceholder = `$${paramIndex}`;
+    const offsetPlaceholder = `$${paramIndex + 1}`;
+    const paginationClause = `LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}`;
+
+    return { orderByClause, paginationClause };
+}
+
+// Main function using both helpers
 async function getPaginatedSortedFilteredRows(
     datasetId,
     userId,
     { page = 1, limit = 50, sortColumns = [], sortDirections = [], filters = {} }
 ) {
     const offset = (page - 1) * limit;
-
     let client;
+
     try {
         client = await pool.connect();
 
-        // Verify dataset ownership and get total row count
-        const datasetCheckResult = await client.query(
+        // Dataset validation and ownership check
+        const { rows } = await client.query(
             'SELECT row_count, user_id FROM datasets WHERE dataset_id = $1',
             [datasetId]
         );
 
-        if (datasetCheckResult.rows.length === 0) {
-            throw new Error('Dataset not found.');
-        }
+        if (rows.length === 0) throw new Error('Dataset not found');
+        if (rows[0].user_id !== userId) throw new Error('Access denied');
 
-        const { row_count: totalRows, user_id: datasetOwnerId } = datasetCheckResult.rows[0];
-
-        if (datasetOwnerId !== userId) {
-            throw new Error('Access denied. This dataset does not belong to you.');
-        }
-
-        // Fetch column types for dynamic query construction and validation
         const datasetColumns = await getDatasetColumns(datasetId);
         const columnTypes = new Map(datasetColumns.map(col => [col.column_name, col.column_type]));
 
-        // console.log('Available columns and types:', Array.from(columnTypes.entries()));
+        // Build filter components
+        const { whereClause, filterValues, nextParamIndex } = buildFilterClause(
+            filters,
+            columnTypes,
+            2 // Start at $2 (since $1 is datasetId)
+        );
 
-        // Dynamic Query Construction for Filtering
-        let filterConditions = [];
-        let filterValues = [];
-        let currentParamIndex = 1;
+        // Build pagination/sorting components
+        const { orderByClause, paginationClause } = buildPaginationSorting(
+            sortColumns,
+            sortDirections,
+            columnTypes,
+            nextParamIndex
+        );
 
-        // Base parameters for the main query
-        const baseQueryValues = [datasetId]; // $1
-        currentParamIndex = baseQueryValues.length + 1; // Next available index after base values
-
-        // --- NEW LOGIC FOR HANDLING 'OR' filters (specifically for null checks) ---
-        if (filters._or_conditions && Array.isArray(filters._or_conditions)) {
-            const orGroupConditions = [];
-            for (const filterObj of filters._or_conditions) {
-                const { columnName, operator, value } = filterObj;
-                const columnType = columnTypes.get(columnName);
-
-                if (!columnType) {
-                    console.warn(`Filter applied to non-existent or invalid column: ${columnName}. Ignoring.`);
-                    continue;
-                }
-                // Pass currentParamIndex to buildFilterCondition
-                const { condition, param, usedParam } = buildFilterCondition(columnName, columnType, operator, value, currentParamIndex);
-                if (condition) {
-                    orGroupConditions.push(condition);
-                    if (usedParam) {
-                        filterValues.push(param);
-                        currentParamIndex++; // Increment ONLY if a parameter was used
-                    }
-                }
-            }
-            if (orGroupConditions.length > 0) {
-                filterConditions.push(`(${orGroupConditions.join(' OR ')})`);
-            }
-        }
-
-        for (const [column, conditions] of Object.entries(filters)) {
-
-            if (column === '_or_conditions') {
-                continue;
-            }            
-            
-            const columnType = columnTypes.get(column);
-
-            if (!columnType) {
-                console.warn(`Filter applied to non-existent or invalid column: ${column}. Ignoring.`);
-                continue;
-            }
-
-            // Handle multiple conditions for the same column
-            const columnConditions = [];
-            for (const { operator, value } of conditions) {
-                const { condition, param, usedParam } = buildFilterCondition(
-                    column, columnType, operator, value, currentParamIndex
-                );
-
-                if (condition) {
-                    columnConditions.push(condition);
-                    if (usedParam) {
-                        filterValues.push(param);
-                        currentParamIndex++;
-                    }
-                }
-            }
-
-            if (columnConditions.length > 0) {
-                filterConditions.push(`(${columnConditions.join(' AND ')})`);
-            }
-        }
-
-        const whereClause = filterConditions.length > 0 ? ' AND ' + filterConditions.join(' AND ') : '';
-
-        let orderByClause = '';
-        if (sortColumns.length > 0) {
-            const orderByParts = [];
-
-            for (let i = 0; i < sortColumns.length; i++) {
-                const column = sortColumns[i];
-                const direction = sortDirections[i] || 'ASC'; // Default to ASC if not provided
-
-                const columnType = columnTypes.get(column);
-                if (!columnType) {
-                    throw new Error(`Cannot sort by non-existent column: ${column}`);
-                }
-
-                let pgSortCastType = '';
-                if (['integer', 'float'].includes(columnType)) {
-                    pgSortCastType = 'numeric';
-                } else if (['date', 'timestamp'].includes(columnType)) {
-                    pgSortCastType = 'timestamp';
-                } else if (columnType === 'boolean') {
-                    pgSortCastType = 'boolean';
-                } else {
-                    pgSortCastType = 'text';
-                }
-
-                orderByParts.push(`(row_data->>'${column}')::${pgSortCastType} ${direction}`);
-            }
-
-            orderByClause = `ORDER BY ${orderByParts.join(', ')}`;
-        } else {
-            orderByClause = `ORDER BY row_number ASC`;
-        }
-
-        // Parameter positions in the final query string will be:
-        // $1: datasetId
-        // $2 to $(1 + filterValues.length): filter parameters
-
-        const limitPlaceholder = `$${1 + filterValues.length + 1}`; // LIMIT value
-        const offsetPlaceholder = `$${1 + filterValues.length + 2}`; // OFFSET value
-
+        // Construct main query
         const query = `
             SELECT row_data
             FROM csv_data
             WHERE dataset_id = $1 ${whereClause}
             ${orderByClause}
-            LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}
+            ${paginationClause}
         `;
 
-        // Combine all parameters into one array for the query execution
+        // Execute query with combined parameters
         const finalQueryParams = [
-            ...baseQueryValues,   // datasetId (for $1)
-            ...filterValues,      // All filter values (for $2 onwards)
-            limit,                // For LIMIT placeholder
-            offset                // For OFFSET placeholder
+            datasetId,          // datasetId (for $1)
+            ...filterValues,    // All filter values (for $2 onwards)
+            limit,
+            offset
         ];
 
         const rowsResult = await client.query(query, finalQueryParams);
+        const data = rowsResult.rows.map(row => row.row_data);
 
-        const rows = rowsResult.rows.map(row => row.row_data);
+        // Get filtered count
+        const countResult = await client.query(
+            `SELECT COUNT(*) FROM csv_data WHERE dataset_id = $1 ${whereClause}`,
+            [datasetId, ...filterValues]
+        );
 
-        // Getting the total count but without LIMIT and OFFSET and only the relevant parameters
-        const countQuery = `
-            SELECT COUNT(*)
-            FROM csv_data
-            WHERE dataset_id = $1 ${whereClause}
-        `;
-        // Parameters for count query are datasetId and filter parameters only
-        const countQueryParams = [
-            ...baseQueryValues,
-            ...filterValues
-        ];
-
-        const countResult = await client.query(countQuery, countQueryParams);
-        const totalRowsAfterFilter = parseInt(countResult.rows[0].count, 10);
-
-
-        // Calculate pagination metadata
-        const totalPages = Math.ceil(totalRowsAfterFilter / limit);
-        const hasNextPage = page < totalPages;
-        const hasPreviousPage = page > 1;
+        const totalFiltered = parseInt(countResult.rows[0].count, 10);
+        const totalPages = Math.ceil(totalFiltered / limit);
 
         return {
-            data: rows,
+            data,
             pagination: {
-                totalRows: totalRowsAfterFilter,
+                totalRows: totalFiltered,
                 rowsPerPage: limit,
                 currentPage: page,
-                totalPages: totalPages,
-                hasNextPage: hasNextPage,
-                hasPreviousPage: hasPreviousPage
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
             }
         };
 

@@ -1,6 +1,6 @@
 import { renderCSVlist, getCSVlist } from "./HandleCSV/getCSVlist.js";
 
-async function searchProducts(searchInput) {
+async function searchCSV(searchInput) {
     const Datasets = await getCSVlist();
 
     const query = searchInput.toLowerCase();
@@ -18,7 +18,7 @@ function handleSearchFromURL() {
 
     if (searchQuery) {
         searchInput.value = searchQuery;
-        searchProducts(searchQuery);
+        searchCSV(searchQuery);
     } else {
         searchInput.value = '';
         // console.log("from handlesearch") // might use in debugging later
@@ -26,4 +26,4 @@ function handleSearchFromURL() {
     }
 }
 
-export { searchProducts, handleSearchFromURL };
+export { searchCSV, handleSearchFromURL };

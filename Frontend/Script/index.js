@@ -1,6 +1,6 @@
 import { checkAuthAndRender, handleLogout } from "./module/Auth/HandleLogin.js";
 import { handleFile, clearFile, processCSV } from "./module/HandleCSV/CSVupload.js";
-import { searchProducts, handleSearchFromURL } from "./module/SearchDatasets.js";
+import { searchCSV, handleSearchFromURL } from "./module/SearchDatasets.js";
 import { DeleteCSV } from "./module/HandleCSV/DeleteCSV.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 import { initializePagination } from "./module/HandleCSV/getCSVlist.js";
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         history.pushState({}, '', newUrl);
 
-        searchProducts(query);
+        searchCSV(query);
     });
 
     const dropZone = document.getElementById('dropZone');

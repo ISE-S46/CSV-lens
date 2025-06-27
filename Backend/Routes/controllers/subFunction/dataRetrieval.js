@@ -90,6 +90,86 @@ function buildFilterClause(filters, columnTypes, baseParamIndex = 1) {
     return { whereClause, filterValues, nextParamIndex: currentParamIndex };
 }
 
+function buildFilterCondition(columnName, columnType, operator, value, paramCounter) {
+    const jsonbPath = `row_data->>'${columnName}'`;
+    let condition = '';
+    let param = null;
+    let usedParam = false; // indicate if a parameter placeholder ($N) was used
+
+    switch (operator) {
+        case '=':
+        case '!=':
+            if (['date', 'timestamp'].includes(columnType)) {
+                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
+                param = value;
+            } else if (['integer', 'float'].includes(columnType)) {
+                condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
+                param = parseFloat(value);
+            } else if (columnType === 'boolean') {
+                condition = `(${jsonbPath})::boolean ${operator} $${paramCounter}::boolean`;
+                param = value === 'true' || value === true;
+            } else {
+                condition = `${jsonbPath} ${operator} $${paramCounter}`;
+                param = value;
+            }
+            usedParam = true;
+            break;
+
+        case '>':
+        case '<':
+        case '>=':
+        case '<=':
+            if (!['integer', 'float', 'date', 'timestamp'].includes(columnType)) {
+                throw new Error(`Operator '${operator}' not supported for column type '${columnType}' on column '${columnName}'.`);
+            }
+
+            if (['integer', 'float'].includes(columnType)) {
+                condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
+                param = parseFloat(value);
+            } else if (['date', 'timestamp'].includes(columnType)) {
+                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
+                param = value;
+            }
+            usedParam = true;
+            break;
+
+        case 'contains':
+            condition = `${jsonbPath} ILIKE $${paramCounter}`;
+            param = `%${value}%`;
+            usedParam = true;
+            break;
+
+        case 'starts':
+            condition = `${jsonbPath} ILIKE $${paramCounter}`;
+            param = `${value}%`;
+            usedParam = true;
+            break;
+
+        case 'ends':
+            condition = `${jsonbPath} ILIKE $${paramCounter}`;
+            param = `%${value}`;
+            usedParam = true;
+            break;
+
+        case 'isNull':
+            condition = `(${jsonbPath} IS NULL OR ${jsonbPath} = 'null' OR ${jsonbPath} = '')`;
+            param = null;
+            usedParam = false; // No parameter placeholder is used in SQL
+            break;
+
+        case 'isNotNull':
+            condition = `(${jsonbPath} IS NOT NULL AND ${jsonbPath} != 'null' AND ${jsonbPath} != '')`;
+            param = null;
+            usedParam = false; // No parameter placeholder is used in SQL
+            break;
+
+        default:
+            throw new Error(`Unsupported filter operator: ${operator}`);
+    }
+
+    return { condition, param, usedParam };
+}
+
 function buildPaginationSorting(sortColumns, sortDirections, columnTypes, paramIndex) {
     // Build ORDER BY clause
     let orderByClause = '';
@@ -214,84 +294,79 @@ async function getPaginatedSortedFilteredRows(
     }
 }
 
-function buildFilterCondition(columnName, columnType, operator, value, paramCounter) {
-    const jsonbPath = `row_data->>'${columnName}'`;
-    let condition = '';
-    let param = null;
-    let usedParam = false; // indicate if a parameter placeholder ($N) was used
+async function getSortFilteredRowsForGraph(
+    datasetId,
+    userId,
+    { sortColumns = [], sortDirections = [], filters = {} }
+) {
+    let client;
 
-    switch (operator) {
-        case '=':
-        case '!=':
-            if (['date', 'timestamp'].includes(columnType)) {
-                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
-                param = value;
-            } else if (['integer', 'float'].includes(columnType)) {
-                condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
-                param = parseFloat(value);
-            } else if (columnType === 'boolean') {
-                condition = `(${jsonbPath})::boolean ${operator} $${paramCounter}::boolean`;
-                param = value === 'true' || value === true;
-            } else {
-                condition = `${jsonbPath} ${operator} $${paramCounter}`;
-                param = value;
-            }
-            usedParam = true;
-            break;
+    try {
+        client = await pool.connect();
 
-        case '>':
-        case '<':
-        case '>=':
-        case '<=':
-            if (!['integer', 'float', 'date', 'timestamp'].includes(columnType)) {
-                throw new Error(`Operator '${operator}' not supported for column type '${columnType}' on column '${columnName}'.`);
-            }
+        // Dataset validation and ownership check
+        const { rows } = await client.query(
+            'SELECT row_count, user_id FROM datasets WHERE dataset_id = $1',
+            [datasetId]
+        );
 
-            if (['integer', 'float'].includes(columnType)) {
-                condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
-                param = parseFloat(value);
-            } else if (['date', 'timestamp'].includes(columnType)) {
-                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
-                param = value;
-            }
-            usedParam = true;
-            break;
+        if (rows.length === 0) throw new Error('Dataset not found');
+        if (rows[0].user_id !== userId) throw new Error('Access denied');
 
-        case 'contains':
-            condition = `${jsonbPath} ILIKE $${paramCounter}`;
-            param = `%${value}%`;
-            usedParam = true;
-            break;
+        const datasetColumns = await getDatasetColumns(datasetId);
+        const columnTypes = new Map(datasetColumns.map(col => [col.column_name, col.column_type]));
 
-        case 'starts':
-            condition = `${jsonbPath} ILIKE $${paramCounter}`;
-            param = `${value}%`;
-            usedParam = true;
-            break;
+        // Build filter components
+        const { whereClause, filterValues } = buildFilterClause(
+            filters,
+            columnTypes,
+            2 // Start at $2 (since $1 is datasetId)
+        );
 
-        case 'ends':
-            condition = `${jsonbPath} ILIKE $${paramCounter}`;
-            param = `%${value}`;
-            usedParam = true;
-            break;
+        const { orderByClause } = buildPaginationSorting(
+            sortColumns,
+            sortDirections,
+            columnTypes
+        );
 
-        case 'isNull':
-            condition = `(${jsonbPath} IS NULL OR ${jsonbPath} = 'null' OR ${jsonbPath} = '')`;
-            param = null;
-            usedParam = false; // No parameter placeholder is used in SQL
-            break;
+        // Construct main query
+        const query = `
+            SELECT row_data
+            FROM csv_data
+            WHERE dataset_id = $1 ${whereClause}
+            ${orderByClause}
+        `;
 
-        case 'isNotNull':
-            condition = `(${jsonbPath} IS NOT NULL AND ${jsonbPath} != 'null' AND ${jsonbPath} != '')`;
-            param = null;
-            usedParam = false; // No parameter placeholder is used in SQL
-            break;
+        // Execute query with combined parameters
+        const finalQueryParams = [
+            datasetId,          // datasetId (for $1)
+            ...filterValues,   // All filter values (for $2 onwards)
+        ];
 
-        default:
-            throw new Error(`Unsupported filter operator: ${operator}`);
+        const rowsResult = await client.query(query, finalQueryParams);
+        const data = rowsResult.rows.map(row => row.row_data);
+
+        // Get filtered count
+        const countResult = await client.query(
+            `SELECT COUNT(*) FROM csv_data WHERE dataset_id = $1 ${whereClause}`,
+            [datasetId, ...filterValues]
+        );
+
+        const totalFiltered = parseInt(countResult.rows[0].count, 10);
+
+        return {
+            data,
+            totalRows: totalFiltered
+        };
+
+    } catch (error) {
+        console.error('Database query error in getPaginatedSortedFilteredRows:', error);
+        throw error;
+    } finally {
+        if (client) {
+            client.release(); // Always release the client back to the pool
+        }
     }
-
-    return { condition, param, usedParam };
 }
 
-export { getDatasetColumns, getPaginatedSortedFilteredRows };
+export { getDatasetColumns, getPaginatedSortedFilteredRows, getSortFilteredRowsForGraph };

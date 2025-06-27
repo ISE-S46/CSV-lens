@@ -1,6 +1,6 @@
 import { pool } from '../../main.js';
 import { validateDatasetId } from './subFunction/Validation.js';
-import { getPaginatedSortedFilteredRows, getDatasetColumns } from './subFunction/dataRetrieval.js';
+import { getPaginatedSortedFilteredRows, getDatasetColumns, getSortFilteredRowsForGraph } from './subFunction/dataRetrieval.js';
 
 const ListAllDatasets = async (req, res) => {
     const userId = req.user.id;
@@ -159,6 +159,73 @@ const GetSpecificDatasetRow = async (req, res) => {
     }
 }
 
+const GetSpecificDatasetAllRows = async (req, res) => {
+    const userId = req.user.id;
+    const datasetId = parseInt(req.params.datasetId, 10);
+
+    let sortColumns = [];
+    let sortDirections = [];
+    if (req.query.sortBy) {
+        sortColumns = req.query.sortBy.split(',');
+    }
+    if (req.query.sortOrder) {
+        sortDirections = req.query.sortOrder.split(',');
+    }
+    
+    let filters = {};
+    if (req.query.filters) {
+        try {
+            filters = JSON.parse(req.query.filters);
+        } catch (e) {
+            return res.status(400).json({ msg: 'Invalid filters parameter. Must be valid JSON.', error: e.message });
+        }
+    }
+
+    if (validateDatasetId(datasetId, res)) return;
+
+    // Validate sort directions
+    const validDirections = ['ASC', 'DESC'];
+    for (const dir of sortDirections) {
+        if (!validDirections.includes(dir.toUpperCase())) {
+            return res.status(400).json({ msg: `Invalid sort direction: ${dir}. Must be ASC or DESC.` });
+        }
+    }
+
+    try {
+        // Call the utility function with multiple sort support
+        const result = await getSortFilteredRowsForGraph(
+            datasetId,
+            userId,
+            {
+                sortColumns, 
+                sortDirections, 
+                filters 
+            }
+        );
+
+        res.status(200).json({
+            msg: 'Dataset rows retrieved successfully',
+            ...result
+        });
+
+    } catch (err) {
+        console.error(`Error fetching rows for dataset ${datasetId}:`, err.message);
+        if (err.message.includes('Dataset not found')) {
+            res.status(404).json({ msg: err.message });
+        } else if (err.message.includes('Access denied')) {
+            res.status(403).json({ msg: err.message });
+        } else if (
+            err.message.includes('Invalid') ||
+            err.message.includes('Unsupported') ||
+            err.message.includes('Cannot sort')
+        ) {
+            res.status(400).json({ msg: err.message });
+        } else {
+            res.status(500).json({ msg: 'Server error fetching dataset rows.', error: err.message });
+        }
+    }
+}
+
 const GetSpecificDatasetNullRow = async (req, res) => {
     const userId = req.user.id;
     const datasetId = parseInt(req.params.datasetId, 10);
@@ -224,4 +291,10 @@ const GetSpecificDatasetNullRow = async (req, res) => {
     }
 };
 
-export { ListAllDatasets, GetSpecificDataset, GetSpecificDatasetRow, GetSpecificDatasetNullRow };
+export { 
+    ListAllDatasets, 
+    GetSpecificDataset, 
+    GetSpecificDatasetRow, 
+    GetSpecificDatasetAllRows, 
+    GetSpecificDatasetNullRow 
+};

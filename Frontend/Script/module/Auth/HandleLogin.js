@@ -48,7 +48,7 @@ async function handleLogout() {
     hideMessage(dashboardMessageDiv);
 
     try {
-        const response = await fetch('/api/auth/logout', {
+        const response = await fetch(`${API_BASE_URL}/auth/logout`, {
             method: 'POST',
             credentials: 'include',
         });
@@ -80,7 +80,8 @@ async function checkAuthAndRender() {
 
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
-            method: 'GET'
+            method: 'GET',
+            credentials: 'include'
         });
 
         if (!response.ok) {

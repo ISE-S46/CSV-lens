@@ -1,5 +1,5 @@
 import { filterManager } from './Filter.js';
-import { loadCurrentPageRows } from './HandleCSV/LoadCSVpage.js';
+import { loadCurrentPageRows, loadGraphData } from './HandleCSV/LoadCSVpage.js';
 import { getCurrentPage } from './Pagination.js';
 
 const filterBuilder = document.getElementById('filter-builder');
@@ -72,6 +72,7 @@ function applyFilters() {
     });
 
     loadCurrentPageRows();
+    loadGraphData();
     updateURLWithFilters();
 }
 
@@ -79,6 +80,7 @@ function clearFilters() {
     filterManager.clearFilters();
     resetFilterUI();
     loadCurrentPageRows();
+    loadGraphData();
     updateURLWithFilters();
 }
 
@@ -196,6 +198,7 @@ function applySorts() {
     });
 
     loadCurrentPageRows();
+    loadGraphData();
     updateURLWithFilters();
 }
 
@@ -203,6 +206,7 @@ function clearSorts() {
     filterManager.clearSorts();
     resetFilterUI();
     loadCurrentPageRows();
+    loadGraphData();
     updateURLWithFilters();
 }
 

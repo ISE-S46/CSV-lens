@@ -1,6 +1,7 @@
 import { formatTimestamp } from "./getCSVlist.js";
 import { populateColumnDropdowns } from "../FilterUI.js";
 import { showMessage, hideMessage } from "../ShowMessage.js";
+import { initGraph } from "../graph.js";
 
 const CSVname = document.getElementById('CSV-name');
 const metaName = document.getElementById('meta-name');
@@ -21,6 +22,8 @@ function renderDatasetMetadata(dataset) {
 
     // Populate column dropdowns
     populateColumnDropdowns(columnsInfo);
+
+    initGraph(columnsInfo);
 }
 
 const csvTableHeaderRow = document.getElementById('table-header-row');

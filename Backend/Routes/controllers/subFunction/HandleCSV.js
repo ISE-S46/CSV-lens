@@ -53,7 +53,7 @@ const inferColumnType = (value, currentInferredType = 'unknown') => {
         }
     }
 
-    // Conbert date to yyyy-mm-dd format
+    // Convert date to yyyy-mm-dd format
     function convertToStandardDateFormat(input) {
         for (const formatPattern of dateFormats) {
             const parsedDate = parse(stringValue, formatPattern, new Date());

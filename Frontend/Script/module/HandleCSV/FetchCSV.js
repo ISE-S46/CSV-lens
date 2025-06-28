@@ -96,6 +96,52 @@ async function fetchDatasetRows(datasetId, page, limit) {
     }
 }
 
+async function fetchDatasetGraph(datasetId) {
+    hideMessage(messageArea);
+    showLoadingSpinner();
+    const token = localStorage.getItem('token');
+    if (!token) {
+        handleAuthError({ status: 401 });
+        return null;
+    }
+
+    try {
+        const queryParams = new URLSearchParams();
+
+        // Add filters
+        const filters = filterManager.getFilters();
+        if (Object.keys(filters).length > 0) {
+            queryParams.append('filters', JSON.stringify(filters));
+        }
+
+        // Add sorts - now supports multiple
+        const sorts = filterManager.getSorts();
+        if (sorts.length > 0) {
+            queryParams.append('sortBy', sorts.map(sort => sort.column).join(','));
+            queryParams.append('sortOrder', sorts.map(sort => sort.direction).join(','));
+        }
+
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/GraphData?${queryParams.toString()}`);
+
+        if (handleAuthError(response)) return null;
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            showMessage(messageArea, `Error fetching dataset rows: ${errorData.msg || response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Network error fetching dataset rows:', error);
+        showMessage(messageArea, 'Error fetching dataset rows.');
+        return null;
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
 async function fetchDatasetNullRows(datasetId) {
     hideMessage(messageArea);
     showLoadingSpinner();
@@ -127,4 +173,4 @@ async function fetchDatasetNullRows(datasetId) {
     }
 }
 
-export { fetchDatasetDetails, fetchDatasetRows, fetchDatasetNullRows };
+export { fetchDatasetDetails, fetchDatasetRows, fetchDatasetGraph, fetchDatasetNullRows };

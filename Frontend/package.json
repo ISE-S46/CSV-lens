@@ -2,15 +2,20 @@
   "name": "frontend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tailwind": "npx @tailwindcss/cli -i ./css/input.css -o ./css/styles.css --watch"
+    "tailwind": "npx @tailwindcss/cli -i ./css/input.css -o ./css/styles.css --watch",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "@tailwindcss/cli": "^4.1.8",
+    "plotly.js-dist-min": "^3.0.1",
     "tailwindcss": "^4.1.8"
   }
 }

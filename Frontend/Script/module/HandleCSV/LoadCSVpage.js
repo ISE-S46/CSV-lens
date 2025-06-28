@@ -2,7 +2,13 @@ import { showMessage, hideMessage } from "../ShowMessage.js";
 import { updateTotalPages } from '../PageInput.js';
 import { updateFilterUI } from "../FilterUI.js";
 import { filterManager } from '../Filter.js';
-import { fetchDatasetDetails, fetchDatasetRows, fetchDatasetNullRows } from "./FetchCSV.js";
+import { setGraphData } from "../graph.js";
+import { 
+    fetchDatasetDetails, 
+    fetchDatasetRows, 
+    fetchDatasetGraph, 
+    fetchDatasetNullRows 
+} from "./FetchCSV.js";
 
 import { 
     renderDatasetMetadata, 
@@ -134,6 +140,7 @@ async function loadDatasetPage() {
     updateUrlWithPage(initialPage, false);
 
     await loadCurrentPageRows(false); // Don't update URL again
+    await loadGraphData();
 
     bindPaginationButtons(async (direction) => {
         const newPage = getCurrentPage() + direction;
@@ -173,6 +180,7 @@ async function loadDatasetPage() {
         // Update UI to reflect restored state
         updateFilterUI();
         await loadCurrentPageRows(false);
+        await loadGraphData();
     });
 
 }
@@ -192,4 +200,12 @@ async function loadCurrentPageRows(updateUrl = true) {
     }
 }
 
-export { loadDatasetPage, loadCurrentPageRows };
+async function loadGraphData() {
+    const GraphResponse = await fetchDatasetGraph(currentDatasetId);
+    if (GraphResponse && GraphResponse.data) {
+        // console.log(GraphResponse.data)
+        setGraphData(GraphResponse.data);
+    }
+}
+
+export { loadDatasetPage, loadCurrentPageRows, loadGraphData };

@@ -4,12 +4,15 @@ import { hidePageInputModal, showPageInputModal, initializePageInput } from "./m
 import { hideMessage } from "./module/ShowMessage.js";
 import { getFilterUIEventHandlers } from "./module/FilterUI.js";
 import { toggleNullRowsDisplay } from "./module/HandleCSV/RenderCSVrows.js";
+import { setupGraphEvents } from "./module/graph.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
     checkAuthAndRender();
     loadDatasetPage();
     initializePageInput(loadCurrentPageRows);
+
+    setupGraphEvents();
 
     const {
         addFilterRow,

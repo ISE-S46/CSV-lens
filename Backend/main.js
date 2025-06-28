@@ -24,6 +24,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
+const port = process.env.SERVER_PORT;
+const API_BASE_URL = process.env.API_BASE_URL;
+
+app.use(`${API_BASE_URL}/auth`, AuthRouter);
+app.use(`${API_BASE_URL}/datasets`, DatasetRouter);
+
 // Setup static folder
 app.use(express.static(path.join(__dirname, '../Frontend')));
 
@@ -64,11 +70,6 @@ const pool = new pg.Pool({
 
 export { pool };
 
-const API_BASE_URL = process.env.API_BASE_URL;
-
-app.use(`${API_BASE_URL}/auth`, AuthRouter);
-app.use(`${API_BASE_URL}/datasets`, DatasetRouter);
-
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
@@ -79,12 +80,11 @@ pool.query('SELECT NOW()', (err, res) => {
 });
 
 app.post(`${API_BASE_URL}/test`, (req, res) => {
-    res.json({msg: "hello world"});
+    res.json({ msg: "hello world" });
 })
 
 app.get(`${API_BASE_URL}/Verified`, Middleware, (req, res) => {
     res.json({ msg: `Welcome, ${req.user.username}! verified jwt token for user ID: ${req.user.id}` });
 });
 
-const port = process.env.SERVER_PORT;
 app.listen(port, () => console.log(`server running on port: ${port}`));

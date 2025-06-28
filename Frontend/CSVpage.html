@@ -50,7 +50,7 @@
     </nav>
 
     <main class="flex-grow mt-24">
-        <div class="max-w-7xl mx-3 lg:mx-auto bg-white p-6 rounded-xl shadow-lg px-4 mb-5">
+        <div class="mx-3 bg-white p-3 rounded-xl shadow-lg mb-5">
 
             <!-- Dataset Metadata Section -->
             <div id="dataset-metadata" class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -117,10 +117,10 @@
                                         class="filter-operator flex-grow border border-gray-300 rounded-md py-1 px-2 text-sm">
                                         <option value="=">=</option>
                                         <option value="!=">!=</option>
-                                        <option value=">">></option>
-                                        <option value="<"><</option>
-                                        <option value=">=">>=</option>
-                                        <option value="<="><=</option>
+                                        <option value="&gt;">&gt;</option>
+                                        <option value="&lt;">&lt;</option>
+                                        <option value="&gt;=">&gt;=</option>
+                                        <option value="&lt;=">&lt;=</option>
                                         <option value="contains">contains</option>
                                         <option value="starts">starts with</option>
                                         <option value="ends">ends with</option>
@@ -215,8 +215,7 @@
         </div>
 
         <!-- Null Data Table Section -->
-        <div id="data-quality-check"
-            class="mb-6 bg-white p-6 rounded-xl shadow-lg px-4 hidden max-w-7xl mx-3 lg:mx-auto">
+        <div id="data-quality-check" class="mb-6 bg-white p-3 rounded-xl shadow-lg hidden mx-3">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-gray-800">Data Quality Check</h2>
                 <button id="hide-null-rows-btn" class="hide-null-rows-btn blue-btn px-3 rounded-lg">Hide Null
@@ -236,6 +235,52 @@
                 </table>
             </div>
         </div>
+
+        <!-- Updated graph section with color by dropdown -->
+        <div id="graph-section" class="mb-6 bg-white p-3 rounded-xl shadow-lg hidden mx-3">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Data Visualization</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                <div>
+                    <label for="graph-type" class="block text-sm font-medium text-gray-700">Graph Type</label>
+                    <select id="graph-type"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="bar">Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="scatter">Scatter Plot</option>
+                        <option value="histogram">Histogram</option>
+                        <option value="pie">Pie Chart</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="x-axis" class="block text-sm font-medium text-gray-700">X Axis</label>
+                    <select id="x-axis"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="">Select column</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="y-axis" class="block text-sm font-medium text-gray-700">Y Axis</label>
+                    <select id="y-axis"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="">Select column</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="color-by" class="block text-sm font-medium text-gray-700">Color By</label>
+                    <select id="color-by"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="">None</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="plot-btn" class="blue-btn px-4 py-2">Plot Graph</button>
+                </div>
+            </div>
+
+            <div id="graph-container" class="w-full"></div>
+        </div>
+
     </main>
 
     <!-- Page Input Popup Modal -->
@@ -272,6 +317,7 @@
     </footer>
 
     <script type="module" src="/Script/CSVpage.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
 </body>
 
 </html>

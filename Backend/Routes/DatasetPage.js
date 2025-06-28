@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 const DatasetPageRouter = express.Router();
 
 DatasetPageRouter.get('/:datasetId', Middleware, checkDatasetOwnership, async (req, res) => {
-        res.sendFile(path.join(__dirname, '../../Frontend/CSVpage.html'));
+    res.sendFile(path.join(__dirname, '../../Frontend/CSVpage.html'));
 });
 
 export default DatasetPageRouter;

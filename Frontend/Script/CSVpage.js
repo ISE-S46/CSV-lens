@@ -4,7 +4,7 @@ import { hidePageInputModal, showPageInputModal, initializePageInput } from "./m
 import { hideMessage } from "./module/ShowMessage.js";
 import { getFilterUIEventHandlers } from "./module/FilterUI.js";
 import { toggleNullRowsDisplay } from "./module/HandleCSV/RenderCSVrows.js";
-import { setupGraphEvents } from "./module/graph.js";
+import { setupGraphEvents, plotGraph } from "./module/graph.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -97,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case btn.classList.contains('copy-filter-url'):
                 copyFilterUrlToClipboard();
+                break;
+
+            case btn.classList.contains('plot-btn'):
+                plotGraph();
                 break;
 
         }

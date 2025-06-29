@@ -4,7 +4,9 @@ import { hidePageInputModal, showPageInputModal, initializePageInput } from "./m
 import { hideMessage } from "./module/ShowMessage.js";
 import { getFilterUIEventHandlers } from "./module/FilterUI.js";
 import { toggleNullRowsDisplay } from "./module/HandleCSV/RenderCSVrows.js";
-import { setupGraphEvents, plotGraph } from "./module/graph.js";
+import { setupGraphEvents, plotGraph } from "./module/Graph.js";
+import { setupSaveGraphEvents } from "./module/GraphDownload.js";
+import { setupSaveCSVEvents } from "./module/HandleCSV/CSVdownload.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -13,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializePageInput(loadCurrentPageRows);
 
     setupGraphEvents();
+    setupSaveGraphEvents();
+    setupSaveCSVEvents();
 
     const {
         addFilterRow,
@@ -34,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
 
+    const savePlotToggleButton = document.getElementById('save-plot-toggle-btn');
+    const saveOptionsDropdown = document.getElementById('save-options-dropdown');
+
+    const saveCSVToggleButton = document.getElementById('save-csv-toggle-btn');
+    const saveCSVOptionsDropdown = document.getElementById('save-csv-options-dropdown');
+
     const Modal = document.getElementById('csv-page-modal');
 
     document.body.addEventListener('click', event => {
@@ -41,6 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
             dropdownMenu.classList.add('hidden');
+        }
+
+        if (!saveOptionsDropdown.contains(event.target) && !savePlotToggleButton.contains(event.target)) {
+            saveCSVOptionsDropdown.classList.add('hidden');
+        }
+
+        if (!saveOptionsDropdown.contains(event.target) && !saveCSVToggleButton.contains(event.target)) {
+            saveCSVOptionsDropdown.classList.add('hidden');
         }
 
         if (!btn) return;

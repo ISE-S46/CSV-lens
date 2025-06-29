@@ -2,7 +2,7 @@ import { showMessage, hideMessage } from "../ShowMessage.js";
 import { updateTotalPages } from '../PageInput.js';
 import { updateFilterUI } from "../FilterUI.js";
 import { filterManager } from '../Filter.js';
-import { setGraphData } from "../graph.js";
+import { setGraphData } from "../Graph.js";
 import { 
     fetchDatasetDetails, 
     fetchDatasetRows, 

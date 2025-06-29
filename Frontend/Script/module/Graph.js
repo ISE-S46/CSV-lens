@@ -11,10 +11,12 @@ const graphContainer = document.getElementById('graph-container');
 
 const CsvPageModal = document.getElementById('csv-page-modal');
 
+let csvName
 let columnsInfo = [];
 let currentData = [];
 
-function initGraph(columns) {
+function initGraph(columns, csv_name) {
+    csvName = csv_name
     columnsInfo = columns;
 
     populateAxisDropdowns();
@@ -291,4 +293,13 @@ function setupGraphEvents() {
     });
 }
 
-export { initGraph, setGraphData, plotGraph, setupGraphEvents };
+export { 
+    initGraph, 
+    setGraphData, 
+    plotGraph, 
+    setupGraphEvents, 
+    getGraphTitle, 
+    currentData, 
+    columnsInfo,
+    csvName
+};

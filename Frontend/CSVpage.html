@@ -93,11 +93,35 @@
             <div id="filter-section" class="mb-6">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xl font-semibold text-gray-800">Filters & Sorting</h2>
-                    <div class="flex space-x-2">
+                    <div class="flex space-x-1">
                         <button id="copy-filter-url"
                             class="copy-filter-url bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition">
                             Copy URL with Filters
                         </button>
+                        <div class="relative inline-block">
+                            <button id="save-csv-toggle-btn"
+                                class="blue-btn px-4 py-2 flex items-center justify-center ml-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m9 13.5 3 3m0 0 3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                                </svg>
+                            </button>
+
+                            <div id="save-csv-options-dropdown"
+                                class="absolute bg-white border border-gray-300 rounded-md shadow-lg hidden z-10 top-full right-0 mt-1 min-w-max">
+                                <button class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                    data-format="csv">Save
+                                    as CSV</button>
+                                <button class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                    data-format="json">Save
+                                    as JSON</button>
+                                <!-- xlsx library have severity vulnerability at the time of this commit -->
+                                <!-- <button class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                    data-format="xlsx">Save
+                                    as XLSX</button> -->
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -247,10 +271,10 @@
                         class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="bar">Bar Chart</option>
                         <option value="line">Line Chart</option>
+                        <option value="heatmap">Heatmap</option>
                         <option value="scatter">Scatter Plot</option>
                         <option value="histogram">Histogram</option>
                         <option value="pie">Pie Chart</option>
-                        <option value="heatmap">Heatmap</option>
                     </select>
                 </div>
                 <div>
@@ -276,13 +300,25 @@
                 </div>
                 <div class="flex items-end">
                     <button id="plot-btn" class="blue-btn px-4 py-2 plot-btn">Plot Graph</button>
-                    <button id="save-plot-btn" class="save-plot-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-10 blue-btn mx-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m9 13.5 3 3m0 0 3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                        </svg>
-                    </button>
+
+                    <div class="relative inline-block">
+                        <button id="save-plot-toggle-btn"
+                            class="blue-btn px-4 py-2 flex items-center justify-center ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m9 13.5 3 3m0 0 3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                            </svg>
+                        </button>
+
+                        <div id="save-options-dropdown"
+                            class="absolute bg-white border border-gray-300 rounded-md shadow-lg hidden z-10 top-full right-0 mt-1 min-w-max">
+                            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" data-format="png">Save
+                                Plot as PNG</button>
+                            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" data-format="svg">Save
+                                Plot as SVG</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -20,10 +20,17 @@ function renderDatasetMetadata(dataset) {
     metaDate.textContent = formatTimestamp(dataset.upload_date);
     columnsInfo = dataset.columns.sort((a, b) => a.column_order - b.column_order);
 
-    // Populate column dropdowns
     populateColumnDropdowns(columnsInfo);
 
     initGraph(columnsInfo, dataset.csv_name);
+}
+
+function formatDateToISO(dateStr) {
+    const date = new Date(dateStr);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 const csvTableHeaderRow = document.getElementById('table-header-row');
@@ -59,18 +66,24 @@ function renderTable(rows) {
     rows.forEach(rowData => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
+        tr.dataset.rowNumber = rowData.row_number;
+
         columnsInfo.forEach(col => {
             const td = document.createElement('td');
             td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-t border-gray-200';
-            let cellValue = rowData[col.column_name];
+            td.dataset.columnName = col.column_name;
+            td.dataset.columnType = col.column_type;
+            let cellValue = rowData.row_data[col.column_name];
 
             if (col.column_type === 'date' || col.column_type === 'timestamp') {
                 try {
-                    cellValue = cellValue ? new Date(cellValue).toLocaleDateString() : '';
+                    td.dataset.originalValue = cellValue;
+                    cellValue = cellValue ? formatDateToISO(cellValue) : '';
                 } catch (e) {
                     cellValue = cellValue;
                 }
             } else if (col.column_type === true) {
+                td.dataset.originalValue = cellValue;
                 cellValue = cellValue ? 'True' : 'False';
             } else if (cellValue === null || cellValue === undefined || cellValue === '') {
                 cellValue = 'N/A';
@@ -114,24 +127,27 @@ function renderNullTable(nullRows) {
     nullRows.forEach(rowData => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
+        tr.dataset.rowNumber = rowData.row_number;
+
         columnsInfo.forEach(col => {
             const td = document.createElement('td');
             td.className = 'px-6 py-4 whitespace-nowrap text-sm border-t border-gray-200';
-            let cellValue = rowData[col.column_name];
+            td.dataset.columnName = col.column_name;
+            td.dataset.columnType = col.column_type;
+            let cellValue = rowData.row_data[col.column_name];
 
             // Highlight null/empty values specifically for the null table
             if (cellValue === null || cellValue === undefined || cellValue === '' || String(cellValue).toLowerCase() === 'null') {
                 td.textContent = 'NULL'; // Display 'NULL' prominently
                 td.classList.add('text-red-600', 'font-semibold', 'bg-red-50');
             } else {
-                // Apply type handling for non-null values
                 if (col.column_type === 'date' || col.column_type === 'timestamp') {
                     try {
-                        cellValue = new Date(cellValue).toLocaleDateString();
+                        cellValue = cellValue ? formatDateToISO(cellValue) : '';
                     } catch (e) {
                         cellValue = cellValue;
                     }
-                } else if (col.column_type === 'boolean') {
+                } else if (col.column_type === true) {
                     cellValue = cellValue ? 'True' : 'False';
                 }
                 td.textContent = cellValue;
@@ -157,4 +173,4 @@ function toggleNullRowsDisplay() {
     }
 }
 
-export { renderDatasetMetadata, renderTable, renderNullTable, toggleNullRowsDisplay };
+export { renderDatasetMetadata, renderTable, renderNullTable, toggleNullRowsDisplay, formatDateToISO, columnsInfo };

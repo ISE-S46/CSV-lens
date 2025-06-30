@@ -47,6 +47,19 @@ async function fetchDatasetDetails(datasetId) {
     }
 }
 
+function appendFilterAndSortParams(queryParams) {
+    const filters = filterManager.getFilters();
+    if (Object.keys(filters).length > 0) {
+        queryParams.append('filters', JSON.stringify(filters));
+    }
+
+    const sorts = filterManager.getSorts();
+    if (sorts.length > 0) {
+        queryParams.append('sortBy', sorts.map(sort => sort.column).join(','));
+        queryParams.append('sortOrder', sorts.map(sort => sort.direction).join(','));
+    }
+}
+
 async function fetchDatasetRows(datasetId, page, limit) {
     hideMessage(messageArea);
     showLoadingSpinner();
@@ -57,23 +70,9 @@ async function fetchDatasetRows(datasetId, page, limit) {
     }
 
     try {
-        const queryParams = new URLSearchParams({
-            page: page,
-            limit: limit
-        });
+        const queryParams = new URLSearchParams({ page, limit });
 
-        // Add filters
-        const filters = filterManager.getFilters();
-        if (Object.keys(filters).length > 0) {
-            queryParams.append('filters', JSON.stringify(filters));
-        }
-
-        // Add sorts - now supports multiple
-        const sorts = filterManager.getSorts();
-        if (sorts.length > 0) {
-            queryParams.append('sortBy', sorts.map(sort => sort.column).join(','));
-            queryParams.append('sortOrder', sorts.map(sort => sort.direction).join(','));
-        }
+        appendFilterAndSortParams(queryParams);
 
         const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows?${queryParams.toString()}`);
 
@@ -107,19 +106,8 @@ async function fetchDatasetGraph(datasetId) {
 
     try {
         const queryParams = new URLSearchParams();
-
-        // Add filters
-        const filters = filterManager.getFilters();
-        if (Object.keys(filters).length > 0) {
-            queryParams.append('filters', JSON.stringify(filters));
-        }
-
-        // Add sorts - now supports multiple
-        const sorts = filterManager.getSorts();
-        if (sorts.length > 0) {
-            queryParams.append('sortBy', sorts.map(sort => sort.column).join(','));
-            queryParams.append('sortOrder', sorts.map(sort => sort.direction).join(','));
-        }
+        
+        appendFilterAndSortParams(queryParams);
 
         const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/GraphData?${queryParams.toString()}`);
 
@@ -173,4 +161,76 @@ async function fetchDatasetNullRows(datasetId) {
     }
 }
 
-export { fetchDatasetDetails, fetchDatasetRows, fetchDatasetGraph, fetchDatasetNullRows };
+async function fetchSingleRow(datasetId, rowNumber) {
+    showLoadingSpinner();
+    const token = localStorage.getItem('token');
+    if (!token) {
+        handleAuthError({ status: 401 });
+        return null;
+    }
+
+    datasetId = parseInt(datasetId);
+    rowNumber = parseInt(rowNumber);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows/${rowNumber}`);
+
+        if (handleAuthError(response)) return null;
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            showMessage(messageArea, `Error fetching single row: ${errorData.msg || response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json();
+        return data.row || null;
+
+    } catch (error) {
+        console.error('Network error fetching single row:', error);
+        showMessage(messageArea, 'Error fetching single row.');
+        return null;
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
+async function updateDatasetRow(datasetId, rowNumber, rowData) {
+    showLoadingSpinner();
+    const token = localStorage.getItem('token');
+    if (!token) {
+        handleAuthError({ status: 401 });
+        return null;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows/${rowNumber}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(rowData)
+        });
+
+        if (handleAuthError(response)) return null;
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showMessage(messageArea, `Error updating row: ${data.msg || response.statusText}`);
+            return null;
+        }
+
+        showMessage(messageArea, `Row ${rowNumber} updated successfully!`, 'success');
+        return data.updatedRow;
+
+    } catch (error) {
+        console.error('Network error updating row:', error);
+        showMessage(messageArea, 'Network error updating row.');
+        return null;
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
+export { fetchDatasetDetails, fetchDatasetRows, fetchDatasetGraph, fetchDatasetNullRows, updateDatasetRow, fetchSingleRow };

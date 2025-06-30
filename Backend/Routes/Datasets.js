@@ -8,7 +8,8 @@ import {
     GetSpecificDataset, 
     GetSpecificDatasetRow, 
     GetSpecificDatasetAllRows, 
-    GetSpecificDatasetNullRow 
+    GetSpecificDatasetNullRow,
+    GetSingleRowByNumber
 } from './controllers/get.js';
 import { DeleteDatasets } from './controllers/del.js';
 import { UpdateSpecificRow, UpdateColumnName } from './controllers/update.js';
@@ -44,6 +45,8 @@ DatasetRouter.get('/:datasetId/rows', GetSpecificDatasetRow);
 DatasetRouter.get('/:datasetId/GraphData', GetSpecificDatasetAllRows);
 
 DatasetRouter.get('/:datasetId/null-rows', GetSpecificDatasetNullRow);
+
+DatasetRouter.get('/:datasetId/rows/:rowNumber', GetSingleRowByNumber);
 
 DatasetRouter.delete('/:datasetId', DeleteDatasets);
 

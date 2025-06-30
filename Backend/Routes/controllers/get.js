@@ -80,7 +80,7 @@ const GetSpecificDatasetRow = async (req, res) => {
     // Parse pagination, sorting, and filtering parameters from query
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 50;
-    
+
     // Parse multiple sort columns and directions
     let sortColumns = [];
     let sortDirections = [];
@@ -90,7 +90,7 @@ const GetSpecificDatasetRow = async (req, res) => {
     if (req.query.sortOrder) {
         sortDirections = req.query.sortOrder.split(',');
     }
-    
+
     let filters = {};
     if (req.query.filters) {
         try {
@@ -127,12 +127,12 @@ const GetSpecificDatasetRow = async (req, res) => {
         const result = await getPaginatedSortedFilteredRows(
             datasetId,
             userId,
-            { 
-                page, 
-                limit, 
-                sortColumns, 
-                sortDirections, 
-                filters 
+            {
+                page,
+                limit,
+                sortColumns,
+                sortDirections,
+                filters
             }
         );
 
@@ -171,7 +171,7 @@ const GetSpecificDatasetAllRows = async (req, res) => {
     if (req.query.sortOrder) {
         sortDirections = req.query.sortOrder.split(',');
     }
-    
+
     let filters = {};
     if (req.query.filters) {
         try {
@@ -197,9 +197,9 @@ const GetSpecificDatasetAllRows = async (req, res) => {
             datasetId,
             userId,
             {
-                sortColumns, 
-                sortDirections, 
-                filters 
+                sortColumns,
+                sortDirections,
+                filters
             }
         );
 
@@ -291,10 +291,65 @@ const GetSpecificDatasetNullRow = async (req, res) => {
     }
 };
 
-export { 
-    ListAllDatasets, 
-    GetSpecificDataset, 
-    GetSpecificDatasetRow, 
-    GetSpecificDatasetAllRows, 
-    GetSpecificDatasetNullRow 
+const GetSingleRowByNumber = async (req, res) => {
+    const userId = req.user.id;
+    const datasetId = parseInt(req.params.datasetId, 10);
+    const rowNumber = parseInt(req.params.rowNumber, 10);
+
+    if (validateDatasetId(datasetId, res)) return;
+
+    if (isNaN(rowNumber) || rowNumber <= 0) {
+        return res.status(400).json({ msg: 'Invalid row number provided. Row number must be a positive integer.' });
+    }
+
+    let client;
+    try {
+        client = await pool.connect();
+
+        const datasetCheckResult = await client.query(
+            'SELECT user_id FROM datasets WHERE dataset_id = $1',
+            [datasetId]
+        );
+
+        if (datasetCheckResult.rows.length === 0) {
+            return res.status(404).json({ msg: 'Dataset not found.' });
+        }
+
+        const datasetOwnerId = datasetCheckResult.rows[0].user_id;
+
+        if (datasetOwnerId !== userId) {
+            return res.status(403).json({ msg: 'Access denied. This dataset does not belong to you.' });
+        }
+
+        const rowResult = await client.query(
+            'SELECT row_data FROM csv_data WHERE dataset_id = $1 AND row_number = $2',
+            [datasetId, rowNumber]
+        );
+
+        if (rowResult.rows.length === 0) {
+            return res.status(404).json({ msg: `Row ${rowNumber} not found in dataset ${datasetId}.` });
+        }
+
+        res.status(200).json({
+            msg: `Row ${rowNumber} retrieved successfully.`,
+            row: rowResult.rows[0].row_data
+        });
+
+    } catch (err) {
+        console.error(`Error fetching single row ${rowNumber} for dataset ${datasetId}:`, err.message);
+        res.status(500).json({ msg: 'Server error fetching single row.', error: err.message });
+    } finally {
+        if (client) {
+            client.release();
+        }
+    }
+};
+
+export {
+    ListAllDatasets,
+    GetSpecificDataset,
+    GetSpecificDatasetRow,
+    GetSpecificDatasetAllRows,
+    GetSpecificDatasetNullRow,
+    GetSingleRowByNumber
 };

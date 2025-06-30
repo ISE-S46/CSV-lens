@@ -3,6 +3,7 @@ import { updateTotalPages } from '../PageInput.js';
 import { updateFilterUI } from "../FilterUI.js";
 import { filterManager } from '../Filter.js';
 import { setGraphData } from "../Graph.js";
+import { setupCellEditing } from "./EditCSV.js";
 import { 
     fetchDatasetDetails, 
     fetchDatasetRows, 
@@ -31,8 +32,6 @@ import {
 
 let currentDatasetId = null;
 const rowsPerPage = 50; // Api default is 50 but adjustable here as well
-
-let isNullRowsTableVisible = false;
 
 const messageArea = document.getElementById('csv-page-modal');
 
@@ -124,7 +123,6 @@ async function loadDatasetPage() {
 
         renderNullTable(nullRowsResponse.data); // Render the null rows data
 
-        isNullRowsTableVisible = true;
         toggleNullRowsDisplay();
 
         nullRowsMessage.classList.remove('hidden');
@@ -138,6 +136,8 @@ async function loadDatasetPage() {
     setCurrentPage(initialPage);
 
     updateUrlWithPage(initialPage, false);
+
+    setupCellEditing(currentDatasetId, loadCurrentPageRows, datasetDetails.columns);
 
     await loadCurrentPageRows(false); // Don't update URL again
     await loadGraphData();

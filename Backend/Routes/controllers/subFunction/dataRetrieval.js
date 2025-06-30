@@ -100,7 +100,7 @@ function buildFilterCondition(columnName, columnType, operator, value, paramCoun
         case '=':
         case '!=':
             if (['date', 'timestamp'].includes(columnType)) {
-                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
+                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'YYYY/MM/DD')`;
                 param = value;
             } else if (['integer', 'float'].includes(columnType)) {
                 condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
@@ -127,7 +127,7 @@ function buildFilterCondition(columnName, columnType, operator, value, paramCoun
                 condition = `(${jsonbPath})::numeric ${operator} $${paramCounter}::numeric`;
                 param = parseFloat(value);
             } else if (['date', 'timestamp'].includes(columnType)) {
-                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'DD/MM/YYYY')`;
+                condition = `(${jsonbPath})::timestamp ${operator} to_date($${paramCounter}, 'YYYY/MM/DD')`;
                 param = value;
             }
             usedParam = true;
@@ -245,7 +245,7 @@ async function getPaginatedSortedFilteredRows(
 
         // Construct main query
         const query = `
-            SELECT row_data
+            SELECT row_data, row_number
             FROM csv_data
             WHERE dataset_id = $1 ${whereClause}
             ${orderByClause}
@@ -261,7 +261,11 @@ async function getPaginatedSortedFilteredRows(
         ];
 
         const rowsResult = await client.query(query, finalQueryParams);
-        const data = rowsResult.rows.map(row => row.row_data);
+        const data = rowsResult.rows.map(row => ({
+            row_data: row.row_data,
+            row_number: row.row_number
+        }));
+
 
         // Get filtered count
         const countResult = await client.query(

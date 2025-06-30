@@ -10,7 +10,17 @@ const dateFormats = [
     'yyyy-dd-MM',
     'dd:MM:yyyy',
     'yyyy:MM:dd',
-    'yyyy:dd:MM'
+    'yyyy:dd:MM',
+    'MM/dd/yyyy',
+    'MM-dd-yyyy',
+    'yyyy.MM.dd',
+    'dd.MM.yyyy',
+    'yyyyMMdd',
+    'yyyy MM dd',
+    'MMMM dd, yyyy',
+    'dd-MMM-yyyy',
+    'EEE MMM dd yyyy',
+    'yyyy年MM月dd日'
 ];
 
 const inferColumnType = (value, currentInferredType = 'unknown') => {

@@ -1,6 +1,6 @@
-import { showMessage, hideMessage } from "./ShowMessage.js";
+import { showMessage } from "./ShowMessage.js";
 
-const Plotly = window.Plotly; // will change to import from npm package later
+const Plotly = window.Plotly;
 
 const graphSection = document.getElementById('graph-section');
 const graphTypeSelect = document.getElementById('graph-type');
@@ -64,8 +64,6 @@ function plotGraph() {
     const xAxis = xAxisSelect.value;
     const yAxis = yAxisSelect.value;
     const colorBy = colorBySelect.value;
-
-    hideMessage(CsvPageModal);
 
     // Validate inputs based on graph type
     if (!xAxis) {

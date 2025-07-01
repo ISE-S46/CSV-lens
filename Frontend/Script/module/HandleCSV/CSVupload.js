@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 import { renderCSVlist } from "./getCSVlist.js";
 
 let selectedFile = null;
@@ -65,8 +65,6 @@ function formatFileSize(bytes) {
 
 async function processCSV() {
     const dashboardMessageDiv = document.querySelector('#Main-page-modal');
-
-    hideMessage(dashboardMessageDiv);
 
     if (!selectedFile) {
         showMessage(dashboardMessageDiv, 'No file selected', false);

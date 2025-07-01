@@ -22,19 +22,36 @@ function convertValueForAPI(value, columnType) {
         case 'boolean':
             return value.toLowerCase() === 'true';
         case 'date':
-        case 'timestamp':
             try {
-                const date = new Date(value);
-                if (isNaN(date.getTime())) {
+                const parsedDate = new Date(value);
+                if (isNaN(parsedDate.getTime())) {
                     return value;
                 }
-                return date.toISOString().split('T')[0];
+                return parsedDate.toISOString().split('T')[0];
+            } catch (e) {
+                return value;
+            }
+        case 'timestamp':
+            try {
+                const parsedDate = new Date(value);
+                if (isNaN(parsedDate.getTime())) {
+                    return value;
+                }
+                const iso = parsedDate.toISOString();
+                return iso.replace('.000', '');
             } catch (e) {
                 return value;
             }
         default:
             return value;
     }
+}
+
+function getTextWidth(text, font) {
+    const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+    const context = canvas.getContext("2d");
+    context.font = font || getComputedStyle(document.body).font;
+    return context.measureText(text).width;
 }
 
 async function handleCellEdit(event) {
@@ -58,7 +75,12 @@ async function handleCellEdit(event) {
 
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
-    inputElement.className = 'w-22 h-full p-0.5 border rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800';
+    inputElement.className = 'h-full p-0.5 border rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800';
+
+    const computedStyle = getComputedStyle(td);
+    const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+    const textWidth = getTextWidth(originalValue, font);
+    inputElement.style.width = `${textWidth + 16}px`;
     inputElement.value = originalValue;
 
     td.dataset.originalDisplayedText = td.textContent;

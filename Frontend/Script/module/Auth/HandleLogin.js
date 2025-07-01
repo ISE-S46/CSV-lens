@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 
 const API_BASE_URL = '/api';
 
@@ -8,8 +8,6 @@ async function handleLogin(event) {
     const loginEmailInput = document.getElementById('loginEmail');
     const loginPasswordInput = document.getElementById('loginPassword');
     const loginMessageDiv = document.querySelector('#login-modal');
-
-    hideMessage(loginMessageDiv);
 
     const email = loginEmailInput.value;
     const password = loginPasswordInput.value;
@@ -45,8 +43,6 @@ async function handleLogin(event) {
 async function handleLogout() {
     const dashboardMessageDiv = document.querySelector('#login-modal');
 
-    hideMessage(dashboardMessageDiv);
-
     try {
         const response = await fetch(`${API_BASE_URL}/auth/logout`, {
             method: 'POST',
@@ -75,8 +71,6 @@ async function checkAuthAndRender() {
         window.location.href = '/login';
         return;
     }
-
-    hideMessage(dashboardMessageDiv);
 
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
@@ -111,7 +105,6 @@ async function checkAuthAndRender() {
 function handleAuthError(response) {
     const messageArea = document.getElementById('csv-page-modal');
 
-    hideMessage(messageArea);
     if (response.status === 401 || response.status === 403) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

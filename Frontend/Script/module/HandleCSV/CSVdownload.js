@@ -1,6 +1,5 @@
-// import * as XLSX from 'xlsx/xlsx.mjs';
 import { currentData, columnsInfo, csvName } from '../Graph.js';
-import { showMessage, hideMessage } from '../ShowMessage.js';
+import { showMessage } from '../ShowMessage.js';
 
 const saveCSVToggleButton = document.getElementById('save-csv-toggle-btn');
 const saveCSVOptionsDropdown = document.getElementById('save-csv-options-dropdown');
@@ -29,8 +28,6 @@ function setupSaveCSVEvents() {
 }
 
 function saveDataAs(format, data, columnsInfo, defaultFilename) {
-    hideMessage(Modal);
-
     if (!data || data.length === 0) {
         showMessage(Modal, 'No data to export.');
         return;
@@ -63,15 +60,6 @@ function saveDataAs(format, data, columnsInfo, defaultFilename) {
                 blob = new Blob([JSON.stringify(orderedJsonData, null, 2)], { type: 'application/json;charset=utf-8;' });
                 mimeType = 'application/json';
                 break;
-            // case 'xlsx':
-            //     if (!XLSX) {
-            //         showMessage(Modal, 'Error: XLSX library not loaded.');
-            //         console.error('XLSX library not available for download.');
-            //         return;
-            //     }
-            //     blob = convertToXLSX(data, orderedColumnNames);
-            //     mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-            //     break;
             default:
                 showMessage(Modal, `Unsupported format: ${format}`);
                 console.warn(`Unsupported save format: ${format}`);
@@ -112,13 +100,5 @@ function convertToCSV(data, orderedColumnNames) {
     });
     return csv;
 }
-
-// function convertToXLSX(data, orderedColumnNames) {
-//     const ws = XLSX.utils.json_to_sheet(data, { header: orderedColumnNames });
-//     const wb = XLSX.utils.book_new();
-//     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-//     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-//     return new Blob([wbout], { type: 'application/octet-stream' });
-// }
 
 export { setupSaveCSVEvents };

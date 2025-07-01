@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 import { filterManager } from '../Filter.js';
 import { handleAuthError } from "../Auth/HandleLogin.js";
 
@@ -16,7 +16,6 @@ function hideLoadingSpinner() {
 }
 
 async function fetchDatasetDetails(datasetId) {
-    hideMessage(messageArea);
     showLoadingSpinner();
     const token = localStorage.getItem('token');
     if (!token) {
@@ -61,7 +60,6 @@ function appendFilterAndSortParams(queryParams) {
 }
 
 async function fetchDatasetRows(datasetId, page, limit) {
-    hideMessage(messageArea);
     showLoadingSpinner();
     const token = localStorage.getItem('token');
     if (!token) {
@@ -96,7 +94,6 @@ async function fetchDatasetRows(datasetId, page, limit) {
 }
 
 async function fetchDatasetGraph(datasetId) {
-    hideMessage(messageArea);
     showLoadingSpinner();
     const token = localStorage.getItem('token');
     if (!token) {
@@ -131,7 +128,6 @@ async function fetchDatasetGraph(datasetId) {
 }
 
 async function fetchDatasetNullRows(datasetId) {
-    hideMessage(messageArea);
     showLoadingSpinner();
     const token = localStorage.getItem('token');
     if (!token) {

@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 
 const API_BASE_URL = '/api';
 
@@ -11,8 +11,6 @@ async function handleRegister(event) {
     const registerConfirmPassword = document.getElementById('registerConfirmPassword');
 
     const registerMessageDiv = document.getElementById('Register-modal');
-
-    hideMessage(registerMessageDiv);
 
     const email = RegisterEmail.value;
     const username = RegisterUser.value;

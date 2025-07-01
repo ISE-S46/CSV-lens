@@ -1,11 +1,9 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 
 const API_BASE_URL = '/api';
 
 async function DeleteCSV(id) {
     const dashboardMessageDiv = document.querySelector('#Main-page-modal');
-
-    hideMessage(dashboardMessageDiv);
 
     try {
         const response = await fetch(`${API_BASE_URL}/datasets/${id}`, {

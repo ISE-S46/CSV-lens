@@ -1,5 +1,5 @@
 import { getGraphTitle } from './Graph.js';
-import { showMessage, hideMessage } from './ShowMessage.js';
+import { showMessage } from './ShowMessage.js';
 
 const Plotly = window.Plotly;
 
@@ -41,8 +41,6 @@ function savePlotAs(format) {
     const graphTitle = getGraphTitle(graphType, xAxis, yAxis);
 
     const sanitizedFilename = (graphTitle || 'plot').replace(/:/g, '').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-    hideMessage(Modal);
 
     if (!(format === 'png' || format === 'svg')) {
         console.warn(`Unsupported save format: ${format}`);

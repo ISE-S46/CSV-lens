@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 import { formatFileSize } from "./CSVupload.js";
 import {
     getCurrentPage,
@@ -20,8 +20,6 @@ let allDatasets = [];
 
 async function getCSVlist() {
     const dashboardMessageDiv = document.querySelector('#Main-page-modal');
-
-    hideMessage(dashboardMessageDiv);
 
     try {
         const response = await fetch(`${API_BASE_URL}/datasets`, {

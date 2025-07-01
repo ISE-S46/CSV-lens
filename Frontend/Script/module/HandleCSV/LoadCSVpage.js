@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 import { updateTotalPages } from '../PageInput.js';
 import { updateFilterUI } from "../FilterUI.js";
 import { filterManager } from '../Filter.js';
@@ -67,7 +67,6 @@ const nullRowsCountText = document.getElementById('null-rows-count-text');
 const nullRowsMessage = document.getElementById('null-rows-message');
 
 async function loadDatasetPage() {
-    hideMessage(messageArea);
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
 
@@ -137,7 +136,9 @@ async function loadDatasetPage() {
 
     updateUrlWithPage(initialPage, false);
 
-    setupCellEditing(currentDatasetId, loadCurrentPageRows, datasetDetails.columns);
+    setupCellEditing(currentDatasetId, async () => {
+        await loadCurrentPageRows(false);
+    }, datasetDetails.columns);
 
     await loadCurrentPageRows(false); // Don't update URL again
     await loadGraphData();

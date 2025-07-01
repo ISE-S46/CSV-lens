@@ -1,6 +1,6 @@
 import { formatTimestamp } from "./getCSVlist.js";
 import { populateColumnDropdowns } from "../FilterUI.js";
-import { showMessage, hideMessage } from "../ShowMessage.js";
+import { showMessage } from "../ShowMessage.js";
 import { initGraph } from "../Graph.js";
 
 const CSVname = document.getElementById('CSV-name');
@@ -25,19 +25,10 @@ function renderDatasetMetadata(dataset) {
     initGraph(columnsInfo, dataset.csv_name);
 }
 
-function formatDateToISO(dateStr) {
-    const date = new Date(dateStr);
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-}
-
 const csvTableHeaderRow = document.getElementById('table-header-row');
 const csvTableBody = document.getElementById('table-body');
 
 function renderTable(rows) {
-    hideMessage(messageArea);
     csvTableHeaderRow.innerHTML = '';
     csvTableBody.innerHTML = '';
 
@@ -78,7 +69,7 @@ function renderTable(rows) {
             if (col.column_type === 'date' || col.column_type === 'timestamp') {
                 try {
                     td.dataset.originalValue = cellValue;
-                    cellValue = cellValue ? formatDateToISO(cellValue) : '';
+                    cellValue = cellValue;
                 } catch (e) {
                     cellValue = cellValue;
                 }
@@ -102,8 +93,6 @@ const nullCsvTableBody = document.getElementById('null-table-body');
 let isNullRowsTableVisible = true; // Initial state: null rows table is hidden
 
 function renderNullTable(nullRows) {
-    hideMessage(messageArea);
-
     nullCsvTableHeaderRow.innerHTML = '';
     nullCsvTableBody.innerHTML = '';
 
@@ -143,7 +132,7 @@ function renderNullTable(nullRows) {
             } else {
                 if (col.column_type === 'date' || col.column_type === 'timestamp') {
                     try {
-                        cellValue = cellValue ? formatDateToISO(cellValue) : '';
+                        cellValue = cellValue;
                     } catch (e) {
                         cellValue = cellValue;
                     }
@@ -173,4 +162,4 @@ function toggleNullRowsDisplay() {
     }
 }
 
-export { renderDatasetMetadata, renderTable, renderNullTable, toggleNullRowsDisplay, formatDateToISO, columnsInfo };
+export { renderDatasetMetadata, renderTable, renderNullTable, toggleNullRowsDisplay };

@@ -1,6 +1,6 @@
-import { updateDatasetRow, fetchSingleRow, fetchDatasetNullRows } from "./FetchCSV.js";
+import { updateDatasetRow, fetchSingleRow, fetchDatasetNullRows, updateColumnName } from "./FetchCSV.js";
 import { showMessage } from "../ShowMessage.js";
-import { renderNullTable } from "./RenderCSVrows.js";
+import { renderNullTable, updateColumnsInfo } from "./RenderCSVrows.js";
 
 let currentDatasetIdForEditing = null;
 let refreshMainTableFunction = null;
@@ -52,6 +52,81 @@ function getTextWidth(text, font) {
     const context = canvas.getContext("2d");
     context.font = font || getComputedStyle(document.body).font;
     return context.measureText(text).width;
+}
+
+async function handleColumnHeaderEdit(event) {
+    const pathSegments = window.location.pathname.split('/');
+    const id = pathSegments[pathSegments.length - 1];
+
+    if (!id) {
+        showMessage(messageArea, 'No dataset ID provided in the URL.');
+        return;
+    }
+
+    const th = event.target.closest('th');
+
+    if (!th || th.querySelector('input') || !th.dataset.columnName) {
+        return;
+    }
+
+    const oldColumnName = th.dataset.columnName;
+    const originalDisplayedText = th.textContent.trim();
+
+    const inputElement = document.createElement('input');
+    inputElement.type = 'text';
+    inputElement.className = 'h-full p-0.5 border rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800';
+
+    const computedStyle = getComputedStyle(th);
+    const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+    const textWidth = getTextWidth(originalDisplayedText, font);
+    inputElement.style.width = `${textWidth + 16}px`;
+    inputElement.value = originalDisplayedText;
+
+    th.textContent = '';
+    th.appendChild(inputElement);
+    inputElement.focus();
+
+    const commitColumnEdit = async () => {
+        const newColumnName = inputElement.value.trim();
+
+        if (newColumnName === '' || newColumnName === originalDisplayedText) {
+            th.textContent = originalDisplayedText;
+            return;
+        }
+
+        const success = await updateColumnName(currentDatasetIdForEditing, oldColumnName, newColumnName);
+
+        if (success) {
+            // Update the local columnsInfo array
+            const columnIndex = columnsInfo.findIndex(col => col.column_name === oldColumnName);
+            if (columnIndex !== -1) {
+                columnsInfo[columnIndex].column_name = newColumnName;
+            }
+
+            updateColumnsInfo(columnsInfo, id);
+
+            showMessage(messageArea, `Column name "${oldColumnName}" successfully updated to "${newColumnName}"!`);
+            if (refreshMainTableFunction) {
+                await refreshMainTableFunction();
+            }
+            await refreshNullRowsTable();
+        } else {
+            showMessage(messageArea, `Failed to update column name "${oldColumnName}". Please try again.`);
+            th.textContent = originalDisplayedText;
+        }
+    };
+
+    inputElement.addEventListener('blur', commitColumnEdit);
+    inputElement.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            commitColumnEdit();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            th.textContent = originalDisplayedText;
+            inputElement.removeEventListener('blur', commitColumnEdit);
+        }
+    });
 }
 
 async function handleCellEdit(event) {
@@ -139,6 +214,8 @@ async function handleCellEdit(event) {
 
 const csvTableBody = document.getElementById('table-body');
 const nullCsvTableBody = document.getElementById('null-table-body');
+const csvTableHeaderRow = document.getElementById('table-header-row');
+const nullCsvTableHeaderRow = document.getElementById('null-table-header-row');
 
 function setupCellEditing(datasetId, refreshTableFunc, columns) {
     currentDatasetIdForEditing = datasetId;
@@ -158,6 +235,21 @@ function setupCellEditing(datasetId, refreshTableFunc, columns) {
             handleCellEdit(event);
         }
     });
+
+    csvTableHeaderRow.addEventListener('dblclick', (event) => {
+        const targetTh = event.target.closest('th');
+        if (targetTh && targetTh.closest('#table-header-row')) {
+            handleColumnHeaderEdit(event);
+        }
+    });
+
+    nullCsvTableHeaderRow.addEventListener('dblclick', (event) => {
+        const targetTh = event.target.closest('th');
+        if (targetTh && targetTh.closest('#null-table-header-row')) {
+            handleColumnHeaderEdit(event);
+        }
+    });
+
 }
 
 const dataQualityCheckSection = document.getElementById('data-quality-check');

@@ -229,4 +229,36 @@ async function updateDatasetRow(datasetId, rowNumber, rowData) {
     }
 }
 
-export { fetchDatasetDetails, fetchDatasetRows, fetchDatasetGraph, fetchDatasetNullRows, updateDatasetRow, fetchSingleRow };
+async function updateColumnName(datasetId, oldColumnName, newColumnName) {
+    try {
+        const response = await fetch(`/api/datasets/${datasetId}/columns/${encodeURIComponent(oldColumnName)}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ newColumnName: newColumnName })
+        });
+
+        if (response.ok) {
+            console.log(`Column '${oldColumnName}' updated to '${newColumnName}' successfully.`);
+            return true;
+        } else {
+            const errorData = await response.json();
+            console.error(`Failed to update column name: ${errorData.message || response.statusText}`);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error updating column name:', error);
+        return false;
+    }
+}
+
+export {
+    fetchDatasetDetails, 
+    fetchDatasetRows, 
+    fetchDatasetGraph, 
+    fetchDatasetNullRows, 
+    updateDatasetRow, 
+    fetchSingleRow,
+    updateColumnName
+};

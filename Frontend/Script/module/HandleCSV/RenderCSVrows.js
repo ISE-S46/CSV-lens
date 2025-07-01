@@ -25,6 +25,12 @@ function renderDatasetMetadata(dataset) {
     initGraph(columnsInfo, dataset.csv_name);
 }
 
+function updateColumnsInfo(newColumnsInfo, id) {
+    columnsInfo = newColumnsInfo;
+    populateColumnDropdowns(columnsInfo);
+    initGraph(columnsInfo, id);
+}
+
 const csvTableHeaderRow = document.getElementById('table-header-row');
 const csvTableBody = document.getElementById('table-body');
 
@@ -46,6 +52,8 @@ function renderTable(rows) {
     columnsInfo.forEach(col => {
         const th = document.createElement('th');
         th.className = 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg';
+        th.dataset.columnName = col.column_name;
+        th.dataset.columnType = col.column_type;
         if (col.column_order === columnsInfo.length) {
             th.classList.add('rounded-tr-lg');
         }
@@ -105,6 +113,8 @@ function renderNullTable(nullRows) {
     columnsInfo.forEach(col => {
         const th = document.createElement('th');
         th.className = 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg';
+        th.dataset.columnName = col.column_name;
+        th.dataset.columnType = col.column_type;
         if (col.column_order === columnsInfo.length) {
             th.classList.add('rounded-tr-lg');
         }
@@ -162,4 +172,10 @@ function toggleNullRowsDisplay() {
     }
 }
 
-export { renderDatasetMetadata, renderTable, renderNullTable, toggleNullRowsDisplay };
+export {
+    renderDatasetMetadata,
+    renderTable,
+    renderNullTable,
+    toggleNullRowsDisplay,
+    updateColumnsInfo
+};

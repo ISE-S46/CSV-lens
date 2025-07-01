@@ -138,7 +138,7 @@ async function loadDatasetPage() {
 
     setupCellEditing(currentDatasetId, async () => {
         await loadCurrentPageRows(false);
-    }, datasetDetails.columns);
+    }, datasetDetails);
 
     await loadCurrentPageRows(false); // Don't update URL again
     await loadGraphData();

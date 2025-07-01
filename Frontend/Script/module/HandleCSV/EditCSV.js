@@ -54,14 +54,7 @@ function getTextWidth(text, font) {
     return context.measureText(text).width;
 }
 
-async function handleColumnHeaderEdit(event) {
-    const pathSegments = window.location.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1];
-
-    if (!id) {
-        showMessage(messageArea, 'No dataset ID provided in the URL.');
-        return;
-    }
+async function handleColumnHeaderEdit(event, datasetDetails) {
 
     const th = event.target.closest('th');
 
@@ -103,7 +96,7 @@ async function handleColumnHeaderEdit(event) {
                 columnsInfo[columnIndex].column_name = newColumnName;
             }
 
-            updateColumnsInfo(columnsInfo, id);
+            updateColumnsInfo(columnsInfo, datasetDetails.csv_name);
 
             showMessage(messageArea, `Column name "${oldColumnName}" successfully updated to "${newColumnName}"!`);
             if (refreshMainTableFunction) {
@@ -217,10 +210,10 @@ const nullCsvTableBody = document.getElementById('null-table-body');
 const csvTableHeaderRow = document.getElementById('table-header-row');
 const nullCsvTableHeaderRow = document.getElementById('null-table-header-row');
 
-function setupCellEditing(datasetId, refreshTableFunc, columns) {
+function setupCellEditing(datasetId, refreshTableFunc, datasetDetails) {
     currentDatasetIdForEditing = datasetId;
     refreshMainTableFunction = refreshTableFunc;
-    columnsInfo = columns;
+    columnsInfo = datasetDetails.columns;
 
     csvTableBody.addEventListener('dblclick', (event) => {
         const targetTd = event.target.closest('td');
@@ -239,14 +232,14 @@ function setupCellEditing(datasetId, refreshTableFunc, columns) {
     csvTableHeaderRow.addEventListener('dblclick', (event) => {
         const targetTh = event.target.closest('th');
         if (targetTh && targetTh.closest('#table-header-row')) {
-            handleColumnHeaderEdit(event);
+            handleColumnHeaderEdit(event, datasetDetails);
         }
     });
 
     nullCsvTableHeaderRow.addEventListener('dblclick', (event) => {
         const targetTh = event.target.closest('th');
         if (targetTh && targetTh.closest('#null-table-header-row')) {
-            handleColumnHeaderEdit(event);
+            handleColumnHeaderEdit(event, datasetDetails);
         }
     });
 

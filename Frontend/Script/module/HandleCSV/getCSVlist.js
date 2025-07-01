@@ -12,8 +12,7 @@ import {
     handlePopstate
 } from '../Pagination.js';
 import { handleSearchFromURL } from "../SearchDatasets.js";
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from "../../../config.js";
 
 const rowsPerPage = 12;
 let allDatasets = [];

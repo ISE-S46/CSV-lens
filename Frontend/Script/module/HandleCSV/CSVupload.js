@@ -1,9 +1,8 @@
 import { showMessage } from "../ShowMessage.js";
 import { renderCSVlist } from "./getCSVlist.js";
+import { API_BASE_URL } from "../../../config.js";
 
 let selectedFile = null;
-
-const API_BASE_URL = '/api';
 
 function handleFile(file) {
     if (!file.name.toLowerCase().endsWith('.csv')) {

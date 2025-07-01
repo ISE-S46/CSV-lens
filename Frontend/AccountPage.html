@@ -49,12 +49,28 @@
         </div>
     </nav>
 
-    <main class="flex-grow mt-44">
-        <p>account page</p>
+    <main class="flex-grow">
+        <div class="max-w-sm mt-24 p-6 bg-white shadow-md rounded-xl mx-2 sm:mx-auto">
+            <h1 class="text-2xl font-bold text-center mb-6">Account</h1>
+            <form id="LoginForm" class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-gray-500">USERNAME</h3>
+                    <p class="text-lg font-medium mt-1">qux</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-gray-500">EMAIL ADDRESS</h3>
+                    <p class="text-lg font-medium mt-1">qux@example.com</p>
+                </div>
+                <button type="submit" class="w-full red-btn Login">
+                    Logout
+                </button>
+
+            </form>
+        </div>
     </main>
 
     <!-- Main Modal -->
-    <div id="Edit-page-modal" class="fixed z-50 hidden">
+    <div id="Account-page-modal" class="fixed z-50 hidden">
         <div class="fixed top-4 right-4 mt-2 mr-2 z-50">
             <div class="bg-white rounded-md shadow-md w-full max-w-xs relative overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">

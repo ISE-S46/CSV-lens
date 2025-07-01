@@ -25,10 +25,10 @@ function renderDatasetMetadata(dataset) {
     initGraph(columnsInfo, dataset.csv_name);
 }
 
-function updateColumnsInfo(newColumnsInfo, id) {
+function updateColumnsInfo(newColumnsInfo, csv_name) {
     columnsInfo = newColumnsInfo;
     populateColumnDropdowns(columnsInfo);
-    initGraph(columnsInfo, id);
+    initGraph(columnsInfo, csv_name);
 }
 
 const csvTableHeaderRow = document.getElementById('table-header-row');

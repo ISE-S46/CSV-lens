@@ -1,6 +1,5 @@
 import { showMessage } from "../ShowMessage.js";
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from "../../../config.js";
 
 async function handleRegister(event) {
     event.preventDefault();

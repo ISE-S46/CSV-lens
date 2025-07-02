@@ -16,14 +16,11 @@ function hideLoadingSpinner() {
 
 async function fetchDatasetDetails(datasetId) {
     showLoadingSpinner();
-    const token = localStorage.getItem('token');
-    if (!token) {
-        handleAuthError({ status: 401 });
-        return null;
-    }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}`);
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}`, {
+            credentials: 'include'
+        });
 
         if (handleAuthError(response)) return null;
 
@@ -60,18 +57,15 @@ function appendFilterAndSortParams(queryParams) {
 
 async function fetchDatasetRows(datasetId, page, limit) {
     showLoadingSpinner();
-    const token = localStorage.getItem('token');
-    if (!token) {
-        handleAuthError({ status: 401 });
-        return null;
-    }
 
     try {
         const queryParams = new URLSearchParams({ page, limit });
 
         appendFilterAndSortParams(queryParams);
 
-        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows?${queryParams.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows?${queryParams.toString()}`, {
+            credentials: 'include'
+        });
 
         if (handleAuthError(response)) return null;
 
@@ -94,18 +88,15 @@ async function fetchDatasetRows(datasetId, page, limit) {
 
 async function fetchDatasetGraph(datasetId) {
     showLoadingSpinner();
-    const token = localStorage.getItem('token');
-    if (!token) {
-        handleAuthError({ status: 401 });
-        return null;
-    }
 
     try {
         const queryParams = new URLSearchParams();
-        
+
         appendFilterAndSortParams(queryParams);
 
-        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/GraphData?${queryParams.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/GraphData?${queryParams.toString()}`, {
+            credentials: 'include'
+        });
 
         if (handleAuthError(response)) return null;
 
@@ -128,14 +119,10 @@ async function fetchDatasetGraph(datasetId) {
 
 async function fetchDatasetNullRows(datasetId) {
     showLoadingSpinner();
-    const token = localStorage.getItem('token');
-    if (!token) {
-        handleAuthError({ status: 401 });
-        return null;
-    }
-
     try {
-        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/null-rows`);
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/null-rows`, {
+            credentials: 'include'
+        });
 
         if (handleAuthError(response)) return null;
 
@@ -158,17 +145,14 @@ async function fetchDatasetNullRows(datasetId) {
 
 async function fetchSingleRow(datasetId, rowNumber) {
     showLoadingSpinner();
-    const token = localStorage.getItem('token');
-    if (!token) {
-        handleAuthError({ status: 401 });
-        return null;
-    }
 
     datasetId = parseInt(datasetId);
     rowNumber = parseInt(rowNumber);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows/${rowNumber}`);
+        const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows/${rowNumber}`, {
+            credentials: 'include'
+        });
 
         if (handleAuthError(response)) return null;
 
@@ -192,11 +176,6 @@ async function fetchSingleRow(datasetId, rowNumber) {
 
 async function updateDatasetRow(datasetId, rowNumber, rowData) {
     showLoadingSpinner();
-    const token = localStorage.getItem('token');
-    if (!token) {
-        handleAuthError({ status: 401 });
-        return null;
-    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows/${rowNumber}`, {
@@ -204,7 +183,8 @@ async function updateDatasetRow(datasetId, rowNumber, rowData) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(rowData)
+            body: JSON.stringify(rowData),
+            credentials: 'include'
         });
 
         if (handleAuthError(response)) return null;
@@ -235,7 +215,8 @@ async function updateColumnName(datasetId, oldColumnName, newColumnName) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ newColumnName: newColumnName })
+            body: JSON.stringify({ newColumnName: newColumnName }),
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -253,11 +234,11 @@ async function updateColumnName(datasetId, oldColumnName, newColumnName) {
 }
 
 export {
-    fetchDatasetDetails, 
-    fetchDatasetRows, 
-    fetchDatasetGraph, 
-    fetchDatasetNullRows, 
-    updateDatasetRow, 
+    fetchDatasetDetails,
+    fetchDatasetRows,
+    fetchDatasetGraph,
+    fetchDatasetNullRows,
+    updateDatasetRow,
     fetchSingleRow,
     updateColumnName
 };

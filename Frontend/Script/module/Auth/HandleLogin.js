@@ -26,7 +26,6 @@ async function handleLogin(event) {
         const data = await response.json();
 
         if (response.ok) {
-            localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             showMessage(loginMessageDiv, 'Login successful! Redirecting...', true);
             window.location.href = '/';
@@ -47,8 +46,6 @@ async function handleLogout(dashboardMessageDiv) {
         });
         const data = await response.json();
         showMessage(dashboardMessageDiv, `Session expired, ${data.msg}`, false);
-
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
 
         window.location.href = '/login';
@@ -59,13 +56,6 @@ async function handleLogout(dashboardMessageDiv) {
 }
 
 async function checkAuthAndRender(dashboardMessageDiv) {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-        window.location.href = '/login';
-        return;
-    }
-
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
             method: 'GET',
@@ -73,7 +63,6 @@ async function checkAuthAndRender(dashboardMessageDiv) {
         });
 
         if (!response.ok) {
-            localStorage.removeItem('token');
             localStorage.removeItem('user');
             showMessage(dashboardMessageDiv, 'Session expired. Please log in again.', false);
             setTimeout(() => {
@@ -86,7 +75,6 @@ async function checkAuthAndRender(dashboardMessageDiv) {
 
     } catch (error) {
         console.error('Error verifying token:', error);
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
         showMessage(dashboardMessageDiv, 'Network error during authentication check. Redirecting to login.', false);
         setTimeout(() => {
@@ -99,7 +87,6 @@ function handleAuthError(response) {
     const messageArea = document.getElementById('csv-page-modal');
 
     if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
         showMessage(messageArea, 'Session expired or unauthorized. Please log in again.');
         setTimeout(() => {
@@ -122,13 +109,11 @@ async function checkExistingTokenAndRedirect() {
             window.location.href = '/';
             return true;
         } else {
-            localStorage.removeItem('token');
             localStorage.removeItem('user');
             console.log('Session expired or invalid, user must log in.');
         }
     } catch (error) {
         console.error('Error verifying token:', error);
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
     }
     return false;

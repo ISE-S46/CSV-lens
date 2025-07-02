@@ -3,18 +3,24 @@ import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    checkAuthAndRender();
+    const Modal = document.querySelector('Account-page-modal');
+
+    checkAuthAndRender(Modal);
 
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);
 
-    const UserName = document.getElementById("UserName");
+    const UserNameNav = document.getElementById("UserName");
+    UserNameNav.innerHTML = user.username;
+
+    const UserName = document.getElementById("username-account");
     UserName.innerHTML = user.username;
+
+    const email = document.getElementById("email");
+    email.innerHTML = user.email;
 
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
-
-    const Modal = document.querySelector('#Edit-page-modal');
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');
@@ -32,7 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
 
             case btn.classList.contains('logout-btn'):
-                handleLogout();
+                handleLogout(Modal);
+                break;
+
+            case btn.classList.contains('account-logout-btn'):
+                handleLogout(Modal);
                 break;
 
             case btn.classList.contains('close-modal-btn'):

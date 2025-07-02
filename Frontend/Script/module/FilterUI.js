@@ -48,7 +48,6 @@ function addFilterRow() {
     `;
     button.className = 'remove-filter-row bg-red-100 hover:bg-red-200 text-red-700 p-1 rounded-md';
 
-    // Add click handler for the remove button
     button.addEventListener('click', () => {
         newRow.remove();
         applyFilters();

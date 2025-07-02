@@ -8,7 +8,9 @@ import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    checkAuthAndRender();
+    const Modal = document.querySelector('#Main-page-modal');
+
+    checkAuthAndRender(Modal);
     initializePagination();
     initializePageInput(handleSearchFromURL);
 
@@ -65,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const menuButton = document.getElementById('user-menu-button');
     const dropdownMenu = document.getElementById('user-dropdown');
-    const Modal = document.querySelector('#Main-page-modal');
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');

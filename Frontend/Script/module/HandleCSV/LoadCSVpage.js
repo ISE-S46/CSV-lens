@@ -81,7 +81,6 @@ async function loadDatasetPage() {
         return;
     }
 
-    // Reset filters and sort
     filterManager.clearFilters();
     filterManager.clearSorts();
 
@@ -117,10 +116,10 @@ async function loadDatasetPage() {
     const nullRowsResponse = await fetchDatasetNullRows(currentDatasetId);
 
     if (nullRowsResponse && nullRowsResponse.count > 0) {
-        dataQualityCheckSection.classList.remove('hidden'); // Show the whole section
+        dataQualityCheckSection.classList.remove('hidden');
         nullRowsCountText.textContent = `${nullRowsResponse.count} rows across the dataset contain null or missing values. These may affect your data analysis and visualizations.`;
 
-        renderNullTable(nullRowsResponse.data); // Render the null rows data
+        renderNullTable(nullRowsResponse.data);
 
         toggleNullRowsDisplay();
 
@@ -130,7 +129,6 @@ async function loadDatasetPage() {
         dataQualityCheckSection.classList.add('hidden');
     }
 
-    // Get initial page from URL
     const initialPage = getPageFromUrl();
     setCurrentPage(initialPage);
 
@@ -158,7 +156,6 @@ async function loadDatasetPage() {
         // Restore filter/sort state from URL
         const urlState = parseURLParameters();
 
-        // Clear existing state
         filterManager.clearFilters();
         filterManager.clearSorts();
 
@@ -178,7 +175,6 @@ async function loadDatasetPage() {
             });
         }
 
-        // Update UI to reflect restored state
         updateFilterUI();
         await loadCurrentPageRows(false);
         await loadGraphData();
@@ -204,7 +200,6 @@ async function loadCurrentPageRows(updateUrl = true) {
 async function loadGraphData() {
     const GraphResponse = await fetchDatasetGraph(currentDatasetId);
     if (GraphResponse && GraphResponse.data) {
-        // console.log(GraphResponse.data)
         setGraphData(GraphResponse.data);
     }
 }

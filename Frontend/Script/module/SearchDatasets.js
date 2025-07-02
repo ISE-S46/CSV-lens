@@ -21,7 +21,6 @@ function handleSearchFromURL() {
         searchCSV(searchQuery);
     } else {
         searchInput.value = '';
-        // console.log("from handlesearch") // might use in debugging later
         renderCSVlist();
     }
 }

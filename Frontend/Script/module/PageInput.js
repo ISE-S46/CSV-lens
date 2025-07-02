@@ -39,7 +39,6 @@ function validatePageNumber(pageNum) {
 
 async function goToPage(pageNum) {
     if (validatePageNumber(pageNum)) {
-        // console.log("from gotopage") // might use in debugging later
         setCurrentPage(pageNum);
         updateUrlWithPage(pageNum);
         hidePageInputModal();
@@ -74,7 +73,6 @@ function initializePageInput(InputFunction) {
         const pageNum = parseInt(pageNumberInput.value, 10);
         if (goToPage(pageNum)) {
             await InputFunction();
-            // console.log("from initialize page input") // might need for debugging later
         }
     });
 
@@ -84,7 +82,6 @@ function initializePageInput(InputFunction) {
             const pageNum = parseInt(pageNumberInput.value, 10);
             if (goToPage(pageNum)) {
                 await InputFunction();
-                // console.log("from initialize page input") // might need for debugging later
             }
         } else if (e.key === 'Escape') {
             hidePageInputModal();

@@ -164,7 +164,7 @@ async function handleCellEdit(event) {
         const originalRawValueNormalized = originalValue.trim() === '' ? null : originalValue;
         if (processedNewValue === originalRawValueNormalized ||
             (processedNewValue === null && originalRawValueNormalized === null)) {
-            // No significant change, revert to original displayed text
+            // No change, revert to original displayed text
             td.textContent = td.dataset.originalDisplayedText;
             return;
         }

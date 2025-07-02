@@ -49,14 +49,12 @@ async function renderCSVlist(matchingDatasets) {
 
     // Store all datasets for pagination
     allDatasets = datasets || [];
-    
-    // Reset pagination and get initial page from URL
+
     resetPagination();
     const initialPage = getPageFromUrl();
     const totalPages = Math.ceil(allDatasets.length / rowsPerPage);
     
     setTotalPages(totalPages);
-    // console.log("from rendercsvlist") // might use in debugging later
     setCurrentPage(initialPage);
 
     renderCurrentPage();
@@ -67,7 +65,7 @@ function renderCurrentPage() {
 
     if (!DatasetsContainer) return;
 
-    // Calculate pagination using the imported functions
+    // Calculate pagination
     const currentPage = getCurrentPage();
     const totalPages = Math.ceil(allDatasets.length / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
@@ -80,7 +78,6 @@ function renderCurrentPage() {
         DatasetsContainer.innerHTML += renderData(dataset);
     });
 
-    // Update pagination display using imported function
     const pagination = {
         currentPage: currentPage,
         totalPages: totalPages,

@@ -39,16 +39,13 @@ async function handleLogin(event) {
     }
 }
 
-async function handleLogout() {
-    const dashboardMessageDiv = document.querySelector('#login-modal');
-
+async function handleLogout(dashboardMessageDiv) {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/logout`, {
             method: 'POST',
             credentials: 'include',
         });
         const data = await response.json();
-        // console.log(data.msg);
         showMessage(dashboardMessageDiv, `Session expired, ${data.msg}`, false);
 
         localStorage.removeItem('token');
@@ -61,12 +58,10 @@ async function handleLogout() {
     }
 }
 
-async function checkAuthAndRender() {
+async function checkAuthAndRender(dashboardMessageDiv) {
     const token = localStorage.getItem('token');
-    const dashboardMessageDiv = document.querySelector('#login-modal');
 
     if (!token) {
-        // No token found, redirect to login page
         window.location.href = '/login';
         return;
     }
@@ -78,7 +73,6 @@ async function checkAuthAndRender() {
         });
 
         if (!response.ok) {
-            // Token invalid or expired, force logout and redirect
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             showMessage(dashboardMessageDiv, 'Session expired. Please log in again.', false);

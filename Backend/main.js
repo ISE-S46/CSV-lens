@@ -5,8 +5,6 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import cookieParser from 'cookie-parser';
 
-import { Middleware, verifyToken } from './Middleware/authMiddleware.js';
-
 import AuthRouter from './Routes/Auth.js';
 import DatasetRouter from './Routes/Datasets.js';
 import DatasetPageRouter from './Routes/DatasetPage.js'
@@ -35,15 +33,14 @@ app.use(express.static(path.join(__dirname, '../Frontend')));
 
 // Handle route based on authentication status
 app.get('/', async (req, res) => {
-    const token = req.header('x-auth-token');
+    const token = req.signedCookies?.auth_token || req.cookies?.auth_token;;
 
-    const { isValid } = verifyToken(token);
-
-    if (isValid) {
-        res.sendFile(path.join(__dirname, '../Frontend/index.html'));
-    } else {
+    if (!token) {
         res.redirect('/login');
-    }
+    } 
+    
+    res.sendFile(path.join(__dirname, '../Frontend/index.html'));
+    
 });
 
 app.get('/login', async (req, res) => {
@@ -68,8 +65,6 @@ const pool = new pg.Pool({
     port: process.env.DB_PORT,
 });
 
-export { pool };
-
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
@@ -79,12 +74,10 @@ pool.query('SELECT NOW()', (err, res) => {
     console.log('Database connected successfully at:', res.rows[0].now);
 });
 
+export { pool };
+
 app.post(`${API_BASE_URL}/test`, (req, res) => {
     res.json({ msg: "hello world" });
 })
-
-app.get(`${API_BASE_URL}/Verified`, Middleware, (req, res) => {
-    res.json({ msg: `Welcome, ${req.user.username}! verified jwt token for user ID: ${req.user.id}` });
-});
 
 app.listen(port, () => console.log(`server running on port: ${port}`));

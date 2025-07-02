@@ -137,7 +137,7 @@ function renderNullTable(nullRows) {
 
             // Highlight null/empty values specifically for the null table
             if (cellValue === null || cellValue === undefined || cellValue === '' || String(cellValue).toLowerCase() === 'null') {
-                td.textContent = 'NULL'; // Display 'NULL' prominently
+                td.textContent = 'NULL';
                 td.classList.add('text-red-600', 'font-semibold', 'bg-red-50');
             } else {
                 if (col.column_type === 'date' || col.column_type === 'timestamp') {
@@ -150,7 +150,7 @@ function renderNullTable(nullRows) {
                     cellValue = cellValue ? 'True' : 'False';
                 }
                 td.textContent = cellValue;
-                td.classList.add('text-gray-800'); // Regular color for non-null
+                td.classList.add('text-gray-800');
             }
             tr.appendChild(td);
         });

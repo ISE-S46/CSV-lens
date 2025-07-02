@@ -9,8 +9,9 @@ import { setupSaveGraphEvents } from "./module/GraphDownload.js";
 import { setupSaveCSVEvents } from "./module/HandleCSV/CSVdownload.js";
 
 document.addEventListener('DOMContentLoaded', () => {
+    const Modal = document.getElementById('csv-page-modal');
 
-    checkAuthAndRender();
+    checkAuthAndRender(Modal);
     loadDatasetPage();
     initializePageInput(loadCurrentPageRows);
 
@@ -28,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         copyFilterUrlToClipboard
     } = getFilterUIEventHandlers();
 
-
     const userString = localStorage.getItem('user');
     const user = JSON.parse(userString);
 
@@ -43,8 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveCSVToggleButton = document.getElementById('save-csv-toggle-btn');
     const saveCSVOptionsDropdown = document.getElementById('save-csv-options-dropdown');
-
-    const Modal = document.getElementById('csv-page-modal');
 
     document.body.addEventListener('click', event => {
         const btn = event.target.closest('button');

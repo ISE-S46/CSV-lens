@@ -186,7 +186,6 @@ function createTrace(graphType, x, y, name, color) {
                 marker: { color: color }
             };
         case 'pie':
-            // For pie charts, we need to count frequencies
             const counts = {};
             x.forEach(val => {
                 counts[val] = (counts[val] || 0) + 1;
@@ -211,7 +210,7 @@ function createTrace(graphType, x, y, name, color) {
                 hoverongaps: false,
                 showscale: true
             };
-        default: // bar
+        default:
             return {
                 x: x,
                 y: y,
@@ -247,7 +246,6 @@ function aggregateHeatmapData(xValues, yValues) {
     return { z, xLabels, yLabels };
 }
 
-// Generate a title based on graph type
 function getGraphTitle(graphType, xAxis, yAxis) {
     const titles = {
         bar: `Bar Chart: ${xAxis} vs ${yAxis}`,
@@ -261,7 +259,6 @@ function getGraphTitle(graphType, xAxis, yAxis) {
     return titles[graphType];
 }
 
-// Generate distinct colors for categories
 function getCategoryColors(count) {
     const defaultColors = [
         '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',

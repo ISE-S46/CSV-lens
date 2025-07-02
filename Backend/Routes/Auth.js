@@ -103,7 +103,7 @@ AuthRouter.post('/login', async (req, res) => {
         }
 
         // Create JWT
-        const payload = { id: storedUser.id, username: storedUser.username };
+        const payload = { id: storedUser.id, username: storedUser.username, email: email };
 
         jwt.sign(
             payload,
@@ -152,7 +152,14 @@ AuthRouter.post('/logout', async (req, res) => {
 });
 
 AuthRouter.get('/verify-token', Middleware, (req, res) => {
-    res.status(200).json({ msg: 'Token is valid', user: { id: req.user.id } });
+    res.status(200).json({ 
+        msg: `Welcome, ${req.user.username}! verified jwt token for user ID: ${req.user.id}`, 
+        user: { 
+            id: req.user.id, 
+            username: req.user.username,
+            email: req.user.email
+        } 
+    });
 });
 
 export default AuthRouter;

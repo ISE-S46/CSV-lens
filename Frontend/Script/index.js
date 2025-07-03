@@ -1,4 +1,4 @@
-import { checkAuthAndRender, handleLogout } from "./module/Auth/HandleLogin.js";
+import { checkAuthAndRender, handleLogout, resetIdleTimer } from "./module/Auth/HandleSession.js";
 import { handleFile, clearFile, processCSV } from "./module/HandleCSV/CSVupload.js";
 import { searchCSV, handleSearchFromURL } from "./module/SearchDatasets.js";
 import { DeleteCSV } from "./module/HandleCSV/DeleteCSV.js";
@@ -7,8 +7,12 @@ import { initializePagination } from "./module/HandleCSV/getCSVlist.js";
 import { hideMessage } from "./module/ShowMessage.js";
 
 document.addEventListener('DOMContentLoaded', () => {
-
     const Modal = document.querySelector('#Main-page-modal');
+
+    document.addEventListener('mousemove', resetIdleTimer);
+    document.addEventListener('keypress', resetIdleTimer);
+    document.addEventListener('click', resetIdleTimer);
+    document.addEventListener('scroll', resetIdleTimer);
 
     checkAuthAndRender(Modal);
     initializePagination();

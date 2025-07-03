@@ -1,6 +1,6 @@
 import { showMessage } from "../ShowMessage.js";
 import { filterManager } from '../Filter.js';
-import { handleAuthError } from "../Auth/HandleLogin.js";
+import { handleAuthError } from "../Auth/HandleSession.js";
 import { API_BASE_URL } from "../../../config.js";
 
 const messageArea = document.getElementById('csv-page-modal');

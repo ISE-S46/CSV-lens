@@ -55,32 +55,102 @@ async function handleLogout(dashboardMessageDiv) {
     }
 }
 
-async function checkAuthAndRender(dashboardMessageDiv) {
+const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+const REFRESH_THRESHOLD_MS = 15 * 60 * 1000; // Try to refresh 15 minutes before access token expires
+
+let idleTimer;
+let lastActivityTime = Date.now();
+let accessTokenExpiryTime = null;
+
+async function refreshAccessToken() {
+    console.log('Attempting to refresh access token...');
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Access token refreshed successfully.');
+            localStorage.setItem('user', JSON.stringify(data.user)); // Update user data if it changed
+            await checkAuthAndRender(true); // Re-run auth check to update expiry, but don't redirect if valid
+        } else {
+            console.error('Refresh token failed. Forcing full logout.');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Network error during token refresh:', error);
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    }
+}
+
+function resetIdleTimer() {
+    lastActivityTime = Date.now();
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(handleIdleLogout, IDLE_TIMEOUT_MS);
+}
+
+function handleIdleLogout() {
+    console.log('User idle for too long. Logging out.');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+}
+
+async function checkAuthAndRender(dashboardMessageDiv, isRefreshCheck = false) {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
             method: 'GET',
             credentials: 'include'
         });
 
-        if (!response.ok) {
+        if (!response.ok && !isRefreshCheck) {
+            // Access token invalid or missing on initial load/direct call
             localStorage.removeItem('user');
-            showMessage(dashboardMessageDiv, 'Session expired. Please log in again.', false);
+            showMessage(dashboardMessageDiv, 'Session expired or unauthorized. Please log in again.', false);
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1000);
             return;
+        } else if (!response.ok && isRefreshCheck) {
+            // access token expired, and refresh token also failed or was missing.
+            console.log("Access token expired, and refresh also failed. Not redirecting from checkAuthAndRender.");
+            return;
         }
 
-        console.log('User is authenticated. Loading content...');
+        // Access token is valid.
+        const data = await response.json();
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        if (!accessTokenExpiryTime) {
+            accessTokenExpiryTime = Date.now() + (15 * 60 * 1000); 
+        }
+
+        resetIdleTimer();
+        startTokenRefreshCheck();
 
     } catch (error) {
-        console.error('Error verifying token:', error);
+        console.error('Network error during authentication check:', error);
         localStorage.removeItem('user');
-        showMessage(dashboardMessageDiv, 'Network error during authentication check. Redirecting to login.', false);
+        showMessage(dashboardMessageDiv, 'Network error. Could not verify session. Redirecting to login.', false);
         setTimeout(() => {
             window.location.href = '/login';
         }, 1000);
     }
+}
+
+let refreshCheckInterval;
+function startTokenRefreshCheck() {
+    if (refreshCheckInterval) clearInterval(refreshCheckInterval);
+
+    refreshCheckInterval = setInterval(() => {
+        const now = Date.now();
+        if (accessTokenExpiryTime && (accessTokenExpiryTime - now < REFRESH_THRESHOLD_MS) && (now - lastActivityTime < IDLE_TIMEOUT_MS)) {
+            refreshAccessToken();
+        }
+    }, REFRESH_THRESHOLD_MS / 2);
 }
 
 function handleAuthError(response) {
@@ -119,4 +189,11 @@ async function checkExistingTokenAndRedirect() {
     return false;
 }
 
-export { handleLogin, handleLogout, checkAuthAndRender, handleAuthError, checkExistingTokenAndRedirect };
+export {
+    handleLogin,
+    handleLogout,
+    checkAuthAndRender,
+    handleAuthError,
+    checkExistingTokenAndRedirect,
+    resetIdleTimer
+};

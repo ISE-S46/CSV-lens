@@ -2,6 +2,14 @@
     @apply py-2 bg-indigo-600 text-white font-semibold rounded hover:bg-indigo-700 transition duration-200;
 }
 
+.small-blue-btn {
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-4 rounded-md transition text-sm;
+}
+
+.small-gray-btn {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-4 rounded-md transition text-sm ml-2;
+}
+
 .red-btn {
     @apply py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition duration-200;
 }
@@ -16,4 +24,12 @@
 
 .UserMenu {
     @apply block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white;
+}
+
+.NAV {
+    @apply bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600;
+}
+
+.Drop-Down {
+    @apply flex flex-wrap items-center gap-2 p-2 border border-gray-200 rounded-md;
 }

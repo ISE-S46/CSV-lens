@@ -12,8 +12,7 @@
 
 <body class="bg-gray-300 flex flex-col h-screen">
 
-    <nav
-        class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+    <nav class="NAV">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <span class="self-center text-3xl font-semibold whitespace-nowrap dark:text-white">CSV-lens</span>
@@ -130,7 +129,7 @@
                             <h3 class="text-lg font-medium text-gray-800 mb-3">Build Filters</h3>
                             <div id="filter-builder" class="space-y-3">
                                 <div
-                                    class="filter-row flex flex-wrap items-center gap-2 p-2 border border-gray-200 rounded-md">
+                                    class="filter-row Drop-Down">
                                     <select
                                         class="filter-column flex-grow border border-gray-300 rounded-md py-1 px-2 text-sm">
                                         <option value="">Select column</option>
@@ -163,11 +162,11 @@
                             </div>
                             <div class="mt-3">
                                 <button id="apply-filters"
-                                    class="apply-filters bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-4 rounded-md transition text-sm">
+                                    class="apply-filters small-blue-btn">
                                     Apply Filters
                                 </button>
                                 <button id="clear-filters"
-                                    class="clear-filters bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-4 rounded-md transition text-sm ml-2">
+                                    class="clear-filters small-gray-btn">
                                     Clear All
                                 </button>
                             </div>
@@ -176,7 +175,7 @@
                         <div>
                             <h3 class="text-lg font-medium text-gray-800 mb-3">Sort Order</h3>
                             <div id="sort-builder" class="space-y-3">
-                                <div class="sort-row flex items-center gap-2 p-2 border border-gray-200 rounded-md">
+                                <div class="sort-row Drop-Down">
                                     <select id="sort-column"
                                         class="sort-column w-2/3 border border-gray-300 rounded-md py-1 px-2 text-sm">
                                         <option value="">Select column</option>
@@ -199,11 +198,11 @@
                             </div>
                             <div class="mt-3">
                                 <button id="apply-sort"
-                                    class="apply-sort bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-4 rounded-md transition text-sm">
+                                    class="apply-sort small-blue-btn">
                                     Apply Sorting
                                 </button>
                                 <button id="clear-sort"
-                                    class="clear-sort bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-4 rounded-md transition text-sm ml-2">
+                                    class="clear-sort small-gray-btn">
                                     Clear Sort
                                 </button>
                             </div>
@@ -266,7 +265,7 @@
                 <div>
                     <label for="graph-type" class="block text-sm font-medium text-gray-700">Graph Type</label>
                     <select id="graph-type"
-                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="Drop-Down mt-1 w-full">
                         <option value="bar">Bar Chart</option>
                         <option value="line">Line Chart</option>
                         <option value="heatmap">Heatmap</option>
@@ -278,21 +277,21 @@
                 <div>
                     <label for="x-axis" class="block text-sm font-medium text-gray-700">X Axis</label>
                     <select id="x-axis"
-                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="Drop-Down mt-1 w-full">
                         <option value="">Select column</option>
                     </select>
                 </div>
                 <div>
                     <label for="y-axis" class="block text-sm font-medium text-gray-700">Y Axis</label>
                     <select id="y-axis"
-                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="Drop-Down mt-1 w-full">
                         <option value="">Select column</option>
                     </select>
                 </div>
                 <div>
                     <label for="color-by" class="block text-sm font-medium text-gray-700">Color By</label>
                     <select id="color-by"
-                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="Drop-Down mt-1 w-full">
                         <option value="">None</option>
                     </select>
                 </div>

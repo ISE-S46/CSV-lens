@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { pool } from '../main.js';
 import { Middleware } from '../Middleware/authMiddleware.js';
+import { generateTokens } from './controllers/subFunction/Validation.js';
 
 dotenv.config({ path: '../.env' });
 
@@ -104,33 +105,32 @@ AuthRouter.post('/login', async (req, res) => {
 
         // Create JWT
         const payload = { id: storedUser.id, username: storedUser.username, email: email };
+        const { accessToken, refreshToken } = generateTokens(payload);
 
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '2h' },
-            (err, token) => {
-                if (err) throw err;
+        res.cookie('auth_token', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 2 * 60 * 60 * 1000, // 2 hours in ms
+            signed: !!process.env.COOKIE_SECRET,
+        });
 
-                // Set JWT as HTTP-only cookie
-                res.cookie('auth_token', token, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
-                    maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 2 * 60 * 60 * 1000, // 2 hours
-                    signed: !!process.env.COOKIE_SECRET,
-                });
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: parseInt(process.env.REFRESH_COOKIE_MAX_AGE, 10) || 2 * 24 * 60 * 60 * 1000, // 2 days in ms
+            signed: !!process.env.COOKIE_SECRET,
+        });
 
-                res.json({
-                    msg: 'Logged in successfully',
-                    user: {
-                        id: storedUser.id,
-                        username: storedUser.username,
-                        email: storedUser.email,
-                    },
-                });
-            }
-        );
+        res.json({
+            msg: 'Logged in successfully',
+            user: {
+                id: storedUser.id,
+                username: storedUser.username,
+                email: storedUser.email,
+            },
+        });
 
     } catch (err) {
         console.error('Error during login:', err.message);
@@ -148,6 +148,12 @@ AuthRouter.post('/logout', async (req, res) => {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
     });
+    res.clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
+    
     res.json({ msg: 'Logged out successfully' });
 });
 
@@ -160,6 +166,61 @@ AuthRouter.get('/verify-token', Middleware, (req, res) => {
             email: req.user.email
         } 
     });
+});
+
+AuthRouter.post('/refresh-token', async (req, res) => {
+    const refreshToken = req.signedCookies?.refresh_token || req.cookies?.refresh_token;
+
+    if (!refreshToken) {
+        return res.status(401).json({ msg: 'No refresh token provided.' });
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+        const userResult = await pool.query('SELECT id, username, email FROM users WHERE id = $1', [decoded.id]);
+        if (userResult.rows.length === 0) {
+            return res.status(401).json({ msg: 'User not found for refresh token.' });
+        }
+        const user = userResult.rows[0];
+
+        const payload = { id: user.id, username: user.username, email: user.email };
+        const { accessToken, newRefreshToken } = generateTokens(payload);
+
+        // Set NEW Access Token as HTTP-only cookie
+        res.cookie('auth_token', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 2 * 60 * 60 * 1000,
+            signed: !!process.env.COOKIE_SECRET,
+        });
+
+        // Set NEW Refresh Token as HTTP-only cookie (rotate refresh token)
+        res.cookie('refresh_token', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: parseInt(process.env.REFRESH_COOKIE_MAX_AGE, 10) || 2 * 24 * 60 * 60 * 1000,
+            signed: !!process.env.COOKIE_SECRET,
+        });
+
+        res.status(200).json({
+            msg: 'Tokens refreshed successfully',
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+            },
+        });
+
+    } catch (err) {
+        console.error('Error refreshing token:', err.message);
+        // If refresh token is invalid/expired, clear both cookies
+        res.clearCookie('auth_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+        res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+        res.status(401).json({ msg: 'Invalid or expired refresh token. Please log in again.' });
+    }
 });
 
 export default AuthRouter;

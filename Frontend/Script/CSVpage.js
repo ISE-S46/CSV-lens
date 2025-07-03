@@ -1,4 +1,4 @@
-import { checkAuthAndRender, handleLogout } from "./module/Auth/HandleLogin.js";
+import { checkAuthAndRender, handleLogout, resetIdleTimer } from "./module/Auth/HandleSession.js";
 import { loadDatasetPage, loadCurrentPageRows } from "./module/HandleCSV/LoadCSVpage.js";
 import { hidePageInputModal, showPageInputModal, initializePageInput } from "./module/PageInput.js";
 import { hideMessage } from "./module/ShowMessage.js";
@@ -10,6 +10,11 @@ import { setupSaveCSVEvents } from "./module/HandleCSV/CSVdownload.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     const Modal = document.getElementById('csv-page-modal');
+
+    document.addEventListener('mousemove', resetIdleTimer);
+    document.addEventListener('keypress', resetIdleTimer);
+    document.addEventListener('click', resetIdleTimer);
+    document.addEventListener('scroll', resetIdleTimer);
 
     checkAuthAndRender(Modal);
     loadDatasetPage();

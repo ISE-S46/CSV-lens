@@ -31,5 +31,5 @@
 }
 
 .Drop-Down {
-    @apply flex flex-wrap items-center gap-2 p-2 border border-gray-200 rounded-md;
+    @apply flex items-center gap-2 p-2 border border-gray-200 rounded-md;
 }

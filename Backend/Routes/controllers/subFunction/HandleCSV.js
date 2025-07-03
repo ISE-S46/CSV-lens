@@ -51,22 +51,29 @@ const inferColumnType = (value, currentInferredType = 'unknown') => {
     }
 
     // Infer Number (integer or float)
-    if (!isNaN(stringValue) && !isNaN(parseFloat(stringValue))) {
+    const isNumeric = !isNaN(stringValue) && !isNaN(parseFloat(stringValue));
+    if (isNumeric) {
         const num = parseFloat(stringValue);
-        if (Number.isInteger(num)) {
-            if (currentInferredType === 'float') return 'float';
-            if (currentInferredType === 'unknown' || currentInferredType === 'string' || currentInferredType === 'integer') return 'integer';
+
+        // Check if the string explicitly contains a decimal point OR if the parsed number is not an integer
+        if (stringValue.includes('.') || !Number.isInteger(num)) {
+            if (currentInferredType === 'unknown' || currentInferredType === 'string' || currentInferredType === 'integer' || currentInferredType === 'float') {
+                return 'float';
+            }
             return 'string';
         } else {
-            if (currentInferredType === 'unknown' || currentInferredType === 'string' || currentInferredType === 'integer' || currentInferredType === 'float') return 'float';
+            if (currentInferredType === 'float') return 'float'; // Allow upgrading to float
+            if (currentInferredType === 'unknown' || currentInferredType === 'string' || currentInferredType === 'integer') return 'integer';
             return 'string';
         }
     }
 
+    let inferredDateType = null;
+
     // Convert date to yyyy-mm-dd format
     function convertToStandardDateFormat(input) {
         for (const formatPattern of dateFormats) {
-            const parsedDate = parse(stringValue, formatPattern, new Date());
+            const parsedDate = parse(input, formatPattern, new Date());
             if (isValid(parsedDate)) {
                 return format(parsedDate, 'yyyy-MM-dd');
             }
@@ -75,13 +82,22 @@ const inferColumnType = (value, currentInferredType = 'unknown') => {
     }
 
     // Infer date
-    const parsedDate = parseISO(convertToStandardDateFormat(stringValue));
+    const standardDateString = convertToStandardDateFormat(stringValue);
+    const parsedDate = parseISO(standardDateString);
+
     if (isValid(parsedDate)) {
         if (stringValue.includes(':') || stringValue.includes('T') || stringValue.includes('Z') || stringValue.length >= 19) {
-            return 'timestamp';
+            inferredDateType = 'timestamp';
         } else {
-            return 'date';
+            inferredDateType = 'date';
         }
+    }
+
+    if (inferredDateType) {
+        if (currentInferredType === 'unknown' || currentInferredType === 'string' || currentInferredType === inferredDateType) {
+            return inferredDateType;
+        }
+        return 'string';
     }
 
     return 'string';
@@ -204,4 +220,4 @@ async function insertCsvDataBatch(client, datasetId, rows) {
     }
 }
 
-export { parseCsvBuffer, insertCsvDataBatch };
+export { inferColumnType, parseCsvBuffer, insertCsvDataBatch };

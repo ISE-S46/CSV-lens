@@ -164,7 +164,8 @@ AuthRouter.get('/verify-token', Middleware, (req, res) => {
             id: req.user.id, 
             username: req.user.username,
             email: req.user.email
-        } 
+        },
+        expiry: req.user.exp * 1000
     });
 });
 
@@ -192,7 +193,7 @@ AuthRouter.post('/refresh-token', async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 2 * 60 * 60 * 1000,
+            maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 15 * 60 * 1000,
             signed: !!process.env.COOKIE_SECRET,
         });
 

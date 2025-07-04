@@ -55,7 +55,7 @@ async function handleLogout(dashboardMessageDiv) {
     }
 }
 
-const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+const MAX_IDLE_LIMIT = 2 * 60 * 60 * 1000;
 const REFRESH_THRESHOLD_MS = 15 * 60 * 1000; // Try to refresh 15 minutes before access token expires
 
 let idleTimer;
@@ -90,13 +90,20 @@ async function refreshAccessToken() {
 function resetIdleTimer() {
     lastActivityTime = Date.now();
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(handleIdleLogout, IDLE_TIMEOUT_MS);
+    idleTimer = setTimeout(handleLogout, MAX_IDLE_LIMIT);
 }
 
-function handleIdleLogout() {
-    console.log('User idle for too long. Logging out.');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+let refreshCheckInterval;
+
+function startTokenRefreshCheck() {
+    if (refreshCheckInterval) clearInterval(refreshCheckInterval);
+
+    refreshCheckInterval = setInterval(() => {
+        const now = Date.now();
+        if (accessTokenExpiryTime && (accessTokenExpiryTime - now < REFRESH_THRESHOLD_MS) && (now - lastActivityTime < MAX_IDLE_LIMIT)) {
+            refreshAccessToken();
+        }
+    }, REFRESH_THRESHOLD_MS / 2);
 }
 
 async function checkAuthAndRender(dashboardMessageDiv, isRefreshCheck = false) {
@@ -107,7 +114,6 @@ async function checkAuthAndRender(dashboardMessageDiv, isRefreshCheck = false) {
         });
 
         if (!response.ok && !isRefreshCheck) {
-            // Access token invalid or missing on initial load/direct call
             localStorage.removeItem('user');
             showMessage(dashboardMessageDiv, 'Session expired or unauthorized. Please log in again.', false);
             setTimeout(() => {
@@ -115,7 +121,6 @@ async function checkAuthAndRender(dashboardMessageDiv, isRefreshCheck = false) {
             }, 1000);
             return;
         } else if (!response.ok && isRefreshCheck) {
-            // access token expired, and refresh token also failed or was missing.
             console.log("Access token expired, and refresh also failed. Not redirecting from checkAuthAndRender.");
             return;
         }
@@ -125,7 +130,7 @@ async function checkAuthAndRender(dashboardMessageDiv, isRefreshCheck = false) {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         if (!accessTokenExpiryTime) {
-            accessTokenExpiryTime = Date.now() + (15 * 60 * 1000); 
+            accessTokenExpiryTime = data.expiry;
         }
 
         resetIdleTimer();
@@ -139,18 +144,6 @@ async function checkAuthAndRender(dashboardMessageDiv, isRefreshCheck = false) {
             window.location.href = '/login';
         }, 1000);
     }
-}
-
-let refreshCheckInterval;
-function startTokenRefreshCheck() {
-    if (refreshCheckInterval) clearInterval(refreshCheckInterval);
-
-    refreshCheckInterval = setInterval(() => {
-        const now = Date.now();
-        if (accessTokenExpiryTime && (accessTokenExpiryTime - now < REFRESH_THRESHOLD_MS) && (now - lastActivityTime < IDLE_TIMEOUT_MS)) {
-            refreshAccessToken();
-        }
-    }, REFRESH_THRESHOLD_MS / 2);
 }
 
 function handleAuthError(response) {

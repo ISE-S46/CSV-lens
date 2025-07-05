@@ -186,7 +186,7 @@ AuthRouter.post('/refresh-token', async (req, res) => {
         const user = userResult.rows[0];
 
         const payload = { id: user.id, username: user.username, email: user.email };
-        const { accessToken, newRefreshToken } = generateTokens(payload);
+        const { accessToken, refreshToken: newGeneratedRefreshToken } = generateTokens(payload);
 
         // Set NEW Access Token as HTTP-only cookie
         res.cookie('auth_token', accessToken, {
@@ -198,7 +198,7 @@ AuthRouter.post('/refresh-token', async (req, res) => {
         });
 
         // Set NEW Refresh Token as HTTP-only cookie (rotate refresh token)
-        res.cookie('refresh_token', newRefreshToken, {
+        res.cookie('refresh_token', newGeneratedRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
@@ -213,10 +213,16 @@ AuthRouter.post('/refresh-token', async (req, res) => {
                 username: user.username,
                 email: user.email,
             },
+            expiry: decoded.exp * 1000
         });
 
     } catch (err) {
-        console.error('Error refreshing token:', err.message);
+        console.error('Error refreshing token:', err.name, ' - ', err.message);
+        if (err.name === 'TokenExpiredError') {
+            console.log('Debug: Refresh token has expired.');
+        } else if (err.name === 'JsonWebTokenError') {
+            console.log('Debug: Refresh token is malformed or invalid signature.');
+        }
         // If refresh token is invalid/expired, clear both cookies
         res.clearCookie('auth_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
         res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });

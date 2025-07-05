@@ -9,4 +9,8 @@ const presets = [
     ],
 ];
 
-export default { presets };
+const plugins = [
+    '@babel/plugin-syntax-import-meta'
+];
+
+export default { presets, plugins };

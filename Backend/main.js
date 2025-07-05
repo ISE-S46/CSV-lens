@@ -74,10 +74,12 @@ pool.query('SELECT NOW()', (err, res) => {
     console.log('Database connected successfully at:', res.rows[0].now);
 });
 
-export { pool };
+export { app, pool };
 
 app.post(`${API_BASE_URL}/test`, (req, res) => {
     res.json({ msg: "hello world" });
 })
 
-app.listen(port, () => console.log(`server running on port: ${port}`));
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => console.log(`server running on port: ${port}`));
+}

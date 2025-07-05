@@ -180,7 +180,8 @@ async function parseCsvBuffer(csvBuffer) {
                 resolve({ 
                     rows, 
                     columnsMetadata: Array.from(columnsMetadata.values()), 
-                    rowCount 
+                    rowCount,
+                    headers
                 });
             })
             .on('error', reject);

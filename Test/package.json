@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "jest --detectOpenHandles --forceExit"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -12,19 +12,27 @@
   "description": "",
   "devDependencies": {
     "@babel/core": "^7.28.0",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
     "@babel/preset-env": "^7.28.0",
     "babel-jest": "^30.0.4",
+    "dotenv": "^17.0.1",
     "jest": "^30.0.4",
     "supertest": "^7.1.1"
   },
   "jest": {
     "testMatch": [
-      "<rootDir>/**/*.test.js"
+      "**/Test/Backend/**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
     ],
     "testEnvironment": "node",
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
+    "transformIgnorePatterns": [
+      "node_modules/(?!.*\\.mjs$)"
+    ],
     "moduleFileExtensions": [
       "js",
       "json",

@@ -2,3 +2,5 @@
 **/node_modules
 **/styles.css
 config.js
+/Test/DatabaseTest/invalid.txt
+/Test/DatabaseTest/empty_data.csv

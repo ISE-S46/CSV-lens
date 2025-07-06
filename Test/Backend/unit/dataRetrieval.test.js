@@ -1,6 +1,7 @@
 import { 
     getDatasetColumns,
     getPaginatedSortedFilteredRows,
+    getSortFilteredRowsForGraph
 } from '../../../Backend/Routes/controllers/subFunction/dataRetrieval.js';
 
 const testUtils = await import('../testUtils.js');
@@ -12,10 +13,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const TEST_CSV_PATH = path.join(__dirname, '../../DatabaseTest/test3.csv');
+const TEST_CSV_PATH2 = path.join(__dirname, '../../DatabaseTest/iris.csv');
 
 describe('Data Retrieval Functions', () => {
     let testUserId;
     let seededDatasetId;
+    let seededDatasetId2;
     let client;
 
     // Use beforeAll/afterAll for the client connection in this test suite
@@ -36,6 +39,7 @@ describe('Data Retrieval Functions', () => {
         testUserId = await commonBeforeEach(); // Clears DB, creates user, releases client
         client = await pool.connect(); // Get a new mocked client for the current test
         seededDatasetId = await seedTestDataset(client, testUserId, TEST_CSV_PATH, 'Test Retrieved Dataset', 'For data retrieval tests');
+        seededDatasetId2 = await seedTestDataset(client, testUserId, TEST_CSV_PATH2, 'Test Retrieved Dataset 2', 'For data retrieval tests 2');
     });
 
     afterEach(() => {
@@ -223,6 +227,41 @@ describe('Data Retrieval Functions', () => {
         test('should throw error if dataset not found or access denied', async () => {
             await expect(getPaginatedSortedFilteredRows(99999, testUserId, {})).rejects.toThrow('Dataset not found');
             await expect(getPaginatedSortedFilteredRows(seededDatasetId, testUserId + 1, {})).rejects.toThrow('Access denied');
+        });
+    });
+
+    // --- getSortFilteredRowsForGraph Tests ---
+    describe('getSortFilteredRowsForGraph', () => {
+        test('should retrieve all data for graph without pagination', async () => {
+            const result = await getSortFilteredRowsForGraph(seededDatasetId2, testUserId, {});
+
+            expect(result).toBeDefined();
+            expect(result.data.length).toBe(150);
+            expect(result.totalRows).toBe(150);
+            expect(result.data[0]).toEqual({ sepal_length: '5.1', sepal_width: '3.5', petal_length: '1.4', petal_width: '0.2', species: 'setosa' });
+        });
+
+        test('should retrieve filtered data for graph', async () => {
+            const filters = { species: [{ operator: '=', value: 'setosa' }] };
+            const result = await getSortFilteredRowsForGraph(seededDatasetId2, testUserId, { filters });
+
+            expect(result.data.length).toBe(50);
+            expect(result.totalRows).toBe(50);
+            expect(result.data[0]).toEqual(expect.objectContaining({ species: 'setosa' }));
+            expect(result.data[50]).toEqual(undefined);
+        });
+
+        test('should retrieve sorted data for graph', async () => {
+            const result = await getSortFilteredRowsForGraph(seededDatasetId, testUserId, {
+                sortColumns: ['Name'],
+                sortDirections: ['DESC']
+            });
+
+            expect(result.data.length).toBe(10);
+            expect(result.totalRows).toBe(10);
+            expect(result.data.map(d => d.Name)).toEqual([
+                null, 'Julia', 'Ian', 'Grace', 'Frank', 'Eve', 'David', 'Charlie', 'Bob', 'Alice'
+            ]);
         });
     });
 

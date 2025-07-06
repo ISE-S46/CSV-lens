@@ -5,6 +5,7 @@ import fs from 'fs';
 const __dirname = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 
 const TEST_CSV_PATH = path.join(__dirname, '../../DatabaseTest/test3.csv');
+const TEST_CSV_PATH2 = path.join(__dirname, '../../DatabaseTest/iris.csv');
 
 const testUtils = await import('../testUtils.js');
 const { request, app, pool, API_BASE_URL, commonBeforeEach } = testUtils;
@@ -48,7 +49,7 @@ describe('POST API Endpoints Integration Tests', () => {
 
     // --- CSV Upload Endpoint Tests (post.js: CSVuploadEndpoint) ---
     describe('POST /datasets/upload', () => {
-        test('should upload a valid CSV and return 201', async () => {
+        test('should upload test3.csv and return 201', async () => {
             // Assuming test3.csv has 3 rows and columns: id, name, value
             const res = await request(app)
                 .post(`${API_BASE_URL}/datasets/upload`)
@@ -89,7 +90,51 @@ describe('POST API Endpoints Integration Tests', () => {
                 const csvData = await client.query('SELECT row_number, row_data FROM csv_data WHERE dataset_id = $1 ORDER BY row_number', [uploadedDatasetId]);
                 expect(csvData.rows.length).toBe(10);
                 expect(csvData.rows[0].row_data).toEqual({ Name: 'Alice', Age: '30', City: 'New York', Registered: 'true', StartDate: '2023-01-15', Amount: '123.45' });
-                expect(csvData.rows[4].row_data).toEqual({ Name: 'Eve', Age: '22', City: 'New York', Registered: 'true', StartDate: '2024-04-10', Amount: '' || null });
+                expect(csvData.rows[4].row_data).toEqual({ Name: 'Eve', Age: '22', City: 'New York', Registered: 'true', StartDate: '2024-04-10', Amount: null });
+            } finally {
+                client.release();
+            }
+        });
+
+        test('should upload iris.csv and return 201', async () => {
+            const res = await request(app)
+                .post(`${API_BASE_URL}/datasets/upload`)
+                .set('Content-Type', 'multipart/form-data')
+                .attach('csvFile', TEST_CSV_PATH2)
+                .field('csvName', 'Test Upload Dataset from iris')
+                .field('description', 'A dataset from iris.csv for testing upload');
+
+            expect(res.statusCode).toEqual(201);
+            expect(res.body.msg).toEqual('CSV uploaded and processed successfully');
+            expect(res.body.rowCount).toEqual(150);
+            expect(res.body.columns).toEqual([
+                { column_name: 'sepal_length', column_order: 1, column_type: 'float' },
+                { column_name: 'sepal_width', column_order: 2, column_type: 'float' },
+                { column_name: 'petal_length', column_order: 3, column_type: 'float' },
+                { column_name: 'petal_width', column_order: 4, column_type: 'float' },
+                { column_name: 'species', column_order: 5, column_type: 'string' }, ,
+            ]);
+
+            // Verify dataset and columns in DB
+            const client = await pool.connect();
+            try {
+                const dataset = await client.query('SELECT * FROM datasets WHERE user_id = $1 AND csv_name = $2', [testUserId, 'Test Upload Dataset from iris']);
+                expect(dataset.rows.length).toBe(1);
+                const uploadedDatasetId = dataset.rows[0].dataset_id;
+
+                const columns = await client.query('SELECT column_name, column_type FROM columns WHERE dataset_id = $1 ORDER BY column_order', [uploadedDatasetId]);
+                expect(columns.rows).toEqual([
+                    { column_name: 'sepal_length', column_type: 'float' },
+                    { column_name: 'sepal_width', column_type: 'float' },
+                    { column_name: 'petal_length', column_type: 'float' },
+                    { column_name: 'petal_width', column_type: 'float' },
+                    { column_name: 'species', column_type: 'string' },
+                ]);
+
+                const csvData = await client.query('SELECT row_number, row_data FROM csv_data WHERE dataset_id = $1 ORDER BY row_number', [uploadedDatasetId]);
+                expect(csvData.rows.length).toBe(150);
+                expect(csvData.rows[0].row_data).toEqual({ sepal_length: '5.1', sepal_width: '3.5', petal_length: '1.4', petal_width: '0.2', species: 'setosa' });
+                expect(csvData.rows[149].row_data).toEqual({ sepal_length: '5.9', sepal_width: '3.0', petal_length: '5.1', petal_width: '1.8', species: 'virginica' });
             } finally {
                 client.release();
             }
@@ -115,7 +160,7 @@ describe('POST API Endpoints Integration Tests', () => {
 
         test('should return 400 for invalid file type', async () => {
             const invalidFilePath = path.join(__dirname, '../../DatabaseTest/invalid.txt');
-            fs.writeFileSync(invalidFilePath, 'This is not a CSV'); // Create temporary invalid file
+            fs.writeFileSync(invalidFilePath, 'I shall... set the seas ablaze!'); // Create temporary invalid file
 
             const res = await request(app)
                 .post(`${API_BASE_URL}/datasets/upload`)
@@ -127,7 +172,7 @@ describe('POST API Endpoints Integration Tests', () => {
 
         test('should return 400 if CSV file contains no data rows', async () => {
             const emptyCsvPath = path.join(__dirname, '../../DatabaseTest/empty_data.csv');
-            fs.writeFileSync(emptyCsvPath, 'header1,header2\n'); // Create temporary empty CSV
+            fs.writeFileSync(emptyCsvPath, 'Rover,ShoreKeeper\n'); // Create temporary empty CSV
 
             const res = await request(app)
                 .post(`${API_BASE_URL}/datasets/upload`)

@@ -188,5 +188,7 @@ export {
     checkAuthAndRender,
     handleAuthError,
     checkExistingTokenAndRedirect,
-    resetIdleTimer
+    resetIdleTimer,
+    refreshAccessToken,
+    startTokenRefreshCheck
 };

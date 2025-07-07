@@ -1,8 +1,14 @@
 import { jest } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-jest.unstable_mockModule('../../Backend/Middleware/authMiddleware.js', () => ({
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const MiddlewarePath = path.join(__dirname, '../../Backend/Middleware/authMiddleware.js');
+
+jest.unstable_mockModule(MiddlewarePath, () => ({
     Middleware: jest.fn((req, res, next) => {
         req.user = { id: 1, username: 'testuser', email: 'test@example.com' };
         next();
@@ -14,7 +20,7 @@ const { Middleware } = await import('../../Backend/Middleware/authMiddleware.js'
 const { app, pool } = await import('../../Backend/main.js');
 
 import request from 'supertest';
-import { parseCsvBuffer, inferColumnType, insertCsvDataBatch } from '../../Backend/Routes/controllers/subFunction/HandleCSV.js';
+import { parseCsvBuffer, insertCsvDataBatch } from '../../Backend/Routes/controllers/subFunction/HandleCSV.js';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 

@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.backend.js --detectOpenHandles",
+    "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.frontend.js --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -17,28 +19,7 @@
     "babel-jest": "^30.0.4",
     "dotenv": "^17.0.1",
     "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.4",
     "supertest": "^7.1.1"
-  },
-  "jest": {
-    "testMatch": [
-      "**/Test/Backend/**/*.test.js"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "testEnvironment": "node",
-    "transform": {
-      "^.+\\.js$": "babel-jest"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!.*\\.mjs$)"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "node"
-    ],
-    "collectCoverage": false,
-    "coverageDirectory": "coverage"
   }
 }

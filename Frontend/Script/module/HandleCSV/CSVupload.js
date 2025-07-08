@@ -4,6 +4,18 @@ import { API_BASE_URL } from "../../../config.js";
 
 let selectedFile = null;
 
+function getFileElements() {
+    return {
+        fileInfo: document.getElementById('fileInfo'),
+        fileName: document.getElementById('fileName'),
+        fileSize: document.getElementById('fileSize'),
+        fileInput: document.getElementById('fileInput'),
+        processBtn: document.getElementById('processBtn'),
+        errorMessage: document.getElementById('errorMessage'),
+        errorText: document.getElementById('errorText')
+    };
+}
+
 function handleFile(file) {
     if (!file.name.toLowerCase().endsWith('.csv')) {
         showError('Please select a CSV file.');
@@ -20,14 +32,8 @@ function handleFile(file) {
     hideError();
 }
 
-const fileInfo = document.getElementById('fileInfo');
-const fileName = document.getElementById('fileName');
-const fileSize = document.getElementById('fileSize');
-const fileInput = document.getElementById('fileInput');
-
-const processBtn = document.getElementById('processBtn');
-
 function displayFileInfo(file) {
+    const { fileInfo, fileName, fileSize, processBtn } = getFileElements();
     fileName.textContent = file.name;
     fileSize.textContent = formatFileSize(file.size);
     fileInfo.classList.remove('hidden');
@@ -35,6 +41,7 @@ function displayFileInfo(file) {
 }
 
 function clearFile() {
+    const { fileInfo, fileInput, processBtn } = getFileElements();
     selectedFile = null;
     fileInput.value = '';
     fileInfo.classList.add('hidden');
@@ -42,15 +49,14 @@ function clearFile() {
     hideError();
 }
 
-const errorMessage = document.getElementById('errorMessage');
-const errorText = document.getElementById('errorText');
-
 function showError(message) {
+    const { errorText, errorMessage } = getFileElements();
     errorText.textContent = message;
     errorMessage.classList.remove('hidden');
 }
 
 function hideError() {
+    const { errorMessage } = getFileElements();
     errorMessage.classList.add('hidden');
 }
 
@@ -59,7 +65,7 @@ function formatFileSize(bytes) {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return Math.floor((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
 async function processCSV() {
@@ -91,8 +97,8 @@ async function processCSV() {
         }
 
         if (!response.ok) {
-            showMessage(dashboardMessageDiv,`Upload failed, ${data.msg}`, false);
-        } 
+            showMessage(dashboardMessageDiv, `Upload failed, ${data.msg}`, false);
+        }
 
         showMessage(dashboardMessageDiv, 'Upload CSV file successfully', true);
         renderCSVlist();

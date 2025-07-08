@@ -1,12 +1,10 @@
 import { currentData, columnsInfo, csvName } from '../Graph.js';
 import { showMessage } from '../ShowMessage.js';
 
-const saveCSVToggleButton = document.getElementById('save-csv-toggle-btn');
-const saveCSVOptionsDropdown = document.getElementById('save-csv-options-dropdown');
-
-const Modal = document.getElementById('csv-page-modal');
-
 function setupSaveCSVEvents() {
+    const saveCSVToggleButton = document.getElementById('save-csv-toggle-btn');
+    const saveCSVOptionsDropdown = document.getElementById('save-csv-options-dropdown');
+
     if (saveCSVToggleButton && saveCSVOptionsDropdown) {
         saveCSVToggleButton.addEventListener('click', (event) => {
             saveCSVOptionsDropdown.classList.toggle('hidden');
@@ -28,6 +26,8 @@ function setupSaveCSVEvents() {
 }
 
 function saveDataAs(format, data, columnsInfo, defaultFilename) {
+    const Modal = document.getElementById('csv-page-modal');
+    
     if (!data || data.length === 0) {
         showMessage(Modal, 'No data to export.');
         return;
@@ -101,4 +101,4 @@ function convertToCSV(data, orderedColumnNames) {
     return csv;
 }
 
-export { setupSaveCSVEvents };
+export { setupSaveCSVEvents, saveDataAs };

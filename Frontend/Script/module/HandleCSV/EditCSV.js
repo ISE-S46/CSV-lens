@@ -2,14 +2,25 @@ import { updateDatasetRow, fetchSingleRow, fetchDatasetNullRows, updateColumnNam
 import { showMessage } from "../ShowMessage.js";
 import { renderNullTable, updateColumnsInfo } from "./RenderCSVrows.js";
 
-let currentDatasetIdForEditing = null;
-let refreshMainTableFunction = null;
+let currentDatasetIdForEditing = { value: null };
+let refreshMainTableFunction = { value: null };
 let columnsInfo = [];
 
-const messageArea = document.getElementById('csv-page-modal');
+function getFileElements() {
+    return {
+        messageArea: document.getElementById('csv-page-modal'),
+        fileName: document.getElementById('fileName'),
+        csvTableBody: document.getElementById('table-body'),
+        nullCsvTableBody: document.getElementById('null-table-body'),
+        csvTableHeaderRow: document.getElementById('table-header-row'),
+        nullCsvTableHeaderRow: document.getElementById('null-table-header-row'),
+        dataQualityCheckSection: document.getElementById('data-quality-check'),
+        nullRowsCountText: document.getElementById('null-rows-count-text')
+    };
+}
 
 function convertValueForAPI(value, columnType) {
-    if (value.toLowerCase() === 'n/a' || value === '' || value === null || value === undefined) {
+    if (value === null || value === undefined || value === '' || value.toLowerCase() === 'n/a') {
         return null;
     }
     switch (columnType) {
@@ -23,23 +34,69 @@ function convertValueForAPI(value, columnType) {
             return value.toLowerCase() === 'true';
         case 'date':
             try {
-                const parsedDate = new Date(value);
-                if (isNaN(parsedDate.getTime())) {
-                    return value;
+                const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+                if (!match) {
+                    const parsedDate = new Date(value);
+                    if (isNaN(parsedDate)) return value;
+                    const year = parsedDate.getFullYear();
+                    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(parsedDate.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
                 }
-                return parsedDate.toISOString().split('T')[0];
-            } catch (e) {
+
+                const year = Number(match[1]);
+                const month = Number(match[2]) - 1; // zero-based month
+                const day = Number(match[3]);
+
+                const normalizedDate = new Date(year, month, day);
+                if (isNaN(normalizedDate)) return value;
+
+                const normYear = normalizedDate.getFullYear();
+                const normMonth = String(normalizedDate.getMonth() + 1).padStart(2, '0');
+                const normDay = String(normalizedDate.getDate()).padStart(2, '0');
+
+                return `${normYear}-${normMonth}-${normDay}`;
+            } catch {
                 return value;
             }
         case 'timestamp':
             try {
-                const parsedDate = new Date(value);
-                if (isNaN(parsedDate.getTime())) {
-                    return value;
+                let normalizedValue = value;
+
+                if (!(value.includes('T') || value.includes('Z') || /[+-]\d{2}:?\d{2}$/.test(value))) {
+                    const [datePart, timePart] = value.split(' ');
+
+                    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+                    if (match) {
+                        const year = Number(match[1]);
+                        const month = Number(match[2]) - 1;
+                        const day = Number(match[3]);
+
+                        const normalizedDate = new Date(year, month, day);
+                        if (!isNaN(normalizedDate)) {
+                            const normYear = normalizedDate.getFullYear();
+                            const normMonth = String(normalizedDate.getMonth() + 1).padStart(2, '0');
+                            const normDay = String(normalizedDate.getDate()).padStart(2, '0');
+
+                            normalizedValue = `${normYear}-${normMonth}-${normDay}`;
+
+                            if (timePart) {
+                                normalizedValue += `T${timePart}Z`;
+                            } else {
+                                normalizedValue += 'T00:00:00Z';
+                            }
+                        }
+                    } else {
+                        normalizedValue = value.replace(' ', 'T') + 'Z';
+                    }
                 }
-                const iso = parsedDate.toISOString();
-                return iso.replace('.000', '');
-            } catch (e) {
+
+                const parsedDate = new Date(normalizedValue);
+
+                if (isNaN(parsedDate)) return value;
+
+                return parsedDate.toISOString().slice(0, 19) + 'Z';
+            } catch {
                 return value;
             }
         default:
@@ -55,7 +112,7 @@ function getTextWidth(text, font) {
 }
 
 async function handleColumnHeaderEdit(event, datasetDetails) {
-
+    const { messageArea } = getFileElements();
     const th = event.target.closest('th');
 
     if (!th || th.querySelector('input') || !th.dataset.columnName) {
@@ -123,7 +180,7 @@ async function handleColumnHeaderEdit(event, datasetDetails) {
 }
 
 async function handleCellEdit(event) {
-
+    const { messageArea } = getFileElements();
     const td = event.target;
 
     if (td.querySelector('input') || !td.dataset.columnName) {
@@ -205,12 +262,11 @@ async function handleCellEdit(event) {
     });
 }
 
-const csvTableBody = document.getElementById('table-body');
 const nullCsvTableBody = document.getElementById('null-table-body');
-const csvTableHeaderRow = document.getElementById('table-header-row');
-const nullCsvTableHeaderRow = document.getElementById('null-table-header-row');
 
 function setupCellEditing(datasetId, refreshTableFunc, datasetDetails) {
+    const { csvTableBody, nullCsvTableBody, csvTableHeaderRow, nullCsvTableHeaderRow } = getFileElements();
+
     currentDatasetIdForEditing = datasetId;
     refreshMainTableFunction = refreshTableFunc;
     columnsInfo = datasetDetails.columns;
@@ -245,10 +301,9 @@ function setupCellEditing(datasetId, refreshTableFunc, datasetDetails) {
 
 }
 
-const dataQualityCheckSection = document.getElementById('data-quality-check');
-const nullRowsCountText = document.getElementById('null-rows-count-text');
-
 async function refreshNullRowsTable() {
+    const { nullCsvTableBody, dataQualityCheckSection, nullRowsCountText } = getFileElements();
+
     const nullRowsResponse = await fetchDatasetNullRows(currentDatasetIdForEditing);
 
     if (nullRowsResponse && nullRowsResponse.count > 0) {
@@ -263,4 +318,12 @@ async function refreshNullRowsTable() {
     }
 }
 
-export { setupCellEditing };
+export {
+    setupCellEditing,
+    convertValueForAPI,
+    getTextWidth,
+    refreshNullRowsTable,
+    currentDatasetIdForEditing,
+    refreshMainTableFunction,
+    columnsInfo
+};

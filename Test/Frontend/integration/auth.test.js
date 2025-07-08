@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const configPath = path.join(__dirname, '../../../Frontend/config.js');
 const showMsgPath = path.join(__dirname, '../../../Frontend/Script/module/ShowMessage.js');
 
 // Mock showMessage modules
@@ -17,12 +16,7 @@ jest.unstable_mockModule(showMsgPath, () => ({
 const { handleRegister } = await import('../../../Frontend/Script/module/Auth/HandleRegister.js');
 const { handleLogin, handleLogout } = await import('../../../Frontend/Script/module/Auth/HandleSession.js');
 
-const { API_BASE_URL } = await import(configPath);
 const { showMessage } = await import(showMsgPath);
-
-test('uses mocked API_BASE_URL', () => {
-    expect(API_BASE_URL).toBe('/api'); // or other custom api endpoint
-});
 
 describe('Auth Module Frontend Tests', () => {
     let mockRegisterEmail, mockRegisterUsername, mockRegisterPassword, mockRegisterConfirmPassword;

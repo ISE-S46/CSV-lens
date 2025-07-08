@@ -189,6 +189,5 @@ export {
     handleAuthError,
     checkExistingTokenAndRedirect,
     resetIdleTimer,
-    refreshAccessToken,
-    startTokenRefreshCheck
+    refreshAccessToken
 };

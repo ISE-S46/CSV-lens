@@ -262,8 +262,6 @@ async function handleCellEdit(event) {
     });
 }
 
-const nullCsvTableBody = document.getElementById('null-table-body');
-
 function setupCellEditing(datasetId, refreshTableFunc, datasetDetails) {
     const { csvTableBody, nullCsvTableBody, csvTableHeaderRow, nullCsvTableHeaderRow } = getFileElements();
 

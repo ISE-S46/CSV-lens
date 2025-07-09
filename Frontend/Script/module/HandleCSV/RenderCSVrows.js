@@ -3,16 +3,15 @@ import { populateColumnDropdowns } from "../FilterUI.js";
 import { showMessage } from "../ShowMessage.js";
 import { initGraph } from "../Graph.js";
 
-const CSVname = document.getElementById('CSV-name');
-const metaName = document.getElementById('meta-name');
-const metaDescription = document.getElementById('meta-description');
-const metaRows = document.getElementById('meta-rows');
-const metaDate = document.getElementById('meta-date');
-const messageArea = document.getElementById('csv-page-modal');
-
 let columnsInfo = [];
 
 function renderDatasetMetadata(dataset) {
+    const CSVname = document.getElementById('CSV-name');
+    const metaName = document.getElementById('meta-name');
+    const metaDescription = document.getElementById('meta-description');
+    const metaRows = document.getElementById('meta-rows');
+    const metaDate = document.getElementById('meta-date');
+
     CSVname.textContent = dataset.csv_name;
     metaName.textContent = dataset.original_filename;
     metaDescription.textContent = dataset.description || 'No description provided.';
@@ -31,10 +30,11 @@ function updateColumnsInfo(newColumnsInfo, csv_name) {
     initGraph(columnsInfo, csv_name);
 }
 
-const csvTableHeaderRow = document.getElementById('table-header-row');
-const csvTableBody = document.getElementById('table-body');
-
 function renderTable(rows) {
+    const csvTableHeaderRow = document.getElementById('table-header-row');
+    const csvTableBody = document.getElementById('table-body');
+    const messageArea = document.getElementById('csv-page-modal');
+
     csvTableHeaderRow.innerHTML = '';
     csvTableBody.innerHTML = '';
 
@@ -95,12 +95,13 @@ function renderTable(rows) {
     });
 }
 
-const nullCsvTableHeaderRow = document.getElementById('null-table-header-row');
-const nullCsvTableBody = document.getElementById('null-table-body');
-
 let isNullRowsTableVisible = true; // Initial state: null rows table is hidden
 
 function renderNullTable(nullRows) {
+    const nullCsvTableHeaderRow = document.getElementById('null-table-header-row');
+    const nullCsvTableBody = document.getElementById('null-table-body');
+    const messageArea = document.getElementById('csv-page-modal');
+
     nullCsvTableHeaderRow.innerHTML = '';
     nullCsvTableBody.innerHTML = '';
 
@@ -158,10 +159,10 @@ function renderNullTable(nullRows) {
     });
 }
 
-const hideNullRowsBtn = document.getElementById('hide-null-rows-btn');
-const nullCsvTableContainer = document.getElementById('null-csv-table');
-
 function toggleNullRowsDisplay() {
+    const hideNullRowsBtn = document.getElementById('hide-null-rows-btn');
+    const nullCsvTableContainer = document.getElementById('null-csv-table');
+
     isNullRowsTableVisible = !isNullRowsTableVisible;
     if (isNullRowsTableVisible) {
         nullCsvTableContainer.classList.remove('hidden');

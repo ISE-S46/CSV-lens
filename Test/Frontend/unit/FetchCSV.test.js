@@ -416,7 +416,7 @@ describe('FetchCSV.js', () => {
             const result = await updateColumnName(mockDatasetId, oldName, newName);
 
             expect(global.fetch).toHaveBeenCalledWith(
-                `/api/datasets/${mockDatasetId}/columns/${encodeURIComponent(oldName)}`, // Note: URL starts with /api
+                `${API_BASE_URL}/datasets/${mockDatasetId}/columns/${encodeURIComponent(oldName)}`, // Note: URL starts with /api
                 expect.objectContaining({
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },

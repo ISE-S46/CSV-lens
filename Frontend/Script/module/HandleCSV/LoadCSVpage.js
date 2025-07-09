@@ -204,4 +204,8 @@ async function loadGraphData() {
     }
 }
 
-export { loadDatasetPage, loadCurrentPageRows, loadGraphData };
+function setDatasetIdForTest(id) {
+    currentDatasetId = id;
+}
+
+export { loadDatasetPage, loadCurrentPageRows, loadGraphData, parseURLParameters, setDatasetIdForTest };

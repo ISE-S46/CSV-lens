@@ -3,18 +3,25 @@ import { filterManager } from '../Filter.js';
 import { handleAuthError } from "../Auth/HandleSession.js";
 import { API_BASE_URL } from "../../../config.js";
 
-const messageArea = document.getElementById('csv-page-modal');
-const loadingSpinner = document.getElementById('loading-spinner');
+function getFileElements() {
+    return {
+        messageArea: document.getElementById('csv-page-modal'),
+        loadingSpinner: document.getElementById('loading-spinner'),
+    };
+}
 
 function showLoadingSpinner() {
+    const { loadingSpinner } = getFileElements();
     loadingSpinner.style.display = 'block';
 }
 
 function hideLoadingSpinner() {
+    const { loadingSpinner } = getFileElements();
     loadingSpinner.style.display = 'none';
 }
 
 async function fetchDatasetDetails(datasetId) {
+    const { messageArea } = getFileElements();
     showLoadingSpinner();
 
     try {
@@ -56,6 +63,7 @@ function appendFilterAndSortParams(queryParams) {
 }
 
 async function fetchDatasetRows(datasetId, page, limit) {
+    const { messageArea } = getFileElements();
     showLoadingSpinner();
 
     try {
@@ -87,6 +95,7 @@ async function fetchDatasetRows(datasetId, page, limit) {
 }
 
 async function fetchDatasetGraph(datasetId) {
+    const { messageArea } = getFileElements();
     showLoadingSpinner();
 
     try {
@@ -118,7 +127,9 @@ async function fetchDatasetGraph(datasetId) {
 }
 
 async function fetchDatasetNullRows(datasetId) {
+    const { messageArea } = getFileElements();
     showLoadingSpinner();
+
     try {
         const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/null-rows`, {
             credentials: 'include'
@@ -144,6 +155,7 @@ async function fetchDatasetNullRows(datasetId) {
 }
 
 async function fetchSingleRow(datasetId, rowNumber) {
+    const { messageArea } = getFileElements();
     showLoadingSpinner();
 
     datasetId = parseInt(datasetId);
@@ -175,6 +187,7 @@ async function fetchSingleRow(datasetId, rowNumber) {
 }
 
 async function updateDatasetRow(datasetId, rowNumber, rowData) {
+    const { messageArea } = getFileElements();
     showLoadingSpinner();
 
     try {

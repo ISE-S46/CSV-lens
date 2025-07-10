@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tailwind": "npx @tailwindcss/cli -i ./css/input.css -o ./css/styles.css --watch"
+    "tailwind": "npx @tailwindcss/cli -i ./css/input.css -o ./css/styles.css --watch",
+    "tailwind:build": "npx @tailwindcss/cli -i ./css/input.css -o ./css/styles.css --minify"
   },
   "author": "",
   "license": "ISC",

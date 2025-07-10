@@ -1,5 +1,5 @@
 services:
-  Database:
+  database:
     image: postgres:17
     restart: unless-stopped
     environment:
@@ -11,6 +11,57 @@ services:
     volumes:
       - PgDB:/var/lib/postgresql/data
       - ./Database/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - csv-lens-app-network
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=database
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+      - SERVER_PORT=3002
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - COOKIE_MAX_AGE=${COOKIE_MAX_AGE}
+      - REFRESH_COOKIE_MAX_AGE=${REFRESH_COOKIE_MAX_AGE}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - JWT_SECRET=${JWT_SECRET}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - API_BASE_URL=${API_BASE_URL}
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - csv-lens-app-network
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - API_BASE_URL=${API_BASE_URL}
+      - SERVER_PORT=${SERVER_PORT}
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - csv-lens-app-network
 
 volumes:
   PgDB:
+
+networks:
+  csv-lens-app-network:
+    driver: bridge

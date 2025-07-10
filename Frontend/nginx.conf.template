@@ -1,0 +1,45 @@
+server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Cache static assets aggressively
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Proxy API requests to backend
+    location ${API_BASE_URL}/ {
+        proxy_pass http://backend:${SERVER_PORT}${API_BASE_URL}/;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_cookie_domain backend localhost;
+        proxy_cookie_path / /;
+    }
+
+    location = /login {
+        try_files /Login.html =404;
+    }
+
+    location = /register {
+        try_files /Register.html =404;
+    }
+
+    location = /account {
+        try_files /AccountPage.html =404;
+    }
+
+    location /datasets/ {
+        try_files /CSVpage.html =404;
+    }
+
+    # Handle client-side routing (SPA)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

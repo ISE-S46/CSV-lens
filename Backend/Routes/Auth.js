@@ -110,7 +110,7 @@ AuthRouter.post('/login', async (req, res) => {
         res.cookie('auth_token', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 2 * 60 * 60 * 1000, // 2 hours in ms
             signed: !!process.env.COOKIE_SECRET,
         });
@@ -118,7 +118,7 @@ AuthRouter.post('/login', async (req, res) => {
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: parseInt(process.env.REFRESH_COOKIE_MAX_AGE, 10) || 2 * 24 * 60 * 60 * 1000, // 2 days in ms
             signed: !!process.env.COOKIE_SECRET,
         });
@@ -146,12 +146,12 @@ AuthRouter.post('/logout', async (req, res) => {
     res.clearCookie('auth_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
     });
     res.clearCookie('refresh_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
     });
     
     res.json({ msg: 'Logged out successfully' });
@@ -192,7 +192,7 @@ AuthRouter.post('/refresh-token', async (req, res) => {
         res.cookie('auth_token', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: parseInt(process.env.COOKIE_MAX_AGE, 10) || 15 * 60 * 1000,
             signed: !!process.env.COOKIE_SECRET,
         });
@@ -201,7 +201,7 @@ AuthRouter.post('/refresh-token', async (req, res) => {
         res.cookie('refresh_token', newGeneratedRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: parseInt(process.env.REFRESH_COOKIE_MAX_AGE, 10) || 2 * 24 * 60 * 60 * 1000,
             signed: !!process.env.COOKIE_SECRET,
         });
@@ -224,8 +224,8 @@ AuthRouter.post('/refresh-token', async (req, res) => {
             console.log('Debug: Refresh token is malformed or invalid signature.');
         }
         // If refresh token is invalid/expired, clear both cookies
-        res.clearCookie('auth_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
-        res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+        res.clearCookie('auth_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
+        res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
         res.status(401).json({ msg: 'Invalid or expired refresh token. Please log in again.' });
     }
 });

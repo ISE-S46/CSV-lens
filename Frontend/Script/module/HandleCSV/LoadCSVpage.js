@@ -4,17 +4,17 @@ import { updateFilterUI } from "../FilterUI.js";
 import { filterManager } from '../Filter.js';
 import { setGraphData } from "../Graph.js";
 import { setupCellEditing } from "./EditCSV.js";
-import { 
-    fetchDatasetDetails, 
-    fetchDatasetRows, 
-    fetchDatasetGraph, 
-    fetchDatasetNullRows 
+import {
+    fetchDatasetDetails,
+    fetchDatasetRows,
+    fetchDatasetGraph,
+    fetchDatasetNullRows
 } from "./FetchCSV.js";
 
-import { 
-    renderDatasetMetadata, 
-    renderTable, 
-    renderNullTable, 
+import {
+    renderDatasetMetadata,
+    renderTable,
+    renderNullTable,
     toggleNullRowsDisplay
 } from "./RenderCSVrows.js";
 
@@ -32,8 +32,6 @@ import {
 
 let currentDatasetId = null;
 const rowsPerPage = 50; // Api default is 50 but adjustable here as well
-
-const messageArea = document.getElementById('csv-page-modal');
 
 function parseURLParameters() {
     const params = new URLSearchParams(window.location.search);
@@ -62,11 +60,12 @@ function parseURLParameters() {
     return state;
 }
 
-const dataQualityCheckSection = document.getElementById('data-quality-check');
-const nullRowsCountText = document.getElementById('null-rows-count-text');
-const nullRowsMessage = document.getElementById('null-rows-message');
-
 async function loadDatasetPage() {
+    const messageArea = document.getElementById('csv-page-modal');
+    const dataQualityCheckSection = document.getElementById('data-quality-check');
+    const nullRowsCountText = document.getElementById('null-rows-count-text');
+    const nullRowsMessage = document.getElementById('null-rows-message');
+
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
 

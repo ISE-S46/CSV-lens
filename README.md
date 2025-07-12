@@ -1,9 +1,9 @@
 # CSV-lens
 
-![License](https://img.shields.io/github/license/ISE-S46/CSV-lens)
-![Repo Size](https://img.shields.io/github/repo-size/ISE-S46/CSV-lens)
-![Issues](https://img.shields.io/github/issues/ISE-S46/CSV-lens)
-![Pull Requests](https://img.shields.io/github/issues-pr/ISE-S46/CSV-lens)
+![GitHub License](https://img.shields.io/github/license/ISE-S46/CSV-lens?cacheSeconds=60s)
+![GitHub repo size](https://img.shields.io/github/repo-size/ISE-S46/CSV-lens?cacheSeconds=60s)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/ISE-S46/CSV-lens?cacheSeconds=60s)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/ISE-S46/CSV-lens?cacheSeconds=60s)
 ![Version](https://img.shields.io/badge/version-1.0-blue)
 
 **CSV-lens** is a full-stack web application for uploading, viewing, and analyzing CSV data directly in your browser.

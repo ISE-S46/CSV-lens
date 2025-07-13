@@ -1,9 +1,9 @@
 # CSV-lens
 
-![GitHub License](https://img.shields.io/github/license/ISE-S46/CSV-lens?cacheSeconds=60s)
-![GitHub repo size](https://img.shields.io/github/repo-size/ISE-S46/CSV-lens?cacheSeconds=60s)
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/ISE-S46/CSV-lens?cacheSeconds=60s)
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/ISE-S46/CSV-lens?cacheSeconds=60s)
+![GitHub License](https://img.shields.io/github/license/ISE-S46/CSV-lens?cacheSeconds=60)
+![GitHub repo size](https://img.shields.io/github/repo-size/ISE-S46/CSV-lens?cacheSeconds=60)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/ISE-S46/CSV-lens?cacheSeconds=60)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/ISE-S46/CSV-lens?cacheSeconds=60)
 ![Version](https://img.shields.io/badge/version-1.0-blue)
 
 **CSV-lens** is a full-stack web application for uploading, viewing, and analyzing CSV data directly in your browser.
@@ -51,9 +51,9 @@
 - Responsive User Interface: Designed to provide a consistent experience across various devices.
 
 ## Demo
-A video demo will be added soon. For now, clone the repo and follow the installation steps to explore locally.
+[Watch the full demo on YouTube](https://www.youtube.com/watch?v=BuG0rp7aKOQ)
 
-Register, Login, and are required to reach the main page (not shown in video).
+The demo skips the registration/login steps — but these are required to access the main page.
 
 ## Installation
 ### Prerequisites
@@ -79,13 +79,13 @@ DB_HOST=database # Based on docker-compose service name
 
 SERVER_PORT=3002 # Internal port for Node.js backend
 
-NODE_ENV=production
-COOKIE_SECRET=your_super_secret_cookie_key_here
+NODE_ENV=production # or set to development if you want to modify the code
+COOKIE_SECRET=your_cookie_secret_key_here
 COOKIE_MAX_AGE=900000 # 15 * 60 * 1000 (15 minutes) or change to what ever you want
 REFRESH_COOKIE_MAX_AGE=172800000 # 2 * 24 * 60 * 60 * 1000 (2 days) or change to what ever you want
 
 JWT_EXPIRES_IN=15m # Or change to what ever you want
-JWT_SECRET=your_super_secret_JWT_key_here
+JWT_SECRET=your_JWT_secret_key_here
 
 REFRESH_TOKEN_EXPIRES_IN=2d # Or change to what ever you want
 REFRESH_TOKEN_SECRET=your_refresh_token_secret_key_here
@@ -116,7 +116,7 @@ Once all containers are up and running, open your web browser and navigate to:
 
 [http://localhost/](http://localhost/)
 
-You can use the CSV files in /Test/Databasetest/ to test this project full capabilities.
+You can use the CSV files in /Test/Databasetest/ to to test the full capabilities of this project.
 
 
 ## Technologies Used
@@ -125,7 +125,7 @@ You can use the CSV files in /Test/Databasetest/ to test this project full capab
     - HTML
     - CSS
         - Tailwind CSS
-    - JavaScript (ES6)
+    - JavaScript
     - [Plotly.js](https://plotly.com/javascript/) (for data visualization)
 - **Backend**: 
     - Node.js

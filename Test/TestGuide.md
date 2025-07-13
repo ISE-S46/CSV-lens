@@ -9,6 +9,24 @@ npm install
 ```bash
 docker-compose up -d
 ```
+**Create .env file for testing at /Test/Backend**
+```bash
+DB_USER=your_DB_user
+DB_PASSWORD=your_DB_password
+DB_NAME=your_DB_name
+DB_HOST=localhost
+DB_PORT=5433 # Must be different from the main .env file
+
+NODE_ENV=test
+
+JWT_SECRET=your_JWT_secret_key_here
+REFRESH_TOKEN_SECRET=your_refresh_token_secret_key_here
+COOKIE_SECRET=your_cookie_secret_key_here
+
+# API Base URL for tests
+API_BASE_URL=/api # Must be the same as the main .env
+SERVER_PORT=3003 # Must be different from the main .env file
+```
 
 ## Database Testing
 Open TestUserAndDB.sql file in your database viewer file (for example: DBeaver) and run specific script inside it.

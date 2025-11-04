@@ -15,7 +15,6 @@
 - [Installation](#installation)
 - [Technologies Used](#technologies-used)
 - [Architecture](#architecture)
-- [Data Pipeline (etl-perspective)](#data-pipeline-etl-perspective)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -162,12 +161,6 @@ You can use the CSV files in /Test/Databasetest/ to to test the full capabilitie
     - Docker: The Database runs in its own Docker container.
 
 Communication between containers happens over an internal Docker network, while the User Browser interacts with Nginx on exposed ports.
-
-## Data Pipeline (ETL Perspective)
-
-The project's data flow can be understood through the lens of an Extract, Transform, Load (ETL) pipeline, showcasing how CSV data is processed from raw input to interactive analysis.
-
-![Data_pipeline](Image/CSV-lens-ETL-pipeline.jpg)
 
 ## Contributing
 

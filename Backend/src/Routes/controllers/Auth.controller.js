@@ -1,17 +1,12 @@
-import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { pool } from '../main.js';
-import { Middleware } from '../Middleware/authMiddleware.js';
-import { generateTokens } from './controllers/subFunction/Validation.js';
+import { pool } from '../../main.js';
+import { generateTokens } from './utils/Validation.js';
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: '../../.env' });
 
-const AuthRouter = express.Router();
-
-// User Registration
-AuthRouter.post('/register', async (req, res) => {
+const register = async (req, res) => {
     const { username, email, password } = req.body;
 
     const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -64,10 +59,9 @@ AuthRouter.post('/register', async (req, res) => {
             client.release();
         }
     }
-});
+}
 
-// User Login
-AuthRouter.post('/login', async (req, res) => {
+const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Basic validation
@@ -140,9 +134,9 @@ AuthRouter.post('/login', async (req, res) => {
             client.release();
         }
     }
-});
+}
 
-AuthRouter.post('/logout', async (req, res) => {
+const logout = async (req, res) => {
     res.clearCookie('auth_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -155,9 +149,13 @@ AuthRouter.post('/logout', async (req, res) => {
     });
     
     res.json({ msg: 'Logged out successfully' });
-});
+}
 
-AuthRouter.get('/verify-token', Middleware, (req, res) => {
+const verifyToken = (req, res) => {
+    const expSeconds = req.user.exp;
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const timeLeftS = expSeconds - nowSeconds;
+
     res.status(200).json({ 
         msg: `Welcome, ${req.user.username}! verified jwt token for user ID: ${req.user.id}`, 
         user: { 
@@ -165,11 +163,12 @@ AuthRouter.get('/verify-token', Middleware, (req, res) => {
             username: req.user.username,
             email: req.user.email
         },
-        expiry: req.user.exp * 1000
+        expiry: expSeconds,
+        expires_in_seconds: timeLeftS,
     });
-});
+}
 
-AuthRouter.post('/refresh-token', async (req, res) => {
+const refreshToken = async (req, res) => {
     const refreshToken = req.signedCookies?.refresh_token || req.cookies?.refresh_token;
 
     if (!refreshToken) {
@@ -213,7 +212,7 @@ AuthRouter.post('/refresh-token', async (req, res) => {
                 username: user.username,
                 email: user.email,
             },
-            expiry: decoded.exp * 1000
+            expiry: decoded.exp
         });
 
     } catch (err) {
@@ -228,6 +227,6 @@ AuthRouter.post('/refresh-token', async (req, res) => {
         res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
         res.status(401).json({ msg: 'Invalid or expired refresh token. Please log in again.' });
     }
-});
+}
 
-export default AuthRouter;
+export { register, login, logout, verifyToken, refreshToken };

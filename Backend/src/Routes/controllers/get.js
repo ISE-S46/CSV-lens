@@ -1,6 +1,6 @@
 import { pool } from '../../main.js';
-import { validateDatasetId } from './subFunction/Validation.js';
-import { getPaginatedSortedFilteredRows, getDatasetColumns, getSortFilteredRowsForGraph } from './subFunction/dataRetrieval.js';
+import { validateDatasetId } from './utils/Validation.js';
+import { getPaginatedSortedFilteredRows, getDatasetColumns, getSortFilteredRowsForGraph } from './utils/dataRetrieval.js';
 
 const ListAllDatasets = async (req, res) => {
     const userId = req.user.id;

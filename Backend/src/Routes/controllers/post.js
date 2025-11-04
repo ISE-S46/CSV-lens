@@ -1,5 +1,5 @@
 import { pool } from '../../main.js';
-import { parseCsvBuffer, insertCsvDataBatch } from './subFunction/HandleCSV.js';
+import { parseCsvBuffer, insertCsvDataBatch } from './utils/HandleCSV.js';
 
 const CSVuploadEndpoint = async (req, res) => {
     const userId = req.user.id;

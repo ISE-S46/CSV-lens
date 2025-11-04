@@ -5,11 +5,10 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import cookieParser from 'cookie-parser';
 
-import AuthRouter from './Routes/Auth.js';
-import DatasetRouter from './Routes/Datasets.js';
-import DatasetPageRouter from './Routes/DatasetPage.js'
+import AuthRouter from './Routes/Auth.routes.js';
+import DatasetRouter from './Routes/Datasets.routes.js';
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: '../../.env' });
 
 const app = express();
 
@@ -29,7 +28,7 @@ app.use(`${API_BASE_URL}/auth`, AuthRouter);
 app.use(`${API_BASE_URL}/datasets`, DatasetRouter);
 
 // Setup static folder
-app.use(express.static(path.join(__dirname, '../Frontend')));
+app.use(express.static(path.join(__dirname, '../../Frontend')));
 
 // Handle route based on authentication status
 app.get('/', async (req, res) => {
@@ -39,23 +38,25 @@ app.get('/', async (req, res) => {
         res.redirect('/login');
     } 
     
-    res.sendFile(path.join(__dirname, '../Frontend/index.html'));
+    res.sendFile(path.join(__dirname, '../../Frontend/index.html'));
     
 });
 
 app.get('/login', async (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/Login.html'));
+    res.sendFile(path.join(__dirname, '../../Frontend/Login.html'));
 });
 
 app.get('/register', async (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/Register.html'));
+    res.sendFile(path.join(__dirname, '../../Frontend/Register.html'));
 });
 
 app.get('/account', async (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/AccountPage.html'));
+    res.sendFile(path.join(__dirname, '../../Frontend/AccountPage.html'));
 });
 
-app.use(`/datasets`, DatasetPageRouter);
+app.get('/datasets/:datasetId', async (req, res) => {
+    res.sendFile(path.join(__dirname, '../../Frontend/CSVpage.html'));
+});
 
 const pool = new pg.Pool({
     user: process.env.DB_USER,

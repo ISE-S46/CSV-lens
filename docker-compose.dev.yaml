@@ -1,0 +1,27 @@
+services:
+  database:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - PgDBdev:/var/lib/postgresql/data
+      - ./Database/init.dev.sql:/docker-entrypoint-initdb.d/init.dev.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - csv-lens-app-dev-network
+
+volumes:
+  PgDBdev:
+
+networks:
+  csv-lens-app-dev-network:
+    driver: bridge

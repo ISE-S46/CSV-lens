@@ -1,4 +1,3 @@
-# Stage 1: Build frontend assets with Node.js
 FROM node:22.17.0-alpine as build
 
 # Set working directory
@@ -13,7 +12,7 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build Tailwind CSS (or your frontend assets)
+# Build Tailwind CSS
 RUN npm run tailwind:build
 
 # Stage 2: Serve with nginx

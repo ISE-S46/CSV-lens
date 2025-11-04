@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import multer from 'multer'; // Express middleware that handles multipart/form-data
 import { Middleware } from '../Middleware/authMiddleware.js';
 
@@ -14,7 +14,7 @@ import {
 import { DeleteDatasets } from './controllers/del.js';
 import { UpdateSpecificRow, UpdateColumnName } from './controllers/update.js';
 
-const DatasetRouter = express.Router();
+const DatasetRouter = Router();
 
 DatasetRouter.use(Middleware);
 

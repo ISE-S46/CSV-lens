@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
 const Middleware = (req, res, next) => {
-    // Read token from signed cookie (if using cookie-parser with secret)
     const token = req.signedCookies?.auth_token || req.cookies?.auth_token;
 
     if (!token) {

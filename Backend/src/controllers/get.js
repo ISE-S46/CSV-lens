@@ -1,19 +1,18 @@
-import { pool } from '../../main.js';
+import { pool } from '../main.js';
 import { validateDatasetId } from './utils/Validation.js';
 import { getPaginatedSortedFilteredRows, getDatasetColumns, getSortFilteredRowsForGraph } from './utils/dataRetrieval.js';
 
+import { findAllDatasetsByUserId, getDatasetAndColumnsById } from '../Models/get.model.js';
+
 const ListAllDatasets = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.id; 
 
     try {
-        const result = await pool.query(
-            'SELECT dataset_id, csv_name, original_filename, description, file_size_bytes, row_count, upload_date, status FROM datasets WHERE user_id = $1 ORDER BY upload_date DESC',
-            [userId]
-        );
+        const datasets = await findAllDatasetsByUserId(userId); 
 
         res.status(200).json({
             msg: 'Datasets retrieved successfully',
-            datasets: result.rows
+            datasets: datasets
         });
 
     } catch (err) {
@@ -30,46 +29,21 @@ const GetSpecificDataset = async (req, res) => {
         return res.status(400).json({ msg: 'Invalid Dataset ID provided.' });
     }
 
-    let client;
     try {
-        client = await pool.connect();
+        const datasetWithColumns = await getDatasetAndColumnsById(datasetId, userId);
 
-        const datasetResult = await client.query(
-            'SELECT dataset_id, csv_name, original_filename, description, file_size_bytes, row_count, upload_date, status FROM datasets WHERE dataset_id = $1 AND user_id = $2',
-            [datasetId, userId]
-        );
-
-        if (datasetResult.rows.length === 0) {
-            const ownerCheck = await client.query('SELECT user_id FROM datasets WHERE dataset_id = $1', [datasetId]);
-            if (ownerCheck.rows.length > 0) {
-                return res.status(403).json({ msg: 'Access denied. This dataset does not belong to you.' });
-            }
+        if (!datasetWithColumns) {
             return res.status(404).json({ msg: 'Dataset not found.' });
         }
 
-        const dataset = datasetResult.rows[0];
-
-        // Fetch associated columns
-        const columnsResult = await client.query(
-            'SELECT column_id, column_name, column_type, column_order FROM columns WHERE dataset_id = $1 ORDER BY column_order',
-            [datasetId]
-        );
-
         res.status(200).json({
             msg: 'Dataset details retrieved successfully',
-            dataset: {
-                ...dataset,
-                columns: columnsResult.rows // Add columns array to the dataset object
-            }
+            dataset: datasetWithColumns
         });
 
     } catch (err) {
         console.error(`Error fetching dataset ${datasetId} details:`, err.message);
-        res.status(500).json({ msg: 'Server error fetching dataset details.', error: err.message });
-    } finally {
-        if (client) {
-            client.release();
-        }
+        res.status(500).json({ msg: 'Server error fetching dataset details.' });
     }
 }
 
@@ -289,7 +263,7 @@ const GetSpecificDatasetNullRow = async (req, res) => {
             res.status(500).json({ msg: 'Server error fetching null rows.', error: err.message });
         }
     }
-};
+}
 
 const GetSingleRowByNumber = async (req, res) => {
     const userId = req.user.id;
@@ -343,7 +317,7 @@ const GetSingleRowByNumber = async (req, res) => {
             client.release();
         }
     }
-};
+}
 
 export {
     ListAllDatasets,

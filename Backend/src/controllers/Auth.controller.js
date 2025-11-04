@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { pool } from '../../main.js';
+import { pool } from '../main.js';
 import { generateTokens } from './utils/Validation.js';
 
 dotenv.config({ path: '../../.env' });

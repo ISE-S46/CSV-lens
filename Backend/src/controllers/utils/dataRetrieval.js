@@ -1,4 +1,4 @@
-import { pool } from '../../../main.js';
+import { pool } from '../../main.js';
 
 async function getDatasetColumns(datasetId) {
     let client;

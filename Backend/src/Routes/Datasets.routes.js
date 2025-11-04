@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer'; // Express middleware that handles multipart/form-data
 import { Middleware } from '../Middleware/authMiddleware.js';
 
-import { CSVuploadEndpoint } from './controllers/post.js';
+import { CSVuploadEndpoint } from '../controllers/post.js';
 import { 
     ListAllDatasets, 
     GetSpecificDataset, 
@@ -10,9 +10,9 @@ import {
     GetSpecificDatasetAllRows, 
     GetSpecificDatasetNullRow,
     GetSingleRowByNumber
-} from './controllers/get.js';
-import { DeleteDatasets } from './controllers/del.js';
-import { UpdateSpecificRow, UpdateColumnName } from './controllers/update.js';
+} from '../controllers/get.js';
+import { DeleteDatasets } from '../controllers/del.js';
+import { UpdateSpecificRow, UpdateColumnName } from '../controllers/update.js';
 
 const DatasetRouter = Router();
 
@@ -23,7 +23,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 10 * 1024 * 1024 // set limit to 10 mb
+        fileSize: 100 * 1024 * 1024 // set limit to 100 mb
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('text/csv') || file.mimetype.startsWith('application/vnd.ms-excel')) {

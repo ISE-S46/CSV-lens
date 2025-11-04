@@ -18,9 +18,20 @@ services:
       retries: 5
     networks:
       - csv-lens-app-dev-network
+  mongodb:
+    image: mongo:8.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_DBdev:/data/db
 
 volumes:
   PgDBdev:
+  mongo_DBdev:
 
 networks:
   csv-lens-app-dev-network:

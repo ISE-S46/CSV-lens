@@ -1,4 +1,4 @@
-import { pool } from "../../main.js";
+import { pool } from "../main.js";
 import { validateDatasetId } from './utils/Validation.js';
 
 const UpdateSpecificRow = async (req, res) => {

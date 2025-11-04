@@ -136,14 +136,14 @@ async function parseCsvBuffer(csvBuffer) {
             })
             .on('data', (data) => {
                 rowCount++;
-                
+
                 // Convert empty strings to null and preserve headers
                 const processedData = Object.fromEntries(
-                    Object.entries(data).map(([key, val]) => 
+                    Object.entries(data).map(([key, val]) =>
                         [key, val === '' ? null : val]
                     )
                 );
-                
+
                 rows.push(processedData);
 
                 // Refine column types
@@ -155,10 +155,10 @@ async function parseCsvBuffer(csvBuffer) {
                             column_order: columnsMetadata.size + 1
                         });
                     }
-                    
+
                     const currentMeta = columnsMetadata.get(key);
                     const inferredType = inferColumnType(value, currentMeta.column_type);
-                    
+
                     // Type conflict resolution
                     if (currentMeta.column_type === 'unknown') {
                         currentMeta.column_type = inferredType;
@@ -176,10 +176,10 @@ async function parseCsvBuffer(csvBuffer) {
                         meta.column_type = 'string';
                     }
                 });
-                
-                resolve({ 
-                    rows, 
-                    columnsMetadata: Array.from(columnsMetadata.values()), 
+
+                resolve({
+                    rows,
+                    columnsMetadata: Array.from(columnsMetadata.values()),
                     rowCount,
                     headers
                 });
@@ -188,37 +188,4 @@ async function parseCsvBuffer(csvBuffer) {
     });
 }
 
-async function insertCsvDataBatch(client, datasetId, rows) {
-    if (rows.length === 0) return;
-
-    const batchSize = 500;
-    let batchCount = 0;
-
-    try {
-        for (let i = 0; i < rows.length; i += batchSize) {
-            batchCount++;
-            const batch = rows.slice(i, i + batchSize);
-            const valuePlaceholders = [];
-            const params = [];
-            let paramIndex = 1;
-
-            batch.forEach((row, index) => {
-                valuePlaceholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}::jsonb)`);
-                params.push(datasetId, i + index + 1, row === null ? null : JSON.stringify(row));
-            });
-
-            const query = `
-                INSERT INTO csv_data (dataset_id, row_number, row_data)
-                VALUES ${valuePlaceholders.join(',')}
-            `;
-
-            await client.query(query, params);
-            console.log(`Inserted batch ${batchCount} (rows ${i + 1}-${Math.min(i + batchSize, rows.length)})`);
-        }
-    } catch (err) {
-        console.error(`Error in batch ${batchCount}:`, err);
-        throw err;
-    }
-}
-
-export { inferColumnType, parseCsvBuffer, insertCsvDataBatch };
+export { inferColumnType, parseCsvBuffer };

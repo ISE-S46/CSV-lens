@@ -6,8 +6,8 @@ import { CSVuploadEndpoint } from '../controllers/post.js';
 import { 
     ListAllDatasets, 
     GetSpecificDataset, 
-    GetSpecificDatasetRow, 
-    GetSpecificDatasetAllRows, 
+    GetSpecificDatasetRows, 
+    GetSpecificDatasetRowsForGraph, 
     GetSpecificDatasetNullRow,
     GetSingleRowByNumber
 } from '../controllers/get.js';
@@ -40,9 +40,9 @@ DatasetRouter.get('/', ListAllDatasets);
 
 DatasetRouter.get('/:datasetId', GetSpecificDataset);
 
-DatasetRouter.get('/:datasetId/rows', GetSpecificDatasetRow);
+DatasetRouter.get('/:datasetId/rows', GetSpecificDatasetRows);
 
-DatasetRouter.get('/:datasetId/GraphData', GetSpecificDatasetAllRows);
+DatasetRouter.get('/:datasetId/GraphData', GetSpecificDatasetRowsForGraph);
 
 DatasetRouter.get('/:datasetId/null-rows', GetSpecificDatasetNullRow);
 

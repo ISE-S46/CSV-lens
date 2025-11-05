@@ -1,14 +1,18 @@
-import { pool } from '../main.js';
 import { validateDatasetId } from './utils/Validation.js';
-import { getPaginatedSortedFilteredRows, getDatasetColumns, getSortFilteredRowsForGraph } from './utils/dataRetrieval.js';
-
-import { findAllDatasetsByUserId, getDatasetAndColumnsById } from '../Models/get.model.js';
+import {
+    getDatasetColumns,
+    findAllDatasetsByUserId,
+    getDatasetAndColumnsById,
+    getSingleRowByIds,
+    getPaginatedSortedFilteredRows,
+    getSortFilteredRowsForGraph
+} from '../Models/get.model.js';
 
 const ListAllDatasets = async (req, res) => {
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     try {
-        const datasets = await findAllDatasetsByUserId(userId); 
+        const datasets = await findAllDatasetsByUserId(userId);
 
         res.status(200).json({
             msg: 'Datasets retrieved successfully',
@@ -47,7 +51,7 @@ const GetSpecificDataset = async (req, res) => {
     }
 }
 
-const GetSpecificDatasetRow = async (req, res) => {
+const GetSpecificDatasetRows = async (req, res) => {
     const userId = req.user.id;
     const datasetId = parseInt(req.params.datasetId, 10);
 
@@ -133,7 +137,7 @@ const GetSpecificDatasetRow = async (req, res) => {
     }
 }
 
-const GetSpecificDatasetAllRows = async (req, res) => {
+const GetSpecificDatasetRowsForGraph = async (req, res) => {
     const userId = req.user.id;
     const datasetId = parseInt(req.params.datasetId, 10);
 
@@ -237,7 +241,7 @@ const GetSpecificDatasetNullRow = async (req, res) => {
         const result = await getPaginatedSortedFilteredRows(
             datasetId,
             userId,
-            { page, limit, filters } // Pass the constructed filters
+            { page, limit, filters }
         );
 
         res.status(200).json({
@@ -276,54 +280,34 @@ const GetSingleRowByNumber = async (req, res) => {
         return res.status(400).json({ msg: 'Invalid row number provided. Row number must be a positive integer.' });
     }
 
-    let client;
     try {
-        client = await pool.connect();
+        const rowData = await getSingleRowByIds(datasetId, rowNumber, userId);
 
-        const datasetCheckResult = await client.query(
-            'SELECT user_id FROM datasets WHERE dataset_id = $1',
-            [datasetId]
-        );
-
-        if (datasetCheckResult.rows.length === 0) {
-            return res.status(404).json({ msg: 'Dataset not found.' });
+        switch (rowData) {
+            case 'not_found':
+                return res.status(404).json({ msg: 'Dataset not found.' });
+            case 'access_denied':
+                return res.status(403).json({ msg: 'Access denied. This dataset does not belong to you.' });
+            case 'row_not_found':
+                return res.status(404).json({ msg: `Row ${rowNumber} not found in dataset ${datasetId}.` });
+            default:
+                return res.status(200).json({
+                    msg: `Row ${rowNumber} retrieved successfully.`,
+                    row: rowData
+                });
         }
-
-        const datasetOwnerId = datasetCheckResult.rows[0].user_id;
-
-        if (datasetOwnerId !== userId) {
-            return res.status(403).json({ msg: 'Access denied. This dataset does not belong to you.' });
-        }
-
-        const rowResult = await client.query(
-            'SELECT row_data FROM csv_data WHERE dataset_id = $1 AND row_number = $2',
-            [datasetId, rowNumber]
-        );
-
-        if (rowResult.rows.length === 0) {
-            return res.status(404).json({ msg: `Row ${rowNumber} not found in dataset ${datasetId}.` });
-        }
-
-        res.status(200).json({
-            msg: `Row ${rowNumber} retrieved successfully.`,
-            row: rowResult.rows[0].row_data
-        });
 
     } catch (err) {
         console.error(`Error fetching single row ${rowNumber} for dataset ${datasetId}:`, err.message);
         res.status(500).json({ msg: 'Server error fetching single row.', error: err.message });
-    } finally {
-        if (client) {
-            client.release();
-        }
     }
 }
 
 export {
     ListAllDatasets,
     GetSpecificDataset,
-    GetSpecificDatasetRow,
-    GetSpecificDatasetAllRows,
+    GetSpecificDatasetRows,
+    GetSpecificDatasetRowsForGraph,
     GetSpecificDatasetNullRow,
     GetSingleRowByNumber
 };

@@ -103,6 +103,38 @@ const inferColumnType = (value, currentInferredType = 'unknown') => {
     return 'string';
 };
 
+const inferColumnTypeMongoDB = (value, columnType) => {
+    if (value === null || value === undefined || value.trim() === '') {
+        return null;
+    }
+
+    const trimmedValue = value.trim();
+
+    switch (columnType) {
+        case 'integer':
+            const intValue = parseInt(trimmedValue, 10);
+            return isNaN(intValue) ? null : intValue;
+        
+        case 'float':
+            const floatValue = parseFloat(trimmedValue);
+            return isNaN(floatValue) ? null : floatValue;
+
+        case 'boolean':
+            if (['true', 't', '1', 'yes', 'y'].includes(trimmedValue.toLowerCase())) return true;
+            if (['false', 'f', '0', 'no', 'n'].includes(trimmedValue.toLowerCase())) return false;
+            return null;
+
+        case 'date':
+        case 'timestamp':
+            const dateValue = new Date(trimmedValue);
+            return isNaN(dateValue.getTime()) ? null : dateValue;
+        
+        case 'string':
+        default:
+            return trimmedValue;
+    }
+};
+
 async function parseCsvBuffer(csvBuffer) {
     let rows = [];
     // Use a Map to maintain insertion order of columns and for easier lookup
@@ -188,4 +220,4 @@ async function parseCsvBuffer(csvBuffer) {
     });
 }
 
-export { inferColumnType, parseCsvBuffer };
+export { inferColumnType, inferColumnTypeMongoDB, parseCsvBuffer };

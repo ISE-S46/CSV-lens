@@ -1,5 +1,7 @@
 import { pool } from '../main.js';
 import { RowDataModel } from './rowData.model.js';
+import { inferColumnTypeMongoDB } from '../controllers/utils/HandleCSV.js';
+import { getDatasetColumns } from './get.model.js';
 
 export const insertDatasetAndColumns = async (userId, datasetDetails, columnsMetadata) => {
     const { csvName, originalFilename, description, fileSize, rowCount } = datasetDetails;
@@ -34,13 +36,31 @@ export const insertDatasetAndColumns = async (userId, datasetDetails, columnsMet
     }
 };
 
-export const insertCsvDataBulk = async (datasetId, rows) => {
+export const insertCsvDataBulk = async (datasetId, rows, columnDefinitions) => {
+    const columnTypeMap = new Map(columnDefinitions.map(col => [col.column_name, col.column_type]));
 
-    const documents = rows.map((row, index) => ({
-        dataset_id: datasetId,
-        row_number: index + 1,
-        row_data: row
-    }));
+    const documents = rows.map((row, index) => {
+        const castedRowData = {};
+
+        for (const columnName in row) {
+            if (row.hasOwnProperty(columnName)) {
+                const columnType = columnTypeMap.get(columnName);
+                const rawValue = row[columnName];
+
+                if (columnType) {
+                    castedRowData[columnName] = inferColumnTypeMongoDB(rawValue, columnType);
+                } else {
+                    castedRowData[columnName] = rawValue;
+                }
+            }
+        }
+        
+        return {
+            dataset_id: datasetId,
+            row_number: index + 1,
+            row_data: castedRowData
+        };
+    });
 
     await RowDataModel.insertMany(documents, { ordered: false }); 
 

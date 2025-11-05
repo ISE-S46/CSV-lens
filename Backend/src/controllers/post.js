@@ -1,6 +1,5 @@
 import { parseCsvBuffer, } from './utils/HandleCSV.js';
-import { insertDatasetAndColumns } from '../Models/post.model.js';
-import { insertCsvDataBulk } from '../Models/post.model.js';
+import { insertDatasetAndColumns, insertCsvDataBulk } from '../Models/post.model.js';
 
 const CSVuploadEndpoint = async (req, res) => {
     const userId = req.user.id;
@@ -37,7 +36,7 @@ const CSVuploadEndpoint = async (req, res) => {
         postgreClient = client;
 
         try {
-            await insertCsvDataBulk(datasetId, rows);
+            await insertCsvDataBulk(datasetId, rows, columnsMetadata); 
         } catch (mongoErr) {
             await postgreClient.query('ROLLBACK');
             throw mongoErr;

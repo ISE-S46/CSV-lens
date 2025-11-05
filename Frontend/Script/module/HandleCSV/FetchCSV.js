@@ -192,7 +192,7 @@ async function updateDatasetRow(datasetId, rowNumber, rowData) {
 
     try {
         const response = await fetch(`${API_BASE_URL}/datasets/${datasetId}/rows/${rowNumber}`, {
-            method: 'PUT',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },

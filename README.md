@@ -4,9 +4,13 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/ISE-S46/CSV-lens?cacheSeconds=60)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/ISE-S46/CSV-lens?cacheSeconds=60)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/ISE-S46/CSV-lens?cacheSeconds=60)
-![Version](https://img.shields.io/badge/version-1.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.1-blue)
 
 **CSV-lens** is a full-stack web application for uploading, viewing, and analyzing CSV data directly in your browser.
+
+
+#### Update
+- Convert csv_data table to dedicated mongodb database (1.0.1)
 
 ## Table of Contents
 

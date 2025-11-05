@@ -1,4 +1,4 @@
-import { parseCsvBuffer, } from './utils/HandleCSV.js';
+import { parseCsvBuffer } from './utils/parseCsvBuffer.js';
 import { insertDatasetAndColumns, insertCsvDataBulk } from '../Models/post.model.js';
 
 const CSVuploadEndpoint = async (req, res) => {

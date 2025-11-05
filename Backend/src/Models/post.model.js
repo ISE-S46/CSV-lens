@@ -1,7 +1,6 @@
 import { pool } from '../main.js';
 import { RowDataModel } from './rowData.model.js';
-import { inferColumnTypeMongoDB } from '../controllers/utils/HandleCSV.js';
-import { getDatasetColumns } from './get.model.js';
+import { convertValueToType } from '../controllers/utils/typeConverter.js';
 
 export const insertDatasetAndColumns = async (userId, datasetDetails, columnsMetadata) => {
     const { csvName, originalFilename, description, fileSize, rowCount } = datasetDetails;
@@ -48,13 +47,13 @@ export const insertCsvDataBulk = async (datasetId, rows, columnDefinitions) => {
                 const rawValue = row[columnName];
 
                 if (columnType) {
-                    castedRowData[columnName] = inferColumnTypeMongoDB(rawValue, columnType);
+                    castedRowData[columnName] = convertValueToType(rawValue, columnType);
                 } else {
                     castedRowData[columnName] = rawValue;
                 }
             }
         }
-        
+
         return {
             dataset_id: datasetId,
             row_number: index + 1,
@@ -62,6 +61,6 @@ export const insertCsvDataBulk = async (datasetId, rows, columnDefinitions) => {
         };
     });
 
-    await RowDataModel.insertMany(documents, { ordered: false }); 
+    await RowDataModel.insertMany(documents, { ordered: false });
 
 };

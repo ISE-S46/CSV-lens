@@ -231,11 +231,40 @@ async function getSortFilteredRowsForGraph(
     }
 }
 
+async function getDatasetMetadataById(datasetId) {
+    let client;
+    try {
+        client = await pool.connect();
+        const result = await client.query(
+            'SELECT user_id, row_count FROM datasets WHERE dataset_id = $1',
+            [datasetId]
+        );
+
+        if (result.rows.length === 0) {
+            return null;
+        }
+
+        return {
+            user_id: result.rows[0].user_id,
+            row_count: result.rows[0].row_count
+        };
+
+    } catch (err) {
+        console.error(`Error fetching dataset metadata for ${datasetId}:`, err.message);
+        throw err;
+    } finally {
+        if (client) {
+            client.release();
+        }
+    }
+}
+
 export {
     findAllDatasetsByUserId,
     getDatasetAndColumnsById,
     getSingleRowByIds,
     getDatasetColumns,
     getPaginatedSortedFilteredRows,
-    getSortFilteredRowsForGraph
+    getSortFilteredRowsForGraph,
+    getDatasetMetadataById
 };

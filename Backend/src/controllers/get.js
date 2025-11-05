@@ -269,7 +269,7 @@ const GetSpecificDatasetNullRow = async (req, res) => {
     }
 }
 
-const GetSingleRowByNumber = async (req, res) => {
+const GetDatasetRowByNumber = async (req, res) => {
     const userId = req.user.id;
     const datasetId = parseInt(req.params.datasetId, 10);
     const rowNumber = parseInt(req.params.rowNumber, 10);
@@ -309,5 +309,5 @@ export {
     GetSpecificDatasetRows,
     GetSpecificDatasetRowsForGraph,
     GetSpecificDatasetNullRow,
-    GetSingleRowByNumber
+    GetDatasetRowByNumber
 };

@@ -1,6 +1,4 @@
 import { parse, format, parseISO, isValid } from 'date-fns';
-import csv from 'csv-parser';
-import { Readable } from 'stream'; // Converting buffers to readable streams
 
 const dateFormats = [
     'dd/MM/yyyy',
@@ -23,7 +21,7 @@ const dateFormats = [
     'yyyy年MM月dd日'
 ];
 
-const inferColumnType = (value, currentInferredType = 'unknown') => {
+export const inferColumnType = (value, currentInferredType = 'unknown') => {
     // Explicit null/empty handling
     if (value === null || value === undefined || value === '') {
         return currentInferredType === 'unknown' ? 'string' : currentInferredType;
@@ -103,26 +101,28 @@ const inferColumnType = (value, currentInferredType = 'unknown') => {
     return 'string';
 };
 
-const inferColumnTypeMongoDB = (value, columnType) => {
-    if (value === null || value === undefined || value.trim() === '') {
+export const convertValueToType = (value, columnType) => {
+    if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
         return null;
     }
 
-    const trimmedValue = value.trim();
+    const trimmedValue = String(value).trim();
+    const type = columnType.toLowerCase();
 
-    switch (columnType) {
+    switch (type) {
         case 'integer':
             const intValue = parseInt(trimmedValue, 10);
             return isNaN(intValue) ? null : intValue;
         
         case 'float':
+        case 'numeric':
             const floatValue = parseFloat(trimmedValue);
             return isNaN(floatValue) ? null : floatValue;
 
         case 'boolean':
             if (['true', 't', '1', 'yes', 'y'].includes(trimmedValue.toLowerCase())) return true;
             if (['false', 'f', '0', 'no', 'n'].includes(trimmedValue.toLowerCase())) return false;
-            return null;
+            return null; // Value is not a valid boolean representation
 
         case 'date':
         case 'timestamp':
@@ -130,94 +130,9 @@ const inferColumnTypeMongoDB = (value, columnType) => {
             return isNaN(dateValue.getTime()) ? null : dateValue;
         
         case 'string':
+        case 'text':
+        case 'varchar':
         default:
             return trimmedValue;
     }
 };
-
-async function parseCsvBuffer(csvBuffer) {
-    let rows = [];
-    // Use a Map to maintain insertion order of columns and for easier lookup
-    let columnsMetadata = new Map();
-    let rowCount = 0;
-    let headers = []; // Store header names
-
-    return new Promise((resolve, reject) => {
-        const readableStream = Readable.from(csvBuffer.toString()); // Assuming UTF-8 CSVs
-
-        readableStream
-            .pipe(csv({
-                strict: false,
-                skipEmptyLines: true,
-                mapHeaders: ({ header, index }) => {
-                    // Store header names in order
-                    headers[index] = header;
-                    return header;
-                }
-            }))
-            .on('headers', (parsedHeaders) => {
-                // Process headers and initialize metadata
-                parsedHeaders.forEach((header, index) => {
-                    // Initialize with 'unknown' or 'string' as a starting point for inference
-                    columnsMetadata.set(header, {
-                        column_name: header,
-                        column_type: 'unknown',
-                        column_order: index + 1
-                    });
-                });
-            })
-            .on('data', (data) => {
-                rowCount++;
-
-                // Convert empty strings to null and preserve headers
-                const processedData = Object.fromEntries(
-                    Object.entries(data).map(([key, val]) =>
-                        [key, val === '' ? null : val]
-                    )
-                );
-
-                rows.push(processedData);
-
-                // Refine column types
-                Object.entries(processedData).forEach(([key, value]) => {
-                    if (!columnsMetadata.has(key)) {
-                        columnsMetadata.set(key, {
-                            column_name: key,
-                            column_type: 'unknown',
-                            column_order: columnsMetadata.size + 1
-                        });
-                    }
-
-                    const currentMeta = columnsMetadata.get(key);
-                    const inferredType = inferColumnType(value, currentMeta.column_type);
-
-                    // Type conflict resolution
-                    if (currentMeta.column_type === 'unknown') {
-                        currentMeta.column_type = inferredType;
-                    } else if (currentMeta.column_type === 'integer' && inferredType === 'float') {
-                        currentMeta.column_type = 'float';
-                    } else if (currentMeta.column_type !== inferredType) {
-                        currentMeta.column_type = 'string';
-                    }
-                });
-            })
-            .on('end', () => {
-                // Final type assignment
-                columnsMetadata.forEach(meta => {
-                    if (meta.column_type === 'unknown') {
-                        meta.column_type = 'string';
-                    }
-                });
-
-                resolve({
-                    rows,
-                    columnsMetadata: Array.from(columnsMetadata.values()),
-                    rowCount,
-                    headers
-                });
-            })
-            .on('error', reject);
-    });
-}
-
-export { inferColumnType, inferColumnTypeMongoDB, parseCsvBuffer };

@@ -35,7 +35,7 @@ const pool = new pg.Pool({
 });
 
 // MongoDB connection
-const MONGO_URI = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@localhost:27017`;
+const MONGO_URI = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:27017`;
 
 if (!MONGO_URI) {
     console.error("FATAL ERROR: MONGO_URI is not defined in environment variables.");

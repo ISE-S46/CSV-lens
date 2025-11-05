@@ -1,7 +1,13 @@
 import { pool } from "../main.js";
 import { validateDatasetId } from './utils/Validation.js';
+import { getDatasetMetadataById } from "../Models/get.model.js";
+import { updateSpecificRowMongo, renameColumnNameMongo } from "../Models/update.model.js";
 
 const UpdateSpecificRow = async (req, res) => {
+    if (!req.user || !req.user.id) {
+        return res.status(401).json({ msg: 'Unauthorized: User authentication details missing.' });
+    }
+
     const userId = req.user.id;
     const datasetId = parseInt(req.params.datasetId, 10);
     const rowNumber = parseInt(req.params.rowNumber, 10);
@@ -14,60 +20,46 @@ const UpdateSpecificRow = async (req, res) => {
     }
 
     // Basic validation for request body
-    if (typeof newRowData !== 'object' || newRowData === null || Array.isArray(newRowData)) {
-        return res.status(400).json({ msg: 'Invalid request body. Expected a JSON object representing the row data.' });
-    }
-    if (Object.keys(newRowData).length === 0) {
-        return res.status(400).json({ msg: 'New row data cannot be empty.' });
+    if (typeof newRowData !== 'object' || newRowData === null || Array.isArray(newRowData) || Object.keys(newRowData).length === 0) {
+        return res.status(400).json({ msg: 'Invalid request body. Expected a non-empty JSON object representing the row data.' });
     }
 
-    let client;
     try {
-        client = await pool.connect();
+        const datasetMetadata = await getDatasetMetadataById(datasetId);
 
-        // Verify dataset ownership and existence
-        const datasetCheckResult = await client.query(
-            'SELECT user_id, row_count FROM datasets WHERE dataset_id = $1',
-            [datasetId]
-        );
-
-        if (datasetCheckResult.rows.length === 0) {
+        if (!datasetMetadata) {
             return res.status(404).json({ msg: 'Dataset not found.' });
         }
 
-        const { user_id: datasetOwnerId, row_count: totalRows } = datasetCheckResult.rows[0];
+        const { user_id: datasetOwnerId, row_count: totalRows } = datasetMetadata;
 
         if (datasetOwnerId !== userId) {
             return res.status(403).json({ msg: 'Access denied. This dataset does not belong to you.' });
         }
 
-        // Check if rowNumber is within valid range (1 to totalRows)
         if (rowNumber > totalRows) {
             return res.status(404).json({ msg: `Row number ${rowNumber} exceeds total rows (${totalRows}) for this dataset.` });
         }
 
-        // Update the row_data in the csv_data table
-        const updateResult = await client.query(
-            'UPDATE csv_data SET row_data = $1 WHERE dataset_id = $2 AND row_number = $3 RETURNING row_data',
-            [newRowData, datasetId, rowNumber]
+        const updatedRow = await updateSpecificRowMongo(
+            datasetId,
+            rowNumber,
+            newRowData
         );
-
-        if (updateResult.rows.length === 0) {
-            return res.status(404).json({ msg: `Row ${rowNumber} not found in dataset ${datasetId}.` });
-        }
 
         res.status(200).json({
             msg: `Row ${rowNumber} in dataset ${datasetId} updated successfully.`,
-            updatedRow: updateResult.rows[0].row_data
+            updatedRow: updatedRow
         });
 
     } catch (err) {
         console.error(`Error updating row ${rowNumber} for dataset ${datasetId}:`, err.message);
-        res.status(500).json({ msg: 'Server error during row update.', error: err.message });
-    } finally {
-        if (client) {
-            client.release();
+
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ msg: err.message });
         }
+
+        res.status(500).json({ msg: 'Server error during row update.', error: err.message });
     }
 }
 
@@ -89,14 +81,14 @@ const UpdateColumnName = async (req, res) => {
         return res.status(400).json({ msg: 'New column name cannot be the same as the old column name.' });
     }
 
-    // Sanitize column names to prevent SQL injection
+    // Sanitize column names to prevent SQL injection (although binding handles this)
     const sanitizedOldColumnName = oldColumnName.trim();
     const sanitizedNewColumnName = newColumnName.trim();
 
     let client;
     try {
         client = await pool.connect();
-        await client.query('BEGIN'); // Start a transaction for atomicity
+        await client.query('BEGIN');
 
         // Verify dataset ownership and existence
         const datasetCheckResult = await client.query(
@@ -144,55 +136,9 @@ const UpdateColumnName = async (req, res) => {
             [sanitizedNewColumnName, datasetId, sanitizedOldColumnName]
         );
 
-        // Method 1: Using string concatenation (more explicit typing)
-        const updateQuery = `
-            UPDATE csv_data
-            SET row_data = (row_data - $1::text) || jsonb_build_object($2::text, row_data->$1::text)
-            WHERE dataset_id = $3
-        `;
+        await client.query('COMMIT');
 
-        try {
-            await client.query(updateQuery, [sanitizedOldColumnName, sanitizedNewColumnName, datasetId]);
-        } catch (jsonbError) {
-            console.log('Method 1 failed, trying alternative approach:', jsonbError.message);
-            
-            // Method 2: Alternative approach using format() function to avoid parameter type issues
-            const alternativeQuery = `
-                UPDATE csv_data
-                SET row_data = row_data - $1 || jsonb_build_object($2, row_data->$1)
-                WHERE dataset_id = $3 AND row_data ? $1
-            `;
-            
-            try {
-                await client.query(alternativeQuery, [sanitizedOldColumnName, sanitizedNewColumnName, datasetId]);
-            } catch (altError) {
-                console.log('Method 2 failed, trying method 3:', altError.message);
-                
-                // Method 3: Step-by-step approach
-                // Get all affected rows
-                const rowsToUpdate = await client.query(
-                    'SELECT row_number, row_data FROM csv_data WHERE dataset_id = $1 AND row_data ? $2',
-                    [datasetId, sanitizedOldColumnName]
-                );
-
-                // Update each row individually
-                for (const row of rowsToUpdate.rows) {
-                    const oldValue = row.row_data[sanitizedOldColumnName];
-                    const updatedRowData = { ...row.row_data };
-                    
-                    // Remove old key and add new key
-                    delete updatedRowData[sanitizedOldColumnName];
-                    updatedRowData[sanitizedNewColumnName] = oldValue;
-
-                    await client.query(
-                        'UPDATE csv_data SET row_data = $1 WHERE dataset_id = $2 AND row_number = $3',
-                        [JSON.stringify(updatedRowData), datasetId, row.row_number]
-                    );
-                }
-            }
-        }
-
-        await client.query('COMMIT'); // Commit the transaction if all operations succeed
+        await renameColumnNameMongo(datasetId, sanitizedOldColumnName, sanitizedNewColumnName);
 
         res.status(200).json({
             msg: `Column '${sanitizedOldColumnName}' successfully renamed to '${sanitizedNewColumnName}' for dataset ${datasetId}.`
@@ -200,7 +146,7 @@ const UpdateColumnName = async (req, res) => {
 
     } catch (err) {
         if (client) {
-            await client.query('ROLLBACK'); // Rollback if any error occurs
+            await client.query('ROLLBACK');
         }
         console.error(`Error renaming column '${sanitizedOldColumnName}' to '${sanitizedNewColumnName}' for dataset ${datasetId}:`, err.message);
         res.status(500).json({ msg: 'Server error during column rename.', error: err.message });

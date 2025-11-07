@@ -199,7 +199,7 @@ MONGO_HOST=localhost
 
 SERVER_PORT=3002 # Internal port for Node.js backend
 
-NODE_ENV=production
+NODE_ENV=development
 COOKIE_SECRET=your_cookie_secret_key_here
 COOKIE_MAX_AGE=900000 # 15 * 60 * 1000 (15 minutes)
 REFRESH_COOKIE_MAX_AGE=172800000 # 2 * 24 * 60 * 60 * 1000 (2 days) 

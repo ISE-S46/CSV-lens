@@ -28,4 +28,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:' + process.env.SERVER_PORT + process.env.API_BASE_URL + '/test', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
-CMD ["node", "main.js"]
+CMD ["node", "./src/main.js"]

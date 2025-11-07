@@ -13,6 +13,7 @@
 - Convert csv_data table to dedicated mongodb database
 - Change upload file size limit to 20 mb
 - Graph is now responsive
+- Remove test with jest unstable mock module
 
 ## Table of Contents
 
@@ -21,6 +22,7 @@
 - [Installation](#installation)
 - [Technologies Used](#technologies-used)
 - [Architecture](#architecture)
+- [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -173,6 +175,59 @@ You can use the CSV files in /Test/Databasetest/ to to test the full capabilitie
     - Docker: Databases runs in its own Docker container.
 
 Communication between containers happens over an internal Docker network, while the User Browser interacts with Nginx on exposed ports.
+
+## Development
+To configure your local development and testing variables, create the required .env.development file at the root of the project.
+
+**1. Configuration File (.env.development)**
+
+Use the following structure, replacing the placeholder values with your desired credentials and secrets.
+```.env
+# Postgres
+DB_USER=your_DB_user
+DB_PASSWORD=your_DB_password
+DB_NAME=your_DB_name
+DB_PORT=5432
+DB_HOST=localhost
+
+# MongoDB
+MONGO_USER=your_MONGO_DB_user
+MONGO_PASSWORD=your_MONGO_DB_password
+MONGO_DB_NAME=your_MONGO_DB_name
+MONGO_PORT=27017
+MONGO_HOST=localhost
+
+SERVER_PORT=3002 # Internal port for Node.js backend
+
+NODE_ENV=production
+COOKIE_SECRET=your_cookie_secret_key_here
+COOKIE_MAX_AGE=900000 # 15 * 60 * 1000 (15 minutes)
+REFRESH_COOKIE_MAX_AGE=172800000 # 2 * 24 * 60 * 60 * 1000 (2 days) 
+
+JWT_EXPIRES_IN=15m
+JWT_SECRET=your_JWT_secret_key_here
+
+REFRESH_TOKEN_EXPIRES_IN=2d
+REFRESH_TOKEN_SECRET=your_refresh_token_secret_key_here
+
+API_BASE_URL=/api # for Nginx proxying
+```
+
+**2. Start Development Databases**
+
+Run the dedicated development databases and environment:
+
+```bash
+docker compose -p csv_lens_dev -f docker-compose.dev.yaml --env-file .env.development up -d
+```
+
+**3. Clean Up Development Environment**
+
+To stop the containers and permanently remove the local database volumes (PgDBdev and mongo_DBdev):
+
+```bash
+docker compose -p csv_lens_dev down --volumes
+```
 
 ## Contributing
 

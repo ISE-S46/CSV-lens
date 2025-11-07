@@ -9,8 +9,10 @@
 **CSV-lens** is a full-stack web application for uploading, viewing, and analyzing CSV data directly in your browser.
 
 
-#### Update
-- Convert csv_data table to dedicated mongodb database (1.0.1)
+#### Update (1.0.1)
+- Convert csv_data table to dedicated mongodb database
+- Change upload file size limit to 20 mb
+- Graph is now responsive
 
 ## Table of Contents
 
@@ -73,27 +75,35 @@ Create a .env file in the root directory of the project (where docker-compose.ya
 
     Create .env file with content:
     #### Replace placeholder values with strong, random strings for COOKIE_SECRET, JWT_SECRET, and REFRESH_TOKEN_SECRET
-```bash
+```.env
+# Postgres
 DB_USER=your_DB_user
 DB_PASSWORD=your_DB_password
 DB_NAME=your_DB_name
-DB_PORT=your_DB_port
+DB_PORT=5432
 DB_HOST=database # Based on docker-compose service name
+
+# MongoDB
+MONGO_USER=your_MONGO_DB_user
+MONGO_PASSWORD=your_MONGO_DB_password
+MONGO_DB_NAME=your_MONGO_DB_name
+MONGO_PORT=27017
+MONGO_HOST=mongodb # Based on docker-compose service name
 
 SERVER_PORT=3002 # Internal port for Node.js backend
 
-NODE_ENV=production # or set to development if you want to modify the code
+NODE_ENV=production
 COOKIE_SECRET=your_cookie_secret_key_here
-COOKIE_MAX_AGE=900000 # 15 * 60 * 1000 (15 minutes) or change to what ever you want
+COOKIE_MAX_AGE=900000 # 15 * 60 * 1000 (15 minutes) or change to whatever you want
 REFRESH_COOKIE_MAX_AGE=172800000 # 2 * 24 * 60 * 60 * 1000 (2 days) or change to what ever you want
 
-JWT_EXPIRES_IN=15m # Or change to what ever you want
+JWT_EXPIRES_IN=15m # Or change to whatever you want
 JWT_SECRET=your_JWT_secret_key_here
 
-REFRESH_TOKEN_EXPIRES_IN=2d # Or change to what ever you want
+REFRESH_TOKEN_EXPIRES_IN=2d # Or change to whatever you want
 REFRESH_TOKEN_SECRET=your_refresh_token_secret_key_here
 
-API_BASE_URL=/api # for Nginx proxying, use this or change to what ever you want
+API_BASE_URL=/api # for Nginx proxying, use this or change to whatever you want
 ```
 3. **Configure config.js**:
 Create config.js file at /Frontend
@@ -117,7 +127,7 @@ It might take a few minutes for all services to start, especially the database a
 
 Once all containers are up and running, open your web browser and navigate to: 
 
-[http://localhost/](http://localhost/)
+[http://localhost:80](http://localhost:80)
 
 You can use the CSV files in /Test/Databasetest/ to to test the full capabilities of this project.
 
@@ -135,13 +145,9 @@ You can use the CSV files in /Test/Databasetest/ to to test the full capabilitie
     - Express.js
 - **Database**: 
     - PostgreSQL
+    - MongoDB
 - **Containerization**:
     - Docker
-- **Testing** (For more detail please check [Test Guide](Test/TestGuide.md)):
-    - Jest
-    - jsdom
-    - babel
-    - Supertest
 
 ## Architecture
 ![Architecture_Design](Image/CSV-lens-acrhitecture.jpg)
@@ -160,9 +166,11 @@ You can use the CSV files in /Test/Databasetest/ to to test the full capabilitie
 
 - **Database (Containerized)**:
 
-    - PostgreSQL: The primary data store for user information and all uploaded CSV data.
+    - PostgreSQL: The primary data store for user information and uploaded CSV metadata.
 
-    - Docker: The Database runs in its own Docker container.
+    - MongoDB: The primary data store for CSV rows based on the metadata in PostgreSQL.
+
+    - Docker: Databases runs in its own Docker container.
 
 Communication between containers happens over an internal Docker network, while the User Browser interacts with Nginx on exposed ports.
 

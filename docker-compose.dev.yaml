@@ -13,7 +13,7 @@ services:
       - ./Database/init.dev.sql:/docker-entrypoint-initdb.d/init.dev.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
     networks:
@@ -28,6 +28,11 @@ services:
       - "${MONGO_PORT}:27017"
     volumes:
       - mongo_DBdev:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - csv-lens-app-dev-network
 

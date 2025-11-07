@@ -149,7 +149,7 @@ function plotGraph() {
 
     // Clear previous plot and render new one
     Plotly.purge(graphContainer);
-    Plotly.newPlot(graphContainer, traces, layout);
+    Plotly.newPlot(graphContainer, traces, layout, { responsive: true });
 }
 
 function createTrace(graphType, x, y, name, color) {

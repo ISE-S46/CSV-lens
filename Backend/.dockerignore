@@ -4,6 +4,7 @@ npm-debug.log
 .gitignore
 README.md
 .env
+.env.development
 .nyc_output
 coverage
 .coverage

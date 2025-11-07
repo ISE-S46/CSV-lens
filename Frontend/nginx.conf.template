@@ -4,10 +4,12 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    client_max_body_size 100m;
+    
     # Cache static assets aggressively
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        expires -1;  # Always check for updates
+        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
     }
 
     # Proxy API requests to backend
